@@ -214,11 +214,13 @@
     <!-- Main 3D Canvas Area -->
     <main class="flex-1 relative overflow-hidden flex justify-center items-center h-full bg-[#050811] z-0">
         
-        <!-- Live Degree Display Box (Positioned above the top edge of the luopan) -->
-        <div id="degreeDisplay" class="absolute z-20 flex flex-col items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300" style="top: calc(50% - min(40vw, 40vh)); left: 50%; transform: translateX(-50%); margin-top: -60px;">
-            <div class="bg-slate-900/80 backdrop-blur-md border border-yellow-500/50 rounded-lg px-4 py-1.5 shadow-[0_0_15px_rgba(212,175,55,0.2)] text-center">
-                <span id="degreeValue" class="text-yellow-400 font-bold text-lg font-mono">0°</span>
-                <div id="dirLabel" class="text-slate-300 text-[10px] font-semibold mt-0.5">เหนือ (N)</div>
+        <!-- Live Degree Display Box (Positioned exactly at the top edge of the luopan) -->
+        <div id="degreeDisplay" class="absolute z-20 flex flex-col items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300" style="top: calc(50% - min(47vw, 47vh)); left: 50%; transform: translate(-50%, -100%); pb-2">
+            <div class="bg-slate-900/90 backdrop-blur-md border border-yellow-500/60 rounded-lg px-4 py-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.6)] text-center relative">
+                <!-- Add a small triangle pointing down to the luopan -->
+                <div class="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-slate-900 border-b border-r border-yellow-500/60 rotate-45"></div>
+                <span id="degreeValue" class="text-yellow-400 font-bold text-lg font-mono relative z-10">0.0°</span>
+                <div id="dirLabel" class="text-slate-300 text-[10px] font-semibold mt-0.5 relative z-10">เหนือ (N)</div>
             </div>
         </div>
         
