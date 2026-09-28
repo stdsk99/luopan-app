@@ -33,6 +33,18 @@
             position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
             object-fit: cover; z-index: 0; display: none;
         }
+
+        /* Improved Top Margin for Degree Box to touch the rim */
+        #degreeDisplay {
+            top: calc(50% - min(47vw, 47vh));
+            transform: translate(-50%, -100%);
+        }
+        /* Mobile specific adjustment for safe area */
+        @media (max-aspect-ratio: 3/4) {
+             #degreeDisplay {
+                top: calc(50% - min(48vw, 48vh)); 
+            }
+        }
     </style>
 </head>
 <body>
@@ -46,8 +58,8 @@
     <!-- UI Layer -->
     <div id="uiLayer">
         
-        <!-- Top Left Controls -->
-        <div id="topLeftControls" class="absolute top-20 left-4 z-30 flex flex-col gap-3 pointer-events-none">
+        <!-- Top Left Controls (Moved down to top-20 to avoid address bar) -->
+        <div id="topLeftControls" class="absolute top-20 left-4 z-30 flex flex-col gap-3 pointer-events-none transition-opacity duration-300">
             <button id="menuBtn" class="pointer-events-auto bg-slate-900/90 border border-slate-700 text-yellow-500 p-3 rounded-xl shadow-lg hover:bg-slate-800 transition-all flex items-center justify-center w-12 h-12">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
@@ -56,7 +68,7 @@
             </button>
         </div>
 
-        <!-- Top Right Controls -->
+        <!-- Top Right Controls (Moved down to top-20) -->
         <div class="absolute top-20 right-4 z-30 flex flex-col gap-3 pointer-events-auto">
             <!-- Live Compass Button -->
             <button id="compassBtn" class="bg-indigo-600/90 text-white p-3 rounded-full shadow-lg border border-indigo-400 hover:bg-indigo-500 transition-all flex items-center justify-center w-12 h-12">
@@ -101,13 +113,13 @@
             <!-- Tab Content: Config -->
             <div id="tab-config" class="p-4 space-y-6 flex-1">
                 
-                <!-- View Modes -->
+                <!-- View Modes (Exclusive selection) -->
                 <div class="space-y-2">
                     <label class="block text-[11px] font-medium text-slate-300">โหมดแสดงผลหน้าปัด (View Mode)</label>
                     <div class="flex flex-col gap-1.5">
-                        <button class="layer-btn active px-3 py-2.5 bg-slate-800 border border-yellow-600 text-yellow-400 rounded-lg text-[12px] text-left transition-all flex items-center gap-2" data-layer="TIME"><span class="text-red-400">🕒</span> แสดงทิศร้ายกาลเวลา (Afflictions)</button>
-                        <button class="layer-btn px-3 py-2.5 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[12px] text-left transition-all flex items-center gap-2" data-layer="KUA"><span class="text-emerald-400">👤</span> แสดงทิศมงคลบุคคล (8 Mansions)</button>
-                        <button class="layer-btn px-3 py-2.5 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[12px] text-left transition-all flex items-center gap-2" data-layer="STARS"><span class="text-blue-400">⭐</span> แสดงดาวเหินประจำปี (Flying Stars)</button>
+                        <button class="layer-btn active px-3 py-2.5 bg-slate-800 border border-yellow-600 text-yellow-400 rounded-lg text-[12px] text-left transition-all flex items-center gap-2" data-layer="TIME"><span class="text-red-400">🕒</span> เฉพาะทิศร้ายกาลเวลา (Afflictions)</button>
+                        <button class="layer-btn px-3 py-2.5 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[12px] text-left transition-all flex items-center gap-2" data-layer="KUA"><span class="text-emerald-400">👤</span> เฉพาะทิศมงคลบุคคล (8 Mansions)</button>
+                        <button class="layer-btn px-3 py-2.5 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[12px] text-left transition-all flex items-center gap-2" data-layer="STARS"><span class="text-blue-400">⭐</span> เฉพาะดาวเหิน (Flying Stars)</button>
                     </div>
                 </div>
 
@@ -180,20 +192,20 @@
             
             <!-- Author signature -->
             <div class="text-center pb-4 text-[9px] text-slate-600 mt-auto">
-                Luopan 3D Pro - Engine v3.0
+                Luopan 3D Pro - Engine v3.1
             </div>
         </div>
 
-        <!-- Live Degree Display Box -->
-        <div id="degreeDisplay" class="absolute z-20 flex flex-col items-center pointer-events-none transition-opacity duration-300 w-full" style="top: calc(50% - min(47vw, 47vh)); left: 50%; transform: translate(-50%, -100%);">
+        <!-- Live Degree Display Box (Positioned to exactly touch the rim) -->
+        <div id="degreeDisplay" class="absolute z-20 flex flex-col items-center pointer-events-none transition-opacity duration-300 w-full left-1/2">
             
-            <!-- Advice Box (Above the degree box) -->
-            <div id="dirAdvice" class="mb-2 bg-white/95 backdrop-blur-sm border-2 border-slate-300 rounded-xl px-4 py-3 shadow-[0_10px_25px_rgba(0,0,0,0.5)] text-center w-max max-w-[85vw] transition-all duration-300 pointer-events-auto opacity-0 scale-95 origin-bottom hidden">
-                <div id="adviceTitle" class="text-black font-bold text-[13px] tracking-wide leading-tight mb-1"></div>
-                <div id="adviceRemedy" class="text-slate-700 text-[11px] leading-tight font-medium"></div>
+            <!-- Advice Box (Above the degree box, grows upwards) -->
+            <div id="dirAdvice" class="mb-1.5 bg-white/95 backdrop-blur-sm border-2 border-slate-300 rounded-xl px-4 py-3 shadow-[0_10px_25px_rgba(0,0,0,0.5)] text-center w-max max-w-[85vw] transition-all duration-300 pointer-events-auto opacity-0 scale-95 origin-bottom hidden flex flex-col items-center justify-end">
+                <div id="adviceTitle" class="text-black font-bold text-[12px] tracking-wide leading-tight mb-1"></div>
+                <div id="adviceRemedy" class="text-slate-700 text-[10px] leading-tight font-medium"></div>
             </div>
 
-            <!-- Main Black Degree Box (Scaled down 20%) -->
+            <!-- Main Black Degree Box -->
             <div class="bg-slate-900/95 backdrop-blur-md border border-yellow-500/80 rounded-xl px-3 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.8)] text-center relative pointer-events-auto scale-90">
                 <div class="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-slate-900 border-b border-r border-yellow-500/80 rotate-45"></div>
                 <span id="degreeValue" class="text-yellow-400 font-bold text-xl font-mono relative z-10 drop-shadow-md tracking-wider">0.0°</span>
@@ -203,7 +215,7 @@
 
         <!-- Status Badge & Legend (Moved to Bottom) -->
         <div class="absolute bottom-[4.5rem] w-full flex justify-center pointer-events-none z-10">
-            <div id="statusBadge" class="bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-2xl px-5 py-3 text-[11px] text-center shadow-[0_10px_30px_rgba(0,0,0,0.8)] font-medium tracking-wide">
+            <div id="statusBadge" class="bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-2xl px-5 py-3 text-[11px] text-center shadow-[0_10px_30px_rgba(0,0,0,0.8)] font-medium tracking-wide w-[85%] max-w-sm">
                 <!-- Status content injected by JS -->
             </div>
         </div>
@@ -291,7 +303,7 @@
             date: new Date(),
             birthDate: new Date(1981, 5, 25, 10, 16),
             gender: 'F',
-            viewMode: 'TIME', // Default to Time mode
+            viewMode: 'TIME', 
             toggles: { year: true, month: true, day: true, hour: true },
             calc: { timeBazi: {}, personBazi: {}, afflictions: {}, stars: {}, kua: 8, auspiciousDirs: [], inauspiciousDirs: [] },
             isCompassActive: false,
@@ -329,6 +341,7 @@
             sidebar: document.getElementById('sidebar'),
             closeSidebarBtn: document.getElementById('closeSidebarBtn'),
             tabBtns: document.querySelectorAll('.tab-btn'),
+            topLeftControls: document.getElementById('topLeftControls'),
             
             // Image edit UI
             importImgBtn: document.getElementById('importImgBtn'),
@@ -365,10 +378,6 @@
         });
 
         function updateStatusBadge() {
-            let modeName = "";
-            let legendHtml = "";
-            
-            // Hide Status Badge if AR is on
             if (isARTransparent) {
                 els.statusBadge.parentElement.style.display = 'none';
                 return;
@@ -376,32 +385,35 @@
                 els.statusBadge.parentElement.style.display = 'flex';
             }
 
+            let modeName = "";
+            let legendHtml = "";
+            let activeDetails = [];
+            let activeText = "";
+            
+            if (state.calc && state.calc.timeBazi) {
+                if (state.toggles.year && state.calc.timeBazi.year !== undefined) activeDetails.push(`ปี${branches[state.calc.timeBazi.year].p}`);
+                if (state.toggles.month && state.calc.timeBazi.month !== undefined) activeDetails.push(`เดือน${branches[state.calc.timeBazi.month].p}`);
+                if (state.toggles.day && state.calc.timeBazi.day !== undefined) activeDetails.push(`วัน${branches[state.calc.timeBazi.day].p}`);
+                if (state.toggles.hour && state.calc.timeBazi.hour !== undefined) activeDetails.push(`ยาม${branches[state.calc.timeBazi.hour].p}`);
+            }
+            activeText = activeDetails.length > 0 ? `(เช็ค: ${activeDetails.join(', ')})` : '(ปิดการเช็คกาลเวลา)';
+
             if (state.viewMode === 'KUA') {
-                modeName = "แสดงทิศมงคลบุคคล (8 Mansions)";
+                modeName = `<span class="text-yellow-400">โหมด: แสดงเฉพาะทิศมงคลบุคคล</span>`;
                 legendHtml = `<div class="flex justify-center gap-5 mt-2 pt-1.5 border-t border-slate-700/80">
                     <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 border border-slate-900"></span>ทิศมงคล</span>
                     <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 border border-slate-900"></span>ทิศร้าย</span>
                 </div>`;
             }
-            if (state.viewMode === 'TIME') {
-                let activeDetails = [];
-                if (state.calc && state.calc.timeBazi) {
-                    // ใช้ .p เพื่อดึงชื่อนักษัตรไทย
-                    if (state.toggles.year && state.calc.timeBazi.year !== undefined) activeDetails.push(`ปี${branches[state.calc.timeBazi.year].p}`);
-                    if (state.toggles.month && state.calc.timeBazi.month !== undefined) activeDetails.push(`เดือน${branches[state.calc.timeBazi.month].p}`);
-                    if (state.toggles.day && state.calc.timeBazi.day !== undefined) activeDetails.push(`วัน${branches[state.calc.timeBazi.day].p}`);
-                    if (state.toggles.hour && state.calc.timeBazi.hour !== undefined) activeDetails.push(`ยาม${branches[state.calc.timeBazi.hour].p}`);
-                }
-                let activeText = activeDetails.length > 0 ? `(เช็ค: ${activeDetails.join(', ')})` : '(ปิดการเช็ค)';
-                modeName = `<span class="text-yellow-400">แสดงทิศร้ายกาลเวลา</span><br><span class="text-[10px] text-slate-300 font-normal mt-0.5 block">${activeText}</span>`;
-                
+            else if (state.viewMode === 'TIME') {
+                modeName = `<span class="text-yellow-400">โหมด: แสดงทิศร้ายกาลเวลา</span><br><span class="text-[10px] text-slate-300 font-normal mt-0.5 block">${activeText}</span>`;
                 legendHtml = `<div class="flex justify-center gap-6 mt-2 pt-1.5 border-t border-slate-700/80">
                     <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-red-600 rounded-sm"></span>ทิศแตก (ชง)</span>
                     <span class="flex items-center gap-1.5"><span class="w-4 h-1.5 bg-orange-500 rounded-full"></span>ทิศอสูร (เส้นขอบ)</span>
                 </div>`;
             }
-            if (state.viewMode === 'STARS') {
-                modeName = "ดาวเหินประจำปี (Flying Stars)";
+            else if (state.viewMode === 'STARS') {
+                modeName = `<span class="text-yellow-400">โหมด: ดาวเหินประจำปี</span><br><span class="text-[10px] text-slate-300 font-normal mt-0.5 block">(อิงจาก: ${state.date.getFullYear()})</span>`;
                 legendHtml = `<div class="flex justify-center gap-4 mt-2 pt-1.5 border-t border-slate-700/80 text-[10px]">
                     <span class="flex items-center gap-1 text-emerald-400">⭐มงคล</span>
                     <span class="flex items-center gap-1 text-red-400">⭐ร้าย</span>
@@ -410,7 +422,7 @@
                 </div>`;
             }
 
-            els.statusBadge.innerHTML = `<div class="flex flex-col text-yellow-500 mb-1">โหมด: ${modeName}</div>${legendHtml}`;
+            els.statusBadge.innerHTML = `<div class="flex flex-col text-yellow-500 mb-1">${modeName}</div>${legendHtml}`;
         }
 
         // Logic functions
@@ -432,12 +444,12 @@
             state.birthDate = new Date(els.birthDate.value);
             state.gender = els.gender.value;
             
-            // 1. Time BaZi
+            // 1. Time BaZi (For afflictions & stars)
             state.calc.timeBazi = getPillars(state.date);
-            // 2. Person BaZi
+            // 2. Person BaZi (For personal data display only)
             state.calc.personBazi = getPillars(state.birthDate);
 
-            // 3. Kua Number
+            // 3. Kua Number (from birthDate)
             const by = state.birthDate.getFullYear();
             let sum = by.toString().split('').reduce((a, b) => a + parseInt(b), 0);
             while (sum > 9) sum = sum.toString().split('').reduce((a, b) => a + parseInt(b), 0);
@@ -469,7 +481,7 @@
                 state.calc.afflictions[p] = getAffliction(state.calc.timeBazi[p]);
             });
 
-            // 5. Flying Stars
+            // 5. Flying Stars (Based on target date)
             const baseYear = 2024;
             const baseStar = 3; 
             const diff = state.date.getFullYear() - baseYear;
@@ -494,6 +506,7 @@
         function updateUI() {
             const formatPillar = (b) => `<div class="bg-slate-900 border border-slate-700 rounded px-2 py-1 flex justify-between items-center"><span class="text-slate-400 mr-2"></span><span class="font-medium text-white">${branches[b].name}</span></div>`;
             
+            // Update Time BaZi panel
             els.timeBaziPanel.innerHTML = `
                 ${formatPillar(state.calc.timeBazi.year).replace('<span>', '<span class="text-slate-400 mr-2">ปี:</span>')}
                 ${formatPillar(state.calc.timeBazi.month).replace('<span>', '<span class="text-slate-400 mr-2">เดือน:</span>')}
@@ -501,6 +514,7 @@
                 ${formatPillar(state.calc.timeBazi.hour).replace('<span>', '<span class="text-slate-400 mr-2">ยาม:</span>')}
             `;
 
+            // Update Person BaZi panel
             els.personBaziPanel.innerHTML = `
                 ${formatPillar(state.calc.personBazi.year).replace('<span>', '<span class="text-slate-400 mr-2">ปี:</span>')}
                 ${formatPillar(state.calc.personBazi.month).replace('<span>', '<span class="text-slate-400 mr-2">เดือน:</span>')}
@@ -512,14 +526,13 @@
             Object.keys(state.toggles).forEach(k => {
                 if (!state.toggles[k]) return;
                 const aff = state.calc.afflictions[k];
-                // แก้ไขดึงชื่อนักษัตรไทย (.p) มาแสดง
                 const bName = branches[state.calc.timeBazi[k]].p; 
                 const label = k==='year'?'ปี':k==='month'?'เดือน':k==='day'?'วัน':'ยาม';
                 sumHtml += `
                     <div class="border-b border-red-900/30 pb-1 mb-1">
                         <span class="text-red-400 font-bold">▲ คำเตือน ทิศร้าย ${label}${bName}</span><br>
                         <span class="text-red-300">ทิศแตก (ชง):</span> ${branches[aff.clash].p} (${branches[aff.clash].name.split(' ')[0]}) | 
-                        <span class="text-orange-400">ทิศอสูร (San Sha):</span> ${aff.ssName}
+                        <span class="text-orange-400">ทิศอสูร:</span> ${aff.ssName}
                     </div>
                 `;
             });
@@ -552,18 +565,17 @@
             });
         });
 
+        // Sidebar Open/Close Logic (with clean hide)
         els.menuBtn.addEventListener('click', () => {
             els.sidebar.classList.add('open');
-            els.menuBtn.style.display = 'none'; 
-            els.quickLayerBtn.style.display = 'none';
+            els.topLeftControls.style.opacity = '0'; // Soft hide
+            setTimeout(() => { els.topLeftControls.style.pointerEvents = 'none'; }, 300);
         });
 
         els.closeSidebarBtn.addEventListener('click', () => {
             els.sidebar.classList.remove('open');
-            setTimeout(() => {
-                els.menuBtn.style.display = 'flex'; 
-                els.quickLayerBtn.style.display = 'flex';
-            }, 400); 
+            els.topLeftControls.style.pointerEvents = 'auto';
+            setTimeout(() => { els.topLeftControls.style.opacity = '1'; }, 100);
         });
 
         const modeOrder = ['TIME', 'KUA', 'STARS'];
@@ -589,7 +601,9 @@
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        renderer.setPixelRatio(window.devicePixelRatio); // Lock resolution to native for sharp text
+        
+        // Fix for blurriness on mobile: force exact pixel ratio
+        renderer.setPixelRatio(window.devicePixelRatio); 
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('canvas3dContainer').appendChild(renderer.domElement);
 
@@ -602,9 +616,9 @@
         texture.minFilter = THREE.LinearMipmapLinearFilter;
         texture.magFilter = THREE.LinearFilter;
 
-        // Change geometry to Ring to allow transparent center
+        // Use RingGeometry so AR mode is hollow in the middle
         const outerRadius = 5;
-        const innerRadius = 0.5; // Small hole in center
+        const innerRadius = 0.05; 
         const geometry = new THREE.RingGeometry(innerRadius, outerRadius, 64);
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide });
         const luopanMesh = new THREE.Mesh(geometry, material);
@@ -638,8 +652,8 @@
             camera.aspect = aspect;
             const fovRad = (camera.fov / 2) * (Math.PI / 180);
             
-            // Fix for S23 Ultra and tall screens: Dynamic safe radius
-            const safeRadius = aspect < 0.5 ? 7.5 : 6.2; 
+            // Dynamic safe radius to prevent cutoff on tall screens (S23 Ultra fix)
+            const safeRadius = aspect < 0.5 ? 7.8 : 6.2; 
             
             camera.position.set(0, aspect < 1 ? (safeRadius / aspect) / Math.tan(fovRad) : safeRadius / Math.tan(fovRad), 0);
             camera.lookAt(0, 0, 0);
@@ -692,7 +706,7 @@
             const innerFontSize = baseFontSize * 0.5;
 
             if (isARTransparent) {
-                // AR Mode: Completely transparent except red outer text
+                // AR Mode: Completely transparent, only red outer text
                 mountains24.forEach(m => {
                     const txt = m.name.split(' ');
                     drawTxt(txt[0], rBrn + (rTicks - rBrn) * 0.7, m.deg, '#ff0000', `900 ${baseFontSize * 1.1}px Arial`, '#ffffff', 8);
@@ -760,11 +774,11 @@
                     if (vm === 'KUA') {
                         if (state.calc.auspiciousDirs.includes(k)) {
                             engColor = '#10b981'; thColor = '#10b981'; 
-                            // เพิ่มสีพื้นหลังจางๆ พร้อมเส้นขอบเขียว
+                            // Add soft background and border
                             drawSeg(rStar, rDir, d.start, d.end, 'rgba(16, 185, 129, 0.15)', '#10b981', 3);
                         } else if (state.calc.inauspiciousDirs.includes(k)) {
                             engColor = '#ef4444'; thColor = '#ef4444'; 
-                            // เพิ่มสีพื้นหลังจางๆ พร้อมเส้นขอบแดง
+                            // Add soft background and border
                             drawSeg(rStar, rDir, d.start, d.end, 'rgba(239, 68, 68, 0.15)', '#ef4444', 3);
                         }
                     }
@@ -788,7 +802,7 @@
                         if ([2, 7, 3].includes(starNum)) { sCol = '#f87171'; bgCol = 'rgba(248, 113, 113, 0.15)'; } 
                         if (starNum === 5) { sCol = '#facc15'; bgCol = 'rgba(250, 204, 21, 0.15)'; } 
                         
-                        // ระบายสีพื้นหลังจางๆ ในช่องดาวเหิน
+                        // Solid Fill for stars cell
                         drawSeg(rTai, rStar, d.start, d.end, bgCol, 'transparent');
                         
                         const starRad = rTai + (rStar - rTai) * 0.5;
@@ -872,30 +886,29 @@
                     remedy = starsInfo[starNum].remedy;
                     if(starsInfo[starNum].type === 'fatal') {
                         els.dirAdvice.classList.replace('border-slate-300', 'border-red-500');
-                        els.adviceTitle.classList.add('text-red-600');
+                        els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-red-600';
                         hasBad = true;
                     } else if (starsInfo[starNum].type === 'bad') {
                          els.dirAdvice.classList.replace('border-slate-300', 'border-orange-500');
-                         els.adviceTitle.classList.add('text-orange-600');
+                         els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-orange-600';
                     } else {
                         els.dirAdvice.classList.replace('border-red-500', 'border-slate-300');
                         els.dirAdvice.classList.replace('border-orange-500', 'border-slate-300');
-                        els.adviceTitle.classList.remove('text-red-600', 'text-orange-600');
+                        els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-emerald-600';
                     }
                 }
             } else if (state.viewMode === 'KUA') {
                 if (state.calc.auspiciousDirs.includes(dirCode)) {
                     title = "ทิศมงคลประจำตัว"; remedy = "ส่งเสริมโชคลาภ สุขภาพ ความสัมพันธ์";
+                    els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-emerald-600';
                 } else {
                     title = "ทิศร้ายประจำตัว"; remedy = "หลีกเลี่ยงการหันหัวเตียง หรือโต๊ะทำงาน";
                     els.dirAdvice.classList.replace('border-slate-300', 'border-red-500');
-                    els.adviceTitle.classList.add('text-red-600');
+                    els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-red-600';
                     hasBad = true;
                 }
-                if(!hasBad) {
-                    els.dirAdvice.classList.replace('border-red-500', 'border-slate-300');
-                    els.adviceTitle.classList.remove('text-red-600');
-                }
+                if(!hasBad) els.dirAdvice.classList.replace('border-red-500', 'border-slate-300');
+                
             } else if (state.viewMode === 'TIME') {
                 let badTitle = [];
                 let currentBranch = Math.floor((deg + 15) % 360 / 30);
@@ -918,13 +931,13 @@
                      title = "⚠️ " + badTitle.join(', ');
                      remedy = "ห้ามเคาะ เจาะ ทุบ ตอก ซ่อมแซม ในทิศนี้เด็ดขาด!";
                      els.dirAdvice.classList.replace('border-slate-300', 'border-red-500');
-                     els.adviceTitle.classList.add('text-red-600');
+                     els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-red-600';
                      hasBad = true;
                 } else {
                      title = "ทิศปกติ (กาลเวลาจร)";
                      remedy = "ไม่มีดาวร้ายจรปะทะ สามารถใช้งานได้ปกติ";
                      els.dirAdvice.classList.replace('border-red-500', 'border-slate-300');
-                     els.adviceTitle.classList.remove('text-red-600');
+                     els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-slate-700';
                 }
             }
 
