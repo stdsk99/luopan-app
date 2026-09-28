@@ -38,10 +38,17 @@
         }
 
         /* Sidebar Animations */
-        .sidebar-expanded { transform: translateX(0); width: 22rem; }
-        .sidebar-collapsed { transform: translateX(-100%); width: 0; border-right: none; }
+        #sidebar { 
+            width: 22rem; 
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar-expanded { margin-left: 0; opacity: 1; pointer-events: auto; }
+        .sidebar-collapsed { margin-left: -22rem; opacity: 0; pointer-events: none; }
+        
         @media (max-width: 768px) {
-            .sidebar-expanded { width: 100%; position: absolute; z-index: 50; }
+            #sidebar { width: 100%; position: absolute; z-index: 50; margin-left: 0; }
+            .sidebar-expanded { transform: translateX(0); opacity: 1; pointer-events: auto; }
+            .sidebar-collapsed { transform: translateX(-100%); opacity: 0; pointer-events: none; margin-left: 0; }
         }
 
         .check-toggle.active {
@@ -63,11 +70,20 @@
             animation: pulse-blue 2s infinite;
         }
         .btn-compass-active svg { color: #60a5fa; }
+
+        /* Animation for hiding hamburger button smoothly */
+        #sidebarToggleBtn {
+            transition: all 0.3s ease;
+        }
+        .btn-hidden {
+            opacity: 0 !important;
+            transform: scale(0.5) !important;
+            pointer-events: none !important;
+        }
     </style>
 </head>
 <body class="h-screen w-full bg-[#050811] flex relative">
 
-    <!-- Global Callback Definition (Prevents ReferenceError) -->
     <script>
         window.update3DTexture = function() {};
     </script>
@@ -88,19 +104,23 @@
         <span class="text-[11px] font-bold hidden sm:inline-block">Live Compass</span>
     </button>
 
-    <!-- AR Camera Toggle Button (โปร่งใส) -->
+    <!-- AR Camera Toggle Button -->
     <button id="cameraBtn" class="absolute top-16 right-4 mt-2 z-40 p-2.5 bg-slate-900/90 text-slate-400 rounded-full border border-slate-600/50 shadow-[0_0_15px_rgba(0,0,0,0.5)] hover:bg-slate-800 hover:text-green-400 transition-all backdrop-blur-md" title="โหมดกล้อง AR (พื้นหลังโปร่งใส)">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
     </button>
 
     <!-- Sidebar Configuration Panel -->
-    <aside id="sidebar" class="flex-shrink-0 h-full flex flex-col glass-panel transition-transform duration-300 sidebar-collapsed shadow-2xl relative z-50">
+    <aside id="sidebar" class="flex-shrink-0 h-full flex flex-col glass-panel sidebar-collapsed shadow-2xl relative z-50">
         
-        <div class="pt-16 pb-4 px-5 border-b border-slate-700/50 flex justify-between items-center bg-slate-900/80">
+        <div class="pt-6 pb-4 px-5 border-b border-slate-700/50 flex justify-between items-center bg-slate-900/80">
             <h1 class="text-lg font-bold gold-gradient-text flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                 Luopan 3D Pro
             </h1>
+            <!-- Close Button Inside Sidebar -->
+            <button id="sidebarCloseBtn" class="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800/80 rounded-lg transition-colors border border-transparent hover:border-slate-700" title="ปิดเมนู">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </div>
 
         <!-- Tab Navigation -->
@@ -230,9 +250,9 @@
         <!-- Video for AR Camera -->
         <video id="arVideo" class="absolute inset-0 w-full h-full object-cover hidden" style="z-index: 1;" autoplay playsinline muted></video>
 
-        <!-- Live Degree Display Box (Positioned properly over the top edge) -->
+        <!-- Live Degree Display Box -->
         <div id="degreeDisplay" class="absolute z-20 flex flex-col items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300" style="top: calc(50% - min(47vw, 47vh)); left: 50%; transform: translate(-50%, -100%); margin-top: -60px;">
-            <div class="bg-slate-900/95 backdrop-blur-md border border-yellow-500/80 rounded-xl px-5 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.8)] text-center relative">
+            <div class="bg-slate-900/95 backdrop-blur-md border border-yellow-500/80 rounded-xl px-5 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.8)] text-center relative pointer-events-auto">
                 <!-- Triangle pointer -->
                 <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-slate-900 border-b border-r border-yellow-500/80 rotate-45"></div>
                 <span id="degreeValue" class="text-yellow-400 font-bold text-2xl font-mono relative z-10 drop-shadow-md">0.0°</span>
@@ -240,7 +260,7 @@
             </div>
             
             <!-- Advice Box (Dynamic Feng Shui Suggestions) -->
-            <div id="dirAdvice" class="absolute top-full mt-4 bg-white/95 backdrop-blur-sm border border-slate-400 rounded-md px-4 py-2.5 shadow-[0_10px_25px_rgba(0,0,0,0.5)] text-center w-max max-w-[90vw] pointer-events-none transition-all duration-300">
+            <div id="dirAdvice" class="mt-4 bg-white/95 backdrop-blur-sm border border-slate-400 rounded-md px-4 py-2.5 shadow-[0_10px_25px_rgba(0,0,0,0.5)] text-center w-max max-w-[90vw] transition-all duration-300 pointer-events-auto relative z-20">
                 <div id="adviceTitle" class="text-black font-bold text-[13px] tracking-wide"></div>
                 <div id="adviceRemedy" class="text-slate-700 text-[12px] mt-1"></div>
             </div>
@@ -255,7 +275,7 @@
              <div id="radialBg" class="absolute inset-0 pointer-events-none transition-opacity duration-500" style="background: radial-gradient(circle at center, transparent 30%, #050811 100%); z-index: 11;"></div>
         </div>
         
-        <!-- Fixed Crosshair (Always remains strictly aligned to the screen) -->
+        <!-- Fixed Crosshair -->
         <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-80" style="z-index: 20;">
             <div class="w-[1px] h-[120vh] bg-red-500 absolute left-1/2 -top-[60vh] shadow-[0_0_8px_rgba(239,68,68,0.8)]"></div>
             <div class="h-[1px] w-[120vw] bg-red-500 absolute top-1/2 -left-[60vw] shadow-[0_0_8px_rgba(239,68,68,0.8)]"></div>
@@ -366,6 +386,7 @@
             tabContents: document.querySelectorAll('.tab-content'),
             sidebar: document.getElementById('sidebar'),
             sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+            sidebarCloseBtn: document.getElementById('sidebarCloseBtn'),
             compassBtn: document.getElementById('compassBtn'),
             compassIcon: document.getElementById('compassIcon'),
             degreeDisplay: document.getElementById('degreeDisplay'),
@@ -596,23 +617,17 @@
             }
 
             const baseFontSize = size * 0.035; 
-            // 50% smaller font size for inner rings
             const innerFontSize = baseFontSize * 0.5;
 
             // --- 24 Mountains Text ---
             for (let i = 0; i < 24; i++) {
                 const mr = rBrn + (rTicks - rBrn) / 2;
-                
-                // Color Logic: Red for AR, Yellow/White for Normal
                 let tColor = isARTransparent ? '#ff3333' : '#fde047'; 
                 let tColorTH = isARTransparent ? '#ff3333' : '#e2e8f0'; 
-                
-                // Outline Logic: Thick black stroke in AR to stand out against camera, or faint shadow in normal mode
-                let strokeCol = isARTransparent ? 'rgba(255,255,255,1)' : null; // White outline in AR to contrast with red
+                let strokeCol = isARTransparent ? 'rgba(255,255,255,1)' : null; 
                 let strokeW = isARTransparent ? 12 : 0; 
                 let shadowBlur = isARTransparent ? 0 : 6;
 
-                // Adjust positioning slightly to accommodate the stroke outline
                 drawTxt(mountains24[i], mr + baseFontSize*0.7, i * 15, tColor, `bold ${baseFontSize*0.9}px Arial`, 'rgba(0,0,0,1)', shadowBlur, strokeCol, strokeW);
                 drawTxt(mountains24TH[i], mr - baseFontSize*0.7, i * 15, tColorTH, `500 ${baseFontSize*0.95 * 1.5}px Prompt`, 'rgba(0,0,0,1)', shadowBlur, strokeCol, strokeW);
             }
@@ -621,18 +636,15 @@
             if (!isARTransparent) {
                 // 12 Branches (Inner Ring 1) 
                 for (let i = 0; i < 12; i++) {
-                    // ปรับขนาดภาษาไทยให้ใหญ่เต็มช่อง 30 องศาพอดี (ไม่ล้นเส้น)
-                    drawTxt(branches[i].name.split(' ')[0], rDir + (rBrn - rDir) * 0.5, i * 30, '#ffffff', `600 ${innerFontSize * 1.35}px Prompt`, 'rgba(0,0,0,0.9)', 10);
+                    drawTxt(branches[i].name.split(' ')[0], rDir + (rBrn - rDir) * 0.5, i * 30, '#ffffff', `600 ${innerFontSize * 1.5}px Prompt`, 'rgba(0,0,0,0.9)', 10);
                 }
                 
                 // 8 Directions (Inner Ring 2)
                 Object.keys(dirs8).forEach(k => {
                     const d = dirs8[k];
                     let mid = (d.start + d.end) / 2; if (d.start > d.end) mid = (d.start + d.end + 360) / 2;
-                    // English dir remains innerFontSize
                     drawTxt(k, rStar + (rDir - rStar) * 0.65, mid, '#d4af37', `900 ${innerFontSize * 1.75}px Arial`, 'rgba(0,0,0,0.9)', 15);
-                    // ปรับขนาดภาษาไทย (เช่น ต.ต.เฉียงเหนือ) ให้เต็มช่อง 45 องศาพอดีเป๊ะโดยไม่ทับตัวอังกฤษ
-                    drawTxt(d.name, rStar + (rDir - rStar) * 0.22, mid, '#cbd5e1', `500 ${innerFontSize * 0.95}px Prompt`, 'rgba(0,0,0,0.8)', 8);
+                    drawTxt(d.name, rStar + (rDir - rStar) * 0.22, mid, '#cbd5e1', `500 ${innerFontSize * 1.05}px Prompt`, 'rgba(0,0,0,0.8)', 8);
                 });
                 
                 // Flying Stars (Inner Ring 3)
@@ -884,15 +896,12 @@
                 els.cameraBtn.classList.remove('text-green-400', 'border-green-500', 'bg-green-900/30');
                 els.cameraBtn.classList.add('text-slate-400', 'border-slate-600/50', 'bg-slate-900/90');
                 
-                // Switch back to normal geometry
                 if (luopanMesh) {
                     const radius = 5;
                     luopanMesh.geometry.dispose();
-                    // Full disk for normal mode
                     luopanMesh.geometry = new THREE.CircleGeometry(radius, 128);
                 }
-                
-                draw2DTexture(); // Re-draw full texture
+                draw2DTexture();
             } else {
                 // Turn ON AR Mode
                 try {
@@ -909,15 +918,12 @@
                     els.cameraBtn.classList.add('text-green-400', 'border-green-500', 'bg-green-900/30');
                     els.cameraBtn.classList.remove('text-slate-400', 'border-slate-600/50', 'bg-slate-900/90');
                     
-                    // Switch to ring geometry to leave center empty in AR
                     if (luopanMesh) {
                         const radius = 5;
                         luopanMesh.geometry.dispose();
-                        // Hollow ring for AR mode, radius matching the rBrn boundary in canvas
                         luopanMesh.geometry = new THREE.RingGeometry(radius * 0.60, radius, 128); 
                     }
-                    
-                    draw2DTexture(); // Re-draw transparent texture
+                    draw2DTexture();
                 } catch (err) {
                     alert("ไม่สามารถเปิดกล้องได้ โปรดตรวจสอบการอนุญาตใช้งานกล้อง: " + err.message);
                 }
@@ -945,7 +951,6 @@
             scene.add(dirLight);
 
             const radius = 5;
-            // Initialize with CircleGeometry for the normal full view
             const geometry = new THREE.CircleGeometry(radius, 128);
             
             const texture = new THREE.CanvasTexture(els.canvas);
@@ -1083,16 +1088,22 @@
             });
         });
 
-        els.sidebarToggleBtn.addEventListener('click', () => {
+        // --- Toggle Sidebar Logic (Hide/Show Hamburger) ---
+        function toggleSidebar() {
             state.sidebarOpen = !state.sidebarOpen;
             if (state.sidebarOpen) {
                 els.sidebar.classList.add('sidebar-expanded');
                 els.sidebar.classList.remove('sidebar-collapsed');
+                els.sidebarToggleBtn.classList.add('btn-hidden'); // ซ่อนปุ่ม 3 ขีด
             } else {
                 els.sidebar.classList.remove('sidebar-expanded');
                 els.sidebar.classList.add('sidebar-collapsed');
+                els.sidebarToggleBtn.classList.remove('btn-hidden'); // แสดงปุ่ม 3 ขีด
             }
-        });
+        }
+
+        els.sidebarToggleBtn.addEventListener('click', toggleSidebar);
+        els.sidebarCloseBtn.addEventListener('click', toggleSidebar);
 
         window.onload = init3D;
     </script>
