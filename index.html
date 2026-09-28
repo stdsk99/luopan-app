@@ -67,11 +67,9 @@
 </head>
 <body class="h-screen w-full bg-[#050811] flex relative">
 
-    <!-- Pre-declare update3DTexture so calculateAll can safely reference it -->
     <script>
-        window.update3DTexture = function() {
-            // Placeholder, overwritten during Three.js initialization
-        };
+        // Placeholder for 3D update callback
+        window.update3DTexture = function() {};
     </script>
 
     <!-- Sidebar Toggle Button -->
@@ -172,25 +170,24 @@
                     </div>
                 </div>
                 
-                <!-- Moved from floating panel: Warnings & BaZi -->
+                <!-- BaZi Result -->
+                <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-3 shadow-lg mt-4">
+                    <div class="text-[11px] text-yellow-500 font-bold mb-2 pb-1.5 border-b border-slate-800 flex items-center gap-1.5">
+                        ผลการคำนวณ 4 เสา:
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-[11px]" id="baziPanel">
+                        <!-- JS renders here -->
+                    </div>
+                </div>
+
                 <!-- Strict Warnings -->
-                <div class="border border-red-800/60 bg-red-950/40 rounded-xl p-3 shadow-lg mt-4">
+                <div class="border border-red-800/60 bg-red-950/40 rounded-xl p-3 shadow-lg">
                     <h3 class="text-red-500 font-bold text-[11px] flex items-center gap-1.5 mb-1.5">
                         <svg class="w-3 h-3 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                         ระบบวิเคราะห์เตือนภัย
                     </h3>
                     <div id="strictWarnings" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1">
                         <!-- JS injects warnings -->
-                    </div>
-                </div>
-
-                <!-- BaZi Result -->
-                <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-3 shadow-lg">
-                    <div class="text-[11px] text-yellow-500 font-bold mb-2 pb-1.5 border-b border-slate-800 flex items-center gap-1.5">
-                        ผลการคำนวณ 4 เสา:
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 text-[11px]" id="baziPanel">
-                        <!-- JS renders here -->
                     </div>
                 </div>
             </div>
@@ -220,7 +217,9 @@
         <canvas id="luopanCanvas" class="hidden" width="3072" height="3072"></canvas>
         
         <!-- Three.js Container -->
-        <div id="canvas3dContainer" class="w-full h-full cursor-default"></div>
+        <div id="canvas3dContainer" class="w-full h-full cursor-default relative">
+             <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(circle at center, transparent 30%, #050811 100%); z-index:5;"></div>
+        </div>
         
         <!-- Fixed Crosshair (Always remains strictly aligned to the screen) -->
         <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-80 z-10">
@@ -421,8 +420,8 @@
             });
 
             // 6: Flying Stars Engine (Annual)
-            let base = sumDigits(solarYear); 
-            let yearStar = 11 - base;
+            let baseStar = sumDigits(solarYear); 
+            let yearStar = 11 - baseStar;
             if (yearStar > 9) yearStar = sumDigits(yearStar);
             if (yearStar === 0) yearStar = 9;
             if (yearStar === 5) yearStar = 5; 
@@ -560,10 +559,10 @@
             ctx.globalCompositeOperation = 'source-over'; // Reset
 
             // --- 3. Typography ---
-            const baseFontSize = size * 0.035; // Keep outer ring font size
-            const innerFontSize = baseFontSize * 0.5; // Reduced by 50% for inner rings
+            const baseFontSize = size * 0.035; 
+            const innerFontSize = baseFontSize * 0.5; // Inner text relative size 50% of base
 
-            // 24 Mountains (Outer Ring - Size maintained)
+            // 24 Mountains (Outer Ring - Normal size)
             for (let i = 0; i < 24; i++) {
                 const en = mountains24[i];
                 const th = mountains24TH[i];
@@ -572,20 +571,23 @@
                 drawTxt(th, mr - baseFontSize*0.7, i * 15, '#e2e8f0', `500 ${baseFontSize*0.95}px Prompt`, 'rgba(0,0,0,0.8)', 6);
             }
             
-            // 12 Branches (Inner Ring 1 - Thai Font increased by ~50% (x1.35))
+            // 12 Branches (Inner Ring 1)
             for (let i = 0; i < 12; i++) {
-                drawTxt(branches[i].name.split(' ')[0], rDir + (rBrn - rDir) * 0.5, i * 30, '#ffffff', `600 ${innerFontSize * 1.35}px Prompt`, 'rgba(0,0,0,0.9)', 10);
+                // Thai font boosted by 50% relative to innerFontSize (1.5x)
+                drawTxt(branches[i].name.split(' ')[0], rDir + (rBrn - rDir) * 0.5, i * 30, '#ffffff', `600 ${innerFontSize * 1.5}px Prompt`, 'rgba(0,0,0,0.9)', 10);
             }
             
-            // 8 Directions (Inner Ring 2 - Thai Font increased by ~50% (x0.85))
+            // 8 Directions (Inner Ring 2)
             Object.keys(dirs8).forEach(k => {
                 const d = dirs8[k];
                 let mid = (d.start + d.end) / 2; if (d.start > d.end) mid = (d.start + d.end + 360) / 2;
+                // EN Direction (Normal inner size relative)
                 drawTxt(k, rStar + (rDir - rStar) * 0.65, mid, '#d4af37', `900 ${innerFontSize * 1.75}px Arial`, 'rgba(0,0,0,0.9)', 15);
-                drawTxt(d.name, rStar + (rDir - rStar) * 0.20, mid, '#cbd5e1', `500 ${innerFontSize * 0.85}px Prompt`, 'rgba(0,0,0,0.8)', 8);
+                // TH Direction (Thai font boosted by 50% (0.85 -> 1.275))
+                drawTxt(d.name, rStar + (rDir - rStar) * 0.20, mid, '#cbd5e1', `500 ${innerFontSize * 1.275}px Prompt`, 'rgba(0,0,0,0.8)', 8);
             });
             
-            // Flying Stars (Inner Ring 3 - Font reduced by 50%, Padding adjusted)
+            // Flying Stars (Inner Ring 3)
             if (vm === 'ALL' || vm === 'STARS') {
                 Object.keys(dirs8).forEach(k => {
                     const d = dirs8[k];
@@ -595,6 +597,7 @@
                     if ([9, 1, 8].includes(starNum)) sCol = '#4ade80';
                     if ([5, 2, 7, 3].includes(starNum)) sCol = '#f87171';
                     if (starNum === 5) sCol = '#facc15'; 
+                    // Numbers size kept constant relative to inner size
                     drawTxt(starNum, rTai + (rStar - rTai) * 0.5, mid, sCol, `900 ${innerFontSize * 2.25}px Arial`, 'rgba(0,0,0,0.9)', 20);
                 });
             }
@@ -628,7 +631,7 @@
             ctx.beginPath(); ctx.arc(0, 0, tr, 0, 2 * Math.PI); ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 6; ctx.stroke();
             
             ctx.restore();
-            window.update3DTexture(); // Signal Three.js to update
+            if(window.update3DTexture) window.update3DTexture();
         }
 
         // --- 4. ANALYSIS ENGINE ---
@@ -720,31 +723,50 @@
             }
         }
 
-        // --- 5. COMPASS SENSOR ENGINE (DEVICE ORIENTATION) ---
+        // --- 5. COMPASS SENSOR ENGINE (SMOOTH CALIBRATION FIX) ---
         let isCompassActive = false;
         let targetRotation = 0; 
         let currentRotation = 0; 
         let sensorWarnTimeout = null;
 
-        function lerpAngle(start, end, factor) {
-            let delta = end - start;
+        // Improved Lerp with Shortest Path Algorithm to prevent 360-degree jitter/flipping
+        function smoothLerpAngle(current, target, factor) {
+            let delta = target - current;
+            // Normalize delta to be between -PI and PI to find the shortest rotation path
             while (delta > Math.PI) delta -= Math.PI * 2;
             while (delta < -Math.PI) delta += Math.PI * 2;
-            return start + delta * factor;
+            return current + delta * factor;
         }
 
         function handleOrientation(event) {
             if (!isCompassActive) return;
             let heading = null;
             
+            // Prefer webkitCompassHeading for iOS (True North relative if available)
             if (event.webkitCompassHeading !== undefined) {
                 heading = event.webkitCompassHeading;
-            } else if (event.alpha !== null) {
+            } 
+            // Fallback for Android (Absolute orientation)
+            else if (event.alpha !== null) {
+                // Determine orientation compensation based on device screen orientation
+                let screenOrientation = 0;
+                if(window.screen && window.screen.orientation) {
+                    screenOrientation = window.screen.orientation.angle || 0;
+                } else {
+                    screenOrientation = window.orientation || 0;
+                }
+                
+                // Adjust alpha based on standard W3C DeviceOrientation formulation
                 heading = 360 - event.alpha;
+                // Basic compensation for screen rotation (landscape vs portrait)
+                if (screenOrientation !== 0) {
+                     heading = (heading - screenOrientation + 360) % 360;
+                }
             }
 
             if (heading !== null) {
                 clearTimeout(sensorWarnTimeout);
+                // Set the target rotation in radians
                 targetRotation = heading * (Math.PI / 180);
             }
         }
@@ -756,30 +778,33 @@
             
             sensorWarnTimeout = setTimeout(() => {
                 if(isCompassActive) {
-                    alert("ไม่ได้รับสัญญาณเข็มทิศ: โปรดตรวจสอบการเปิดใช้งาน GPS/Sensor และตรวจสอบว่าคุณเปิดเว็บนี้ผ่าน https:// เท่านั้น");
+                    alert("ไม่ได้รับสัญญาณเข็มทิศ: โปรดตรวจสอบการเปิดใช้งาน GPS/Location Sensor, ให้สิทธิ์บราวเซอร์, และตรวจสอบว่าคุณเปิดเว็บนี้ผ่านลิงก์ https:// (ปลอดภัย) เท่านั้น");
                 }
             }, 3000);
 
+            // Listen to absolute orientation for reliable magnetic compass data
             if ('ondeviceorientationabsolute' in window) {
                 window.addEventListener('deviceorientationabsolute', handleOrientation);
+            } else {
+                window.addEventListener('deviceorientation', handleOrientation);
             }
-            window.addEventListener('deviceorientation', handleOrientation);
         }
 
         els.compassBtn.addEventListener('click', () => {
             if (isCompassActive) {
                 isCompassActive = false;
-                window.removeEventListener('deviceorientation', handleOrientation);
                 window.removeEventListener('deviceorientationabsolute', handleOrientation);
+                window.removeEventListener('deviceorientation', handleOrientation);
                 els.compassBtn.classList.add('bg-slate-900/90', 'text-slate-400', 'border-slate-600/50');
                 els.compassBtn.classList.remove('btn-compass-active');
-                targetRotation = 0; 
+                targetRotation = 0; // Reset to North
             } else {
+                // Request permission on iOS 13+ devices
                 if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                     DeviceOrientationEvent.requestPermission()
                         .then(permissionState => {
                             if (permissionState === 'granted') activateCompass();
-                            else alert("ระบบต้องการอนุญาตการเข้าถึงเซ็นเซอร์เข็มทิศเพื่อใช้งานฟังก์ชันนี้");
+                            else alert("ระบบต้องการอนุญาตการเข้าถึงเซ็นเซอร์เข็มทิศ (Motion & Orientation) เพื่อใช้งานฟังก์ชันนี้");
                         })
                         .catch(console.error);
                 } else {
@@ -788,32 +813,34 @@
             }
         });
 
-        // --- 6. THREE.JS 3D SCENE (Strict Orthographic Top-Down) ---
+        // --- 6. THREE.JS 3D SCENE (Fixed Camera Initialization) ---
         let scene, camera, renderer, luopanMesh;
 
         function init3D() {
-            calculateAll();
+            calculateAll(); 
 
             const container = document.getElementById('canvas3dContainer');
             scene = new THREE.Scene();
 
+            // Setup orthographic-like perspective camera looking straight down Z axis
             camera = new THREE.PerspectiveCamera(35, 1, 0.1, 1000);
             
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             container.appendChild(renderer.domElement);
 
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7); // Reduced ambient light slightly
+            // Soft Studio Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.85); 
             scene.add(ambientLight);
 
-            const dirLight = new THREE.DirectionalLight(0xffeedd, 0.4); // Reduced directional light
-            dirLight.position.set(0, 0, 10); // Directly above for even lighting
+            const dirLight = new THREE.DirectionalLight(0xfff7e6, 0.5); 
+            dirLight.position.set(0, 0, 10); 
             scene.add(dirLight);
 
             const radius = 5;
             const height = 0.4;
             const geometry = new THREE.CylinderGeometry(radius, radius, height, 128);
-            geometry.rotateX(Math.PI / 2); // Lay flat facing Z axis (Camera)
+            geometry.rotateX(Math.PI / 2); // Lay flat facing camera (Z)
             
             const texture = new THREE.CanvasTexture(els.canvas);
             texture.generateMipmaps = true;
@@ -821,14 +848,13 @@
             texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
             const materials = [
-                new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.8, roughness: 0.3 }), // Side (Gold)
-                new THREE.MeshStandardMaterial({ map: texture, roughness: 0.8, metalness: 0.05 }),   // Top Face (Luopan) - Less shiny to avoid glare
+                new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.6, roughness: 0.4 }), // Side
+                new THREE.MeshStandardMaterial({ map: texture, roughness: 0.9, metalness: 0.1 }),   // Top (Less reflective)
                 new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 })                  // Bottom
             ];
 
             luopanMesh = new THREE.Mesh(geometry, materials);
-            // Face directly to the camera (Z axis), No tilts.
-            luopanMesh.rotation.set(0, 0, 0);
+            luopanMesh.rotation.set(0, 0, 0); // Start at absolute zero
             scene.add(luopanMesh);
 
             window.update3DTexture = function() {
@@ -838,17 +864,20 @@
             };
             window.update3DTexture();
 
-            // Responsive Camera Setup (Fits screen perfectly)
+            // Resize Observer for perfectly fitting the container
             const resizeObserver = new ResizeObserver(() => onWindowResize());
             resizeObserver.observe(container);
-            onWindowResize(); // Force initial calculation
+            
+            // Force initial resize after a tiny delay to ensure container has dimensions
+            setTimeout(onWindowResize, 50);
 
             function animate() {
                 requestAnimationFrame(animate);
                 
                 if (luopanMesh) {
-                    // Compass Sensor Rotation (Only rotates around Z axis)
-                    currentRotation = lerpAngle(currentRotation, targetRotation, 0.08);
+                    // Apply Smooth Lerp Rotation with Shortest Path factor (0.05 for high smoothing)
+                    currentRotation = smoothLerpAngle(currentRotation, targetRotation, 0.05);
+                    // Rotate ONLY on the Z axis relative to camera
                     luopanMesh.rotation.z = -currentRotation;
                 }
 
@@ -867,13 +896,13 @@
             
             camera.aspect = aspect;
             
-            // Calculate distance to fit the radius on screen perfectly
+            // Calculate exact camera distance to fit radius 5 inside the screen
             const fovRad = (camera.fov / 2) * (Math.PI / 180);
-            const safeRadius = 5.2; // slightly larger than mesh radius 5 to give a small margin
+            const safeRadius = 5.3; // Give a small margin around the 5.0 mesh
             
             let distance = aspect < 1 
-                ? (safeRadius / aspect) / Math.tan(fovRad) // Portrait
-                : safeRadius / Math.tan(fovRad);           // Landscape
+                ? (safeRadius / aspect) / Math.tan(fovRad) // Portrait fitting (width constrained)
+                : safeRadius / Math.tan(fovRad);           // Landscape fitting (height constrained)
                 
             camera.position.set(0, 0, distance);
             camera.lookAt(0, 0, 0);
