@@ -46,13 +46,18 @@
     <!-- UI Layer -->
     <div id="uiLayer">
         
-        <!-- Top Left: Menu Button -->
-        <button id="menuBtn" class="pointer-events-auto absolute top-4 left-4 z-30 bg-slate-900/90 border border-slate-700 text-yellow-500 p-3 rounded-xl shadow-lg hover:bg-slate-800 transition-all">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        </button>
+        <!-- Top Left Controls (Moved down and added quick layer toggle) -->
+        <div id="topLeftControls" class="absolute top-20 left-4 z-30 flex flex-col gap-3 pointer-events-none">
+            <button id="menuBtn" class="pointer-events-auto bg-slate-900/90 border border-slate-700 text-yellow-500 p-3 rounded-xl shadow-lg hover:bg-slate-800 transition-all flex items-center justify-center w-12 h-12">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <button id="quickLayerBtn" class="pointer-events-auto bg-slate-900/90 border border-slate-700 text-purple-400 p-3 rounded-xl shadow-lg hover:bg-slate-800 transition-all flex items-center justify-center w-12 h-12" title="สลับหน้าปัดด่วน">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+            </button>
+        </div>
 
-        <!-- Top Right Controls -->
-        <div class="absolute top-4 right-4 z-30 flex flex-col gap-3 pointer-events-auto">
+        <!-- Top Right Controls (Moved down) -->
+        <div class="absolute top-20 right-4 z-30 flex flex-col gap-3 pointer-events-auto">
             <!-- Live Compass Button -->
             <button id="compassBtn" class="bg-indigo-600/90 text-white p-3 rounded-full shadow-lg border border-indigo-400 hover:bg-indigo-500 transition-all flex items-center justify-center w-12 h-12">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
@@ -321,6 +326,7 @@
             manualDegree: document.getElementById('manualDegree'),
             manualRotationControl: document.getElementById('manualRotationControl'),
             menuBtn: document.getElementById('menuBtn'),
+            quickLayerBtn: document.getElementById('quickLayerBtn'),
             sidebar: document.getElementById('sidebar'),
             closeSidebarBtn: document.getElementById('closeSidebarBtn'),
             tabBtns: document.querySelectorAll('.tab-btn'),
@@ -567,13 +573,27 @@
         els.menuBtn.addEventListener('click', () => {
             els.sidebar.classList.add('open');
             els.menuBtn.style.display = 'none'; // Hide menu button
+            els.quickLayerBtn.style.display = 'none'; // Hide quick toggle button
         });
 
         els.closeSidebarBtn.addEventListener('click', () => {
             els.sidebar.classList.remove('open');
             setTimeout(() => {
-                els.menuBtn.style.display = 'block'; // Show menu button after transition
+                els.menuBtn.style.display = 'flex'; // Show menu button after transition
+                els.quickLayerBtn.style.display = 'flex';
             }, 400); // Matches CSS transition duration
+        });
+
+        // Quick Layer Toggle Logic
+        const modeOrder = ['TIME', 'KUA', 'STARS'];
+        els.quickLayerBtn.addEventListener('click', () => {
+            let currentIndex = modeOrder.indexOf(state.viewMode);
+            let nextIndex = (currentIndex + 1) % modeOrder.length;
+            let nextMode = modeOrder[nextIndex];
+            
+            // Trigger the click on the corresponding sidebar button to keep everything synced
+            const targetBtn = Array.from(els.layerBtns).find(b => b.getAttribute('data-layer') === nextMode);
+            if(targetBtn) targetBtn.click();
         });
 
         ['togYear', 'togMonth', 'togDay', 'togHour'].forEach(id => {
