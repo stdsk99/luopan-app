@@ -213,6 +213,15 @@
 
     <!-- Main 3D Canvas Area -->
     <main class="flex-1 relative overflow-hidden flex justify-center items-center h-full bg-[#050811] z-0">
+        
+        <!-- Live Degree Display Box (Positioned near the top edge of the luopan) -->
+        <div id="degreeDisplay" class="absolute z-20 flex flex-col items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300" style="top: calc(50% - min(40vw, 40vh)); left: 50%; transform: translateX(-50%); margin-top: -30px;">
+            <div class="bg-slate-900/80 backdrop-blur-md border border-yellow-500/50 rounded-lg px-4 py-1.5 shadow-[0_0_15px_rgba(212,175,55,0.2)] text-center">
+                <span id="degreeValue" class="text-yellow-400 font-bold text-lg font-mono">0°</span>
+                <div id="dirLabel" class="text-slate-300 text-[10px] font-semibold mt-0.5">เหนือ (N)</div>
+            </div>
+        </div>
+        
         <!-- Hidden 2D Canvas for Texture (Resolution multiplied for Crispness) -->
         <canvas id="luopanCanvas" class="hidden" width="3072" height="3072"></canvas>
         
@@ -319,7 +328,10 @@
             sidebar: document.getElementById('sidebar'),
             sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
             compassBtn: document.getElementById('compassBtn'),
-            compassIcon: document.getElementById('compassIcon')
+            compassIcon: document.getElementById('compassIcon'),
+            degreeDisplay: document.getElementById('degreeDisplay'),
+            degreeValue: document.getElementById('degreeValue'),
+            dirLabel: document.getElementById('dirLabel')
         };
         const ctx = els.canvas.getContext('2d', { alpha: false });
 
@@ -723,32 +735,57 @@
             }
         }
 
-        // --- 5. COMPASS SENSOR ENGINE (SMOOTH CALIBRATION FIX) ---
+        // --- 5. COMPASS SENSOR ENGINE (CALIBRATED & SMOOTHED) ---
         let isCompassActive = false;
         let targetRotation = 0; 
         let currentRotation = 0; 
         let sensorWarnTimeout = null;
 
-        // Improved Lerp with Shortest Path Algorithm to prevent 360-degree jitter/flipping
+        // Shortest Path Lerp for 360 Degree wrap-around
         function smoothLerpAngle(current, target, factor) {
             let delta = target - current;
-            // Normalize delta to be between -PI and PI to find the shortest rotation path
             while (delta > Math.PI) delta -= Math.PI * 2;
             while (delta < -Math.PI) delta += Math.PI * 2;
             return current + delta * factor;
+        }
+
+        // Helper to update Degree Display
+        function updateDegreeDisplay(rad) {
+            let deg = (rad * 180 / Math.PI) % 360;
+            if (deg < 0) deg += 360;
+            
+            // Format to 1 decimal place
+            els.degreeValue.textContent = deg.toFixed(1) + '°';
+
+            // Determine direction label
+            let label = "";
+            for (const [code, info] of Object.entries(dirs8)) {
+                let start = info.start;
+                let end = info.end;
+                let inRange = false;
+                
+                if (start > end) { // Wraps around 360
+                    inRange = (deg >= start || deg < end);
+                } else {
+                    inRange = (deg >= start && deg < end);
+                }
+
+                if (inRange) {
+                    label = `${info.name.split(' ')[0]} (${code})`; // Shorten name
+                    break;
+                }
+            }
+            els.dirLabel.textContent = label;
         }
 
         function handleOrientation(event) {
             if (!isCompassActive) return;
             let heading = null;
             
-            // Prefer webkitCompassHeading for iOS (True North relative if available)
             if (event.webkitCompassHeading !== undefined) {
                 heading = event.webkitCompassHeading;
             } 
-            // Fallback for Android (Absolute orientation)
             else if (event.alpha !== null) {
-                // Determine orientation compensation based on device screen orientation
                 let screenOrientation = 0;
                 if(window.screen && window.screen.orientation) {
                     screenOrientation = window.screen.orientation.angle || 0;
@@ -756,9 +793,7 @@
                     screenOrientation = window.orientation || 0;
                 }
                 
-                // Adjust alpha based on standard W3C DeviceOrientation formulation
                 heading = 360 - event.alpha;
-                // Basic compensation for screen rotation (landscape vs portrait)
                 if (screenOrientation !== 0) {
                      heading = (heading - screenOrientation + 360) % 360;
                 }
@@ -766,7 +801,6 @@
 
             if (heading !== null) {
                 clearTimeout(sensorWarnTimeout);
-                // Set the target rotation in radians
                 targetRotation = heading * (Math.PI / 180);
             }
         }
@@ -776,13 +810,16 @@
             els.compassBtn.classList.remove('bg-slate-900/90', 'text-slate-400', 'border-slate-600/50');
             els.compassBtn.classList.add('btn-compass-active');
             
+            // Show degree display
+            els.degreeDisplay.classList.remove('opacity-0');
+            els.degreeDisplay.classList.add('opacity-100');
+            
             sensorWarnTimeout = setTimeout(() => {
                 if(isCompassActive) {
                     alert("ไม่ได้รับสัญญาณเข็มทิศ: โปรดตรวจสอบการเปิดใช้งาน GPS/Location Sensor, ให้สิทธิ์บราวเซอร์, และตรวจสอบว่าคุณเปิดเว็บนี้ผ่านลิงก์ https:// (ปลอดภัย) เท่านั้น");
                 }
             }, 3000);
 
-            // Listen to absolute orientation for reliable magnetic compass data
             if ('ondeviceorientationabsolute' in window) {
                 window.addEventListener('deviceorientationabsolute', handleOrientation);
             } else {
@@ -797,9 +834,13 @@
                 window.removeEventListener('deviceorientation', handleOrientation);
                 els.compassBtn.classList.add('bg-slate-900/90', 'text-slate-400', 'border-slate-600/50');
                 els.compassBtn.classList.remove('btn-compass-active');
+                
+                // Hide degree display
+                els.degreeDisplay.classList.remove('opacity-100');
+                els.degreeDisplay.classList.add('opacity-0');
+                
                 targetRotation = 0; // Reset to North
             } else {
-                // Request permission on iOS 13+ devices
                 if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                     DeviceOrientationEvent.requestPermission()
                         .then(permissionState => {
@@ -813,7 +854,7 @@
             }
         });
 
-        // --- 6. THREE.JS 3D SCENE (Fixed Camera Initialization) ---
+        // --- 6. THREE.JS 3D SCENE ---
         let scene, camera, renderer, luopanMesh;
 
         function init3D() {
@@ -822,14 +863,12 @@
             const container = document.getElementById('canvas3dContainer');
             scene = new THREE.Scene();
 
-            // Setup orthographic-like perspective camera looking straight down Z axis
             camera = new THREE.PerspectiveCamera(35, 1, 0.1, 1000);
             
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             container.appendChild(renderer.domElement);
 
-            // Soft Studio Lighting
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.85); 
             scene.add(ambientLight);
 
@@ -840,7 +879,7 @@
             const radius = 5;
             const height = 0.4;
             const geometry = new THREE.CylinderGeometry(radius, radius, height, 128);
-            geometry.rotateX(Math.PI / 2); // Lay flat facing camera (Z)
+            geometry.rotateX(Math.PI / 2); 
             
             const texture = new THREE.CanvasTexture(els.canvas);
             texture.generateMipmaps = true;
@@ -848,13 +887,13 @@
             texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
             const materials = [
-                new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.6, roughness: 0.4 }), // Side
-                new THREE.MeshStandardMaterial({ map: texture, roughness: 0.9, metalness: 0.1 }),   // Top (Less reflective)
-                new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 })                  // Bottom
+                new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.6, roughness: 0.4 }), 
+                new THREE.MeshStandardMaterial({ map: texture, roughness: 0.9, metalness: 0.1 }),   
+                new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 })                  
             ];
 
             luopanMesh = new THREE.Mesh(geometry, materials);
-            luopanMesh.rotation.set(0, 0, 0); // Start at absolute zero
+            luopanMesh.rotation.set(0, 0, 0); 
             scene.add(luopanMesh);
 
             window.update3DTexture = function() {
@@ -864,21 +903,22 @@
             };
             window.update3DTexture();
 
-            // Resize Observer for perfectly fitting the container
             const resizeObserver = new ResizeObserver(() => onWindowResize());
             resizeObserver.observe(container);
             
-            // Force initial resize after a tiny delay to ensure container has dimensions
             setTimeout(onWindowResize, 50);
 
             function animate() {
                 requestAnimationFrame(animate);
                 
                 if (luopanMesh) {
-                    // Apply Smooth Lerp Rotation with Shortest Path factor (0.05 for high smoothing)
                     currentRotation = smoothLerpAngle(currentRotation, targetRotation, 0.05);
-                    // Rotate ONLY on the Z axis relative to camera
                     luopanMesh.rotation.z = -currentRotation;
+                    
+                    // Update the degree display UI if active
+                    if (isCompassActive) {
+                        updateDegreeDisplay(currentRotation);
+                    }
                 }
 
                 renderer.render(scene, camera);
@@ -896,13 +936,12 @@
             
             camera.aspect = aspect;
             
-            // Calculate exact camera distance to fit radius 5 inside the screen
             const fovRad = (camera.fov / 2) * (Math.PI / 180);
-            const safeRadius = 5.3; // Give a small margin around the 5.0 mesh
+            const safeRadius = 5.3; 
             
             let distance = aspect < 1 
-                ? (safeRadius / aspect) / Math.tan(fovRad) // Portrait fitting (width constrained)
-                : safeRadius / Math.tan(fovRad);           // Landscape fitting (height constrained)
+                ? (safeRadius / aspect) / Math.tan(fovRad) 
+                : safeRadius / Math.tan(fovRad);           
                 
             camera.position.set(0, 0, distance);
             camera.lookAt(0, 0, 0);
