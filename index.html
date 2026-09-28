@@ -3,1134 +3,629 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Luopan 3D Pro: Time & Personal Feng Shui Analyzer</title>
+    <title>Luopan 3D Pro - Advanced Feng Shui Analyzer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold-primary: #d4af37; --bg-dark: #0f172a; }
-        body { font-family: 'Prompt', sans-serif; background-color: var(--bg-dark); color: #f8fafc; overflow: hidden; touch-action: none; }
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
-        ::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--gold-primary); }
-        .gold-gradient-text { background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .glass-panel { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); border-right: 1px solid rgba(212, 175, 55, 0.15); }
-        #sidebar { width: 22rem; transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .sidebar-expanded { margin-left: 0; opacity: 1; pointer-events: auto; }
-        .sidebar-collapsed { margin-left: -22rem; opacity: 0; pointer-events: none; }
-        @media (max-width: 768px) {
-            #sidebar { width: 100%; position: absolute; z-index: 60; margin-left: 0; }
-            .sidebar-expanded { transform: translateX(0); opacity: 1; pointer-events: auto; }
-            .sidebar-collapsed { transform: translateX(-100%); opacity: 0; pointer-events: none; margin-left: 0; }
-        }
-        .check-toggle.active { background-color: rgba(30, 41, 59, 1); border-color: #ca8a04; color: #fde047; }
-        .check-toggle.active .icon { color: #fde047; }
-        @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
-        @keyframes pulse-red { 0% { fill: rgba(239, 68, 68, 0.8); } 50% { fill: rgba(220, 38, 38, 0.4); } 100% { fill: rgba(239, 68, 68, 0.8); } }
-        .btn-active-blue { background-color: rgba(30, 58, 138, 0.9) !important; border-color: #3b82f6 !important; color: #93c5fd !important; animation: pulse-blue 2s infinite; }
-        #sidebarToggleBtn { transition: all 0.3s ease; }
-        .btn-hidden { opacity: 0 !important; transform: scale(0.5) !important; pointer-events: none !important; }
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: #d4af37; cursor: pointer; margin-top: -8px; box-shadow: 0 0 10px rgba(212,175,55,0.5); }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: rgba(255,255,255,0.2); border-radius: 4px; }
+        body { font-family: 'Prompt', sans-serif; background-color: #020617; color: white; overflow: hidden; touch-action: none; margin: 0; padding: 0; }
+        #canvas3dContainer { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
+        #uiLayer { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 10; pointer-events: none; }
+        .pointer-events-auto { pointer-events: auto; }
+        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .layer-btn.active { background: rgba(30, 41, 59, 0.9); border-color: #d4af37; color: #fde047; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
+        input[type="range"] { accent-color: #d4af37; }
         
-        /* Image Transformation UI */
-        #bgImageWrapper { transform-origin: center center; transition: opacity 0.3s; }
-        .edit-mode-active #canvas3dContainer { opacity: 0.3 !important; pointer-events: none; }
-        .slider-label { font-size: 10px; color: #94a3b8; display: flex; justify-content: space-between; margin-bottom: 2px; }
-        .transform-slider { height: 4px !important; }
-        .transform-slider::-webkit-slider-thumb { height: 16px !important; width: 16px !important; margin-top: -6px !important; }
+        /* Sidebar Smooth Transition */
+        #sidebar {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-100%);
+            opacity: 0;
+            box-shadow: none;
+        }
+        #sidebar.open {
+            transform: translateX(0);
+            opacity: 1;
+            box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+        }
+
+        #videoBackground {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            object-fit: cover; z-index: 0; display: none;
+        }
     </style>
 </head>
-<body class="h-screen w-full bg-[#050811] flex relative">
+<body>
 
-    <script> window.update3DTexture = function() {}; </script>
+    <!-- Camera Background for AR Mode -->
+    <video id="videoBackground" autoplay playsinline></video>
 
-    <!-- Sidebar Toggle Button -->
-    <button id="sidebarToggleBtn" class="absolute top-4 left-4 z-40 p-2.5 bg-slate-900/90 text-yellow-500 rounded-xl border border-yellow-600/50 shadow-[0_0_15px_rgba(212,175,55,0.3)] hover:bg-slate-800 transition-all backdrop-blur-md">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-    </button>
+    <!-- 3D Canvas -->
+    <div id="canvas3dContainer"></div>
 
-    <!-- Layer Quick Cycle Button -->
-    <button id="layerCycleBtn" class="absolute top-16 mt-2 left-4 z-30 p-2.5 bg-slate-900/90 text-yellow-400 rounded-xl border border-yellow-600/50 shadow-[0_0_15px_rgba(212,175,55,0.3)] hover:bg-slate-800 transition-all backdrop-blur-md" title="สลับหน้าปัดด่วน">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-    </button>
-
-    <!-- RIGHT ACTION BUTTONS -->
-    <div class="absolute top-4 right-4 z-30 flex flex-col items-end gap-3">
-        <!-- Live Compass Toggle -->
-        <button id="compassBtn" class="flex items-center gap-2 px-4 py-2 bg-slate-900/90 text-slate-400 rounded-full border border-slate-600/50 shadow-[0_0_15px_rgba(0,0,0,0.5)] hover:bg-slate-800 hover:text-blue-400 transition-all backdrop-blur-md">
-            <svg class="w-5 h-5" id="compassIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-            <span class="text-[11px] font-bold hidden sm:inline-block">Live Compass</span>
+    <!-- UI Layer -->
+    <div id="uiLayer">
+        
+        <!-- Top Left: Menu Button -->
+        <button id="menuBtn" class="pointer-events-auto absolute top-4 left-4 z-30 bg-slate-900/90 border border-slate-700 text-yellow-500 p-3 rounded-xl shadow-lg hover:bg-slate-800 transition-all">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
         </button>
 
-        <!-- AR Camera Toggle -->
-        <button id="cameraBtn" class="p-2.5 bg-slate-900/90 text-slate-400 rounded-full border border-slate-600/50 shadow-[0_0_15px_rgba(0,0,0,0.5)] hover:bg-slate-800 hover:text-green-400 transition-all backdrop-blur-md" title="กล้อง AR">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-        </button>
-
-        <!-- Image Upload (Folder) -->
-        <label for="imageUploader" class="cursor-pointer p-2.5 bg-slate-900/90 text-slate-400 rounded-full border border-slate-600/50 shadow-[0_0_15px_rgba(0,0,0,0.5)] hover:bg-slate-800 hover:text-yellow-400 transition-all backdrop-blur-md" title="อัปโหลดรูปแปลน">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
-        </label>
-        <input type="file" id="imageUploader" accept="image/*" class="hidden">
-
-        <!-- Shutter Button (Visible in AR) -->
-        <button id="btnShutter" class="hidden p-2.5 bg-slate-900/90 text-slate-400 rounded-full border border-slate-600/50 shadow-[0_0_15px_rgba(0,0,0,0.5)] hover:bg-slate-800 hover:text-white transition-all backdrop-blur-md" title="ถ่ายภาพพื้นหลัง">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path><circle cx="12" cy="12" r="9" stroke-width="2"></circle></svg>
-        </button>
-
-        <!-- Edit Image Transform Button (Visible when BG is set) -->
-        <button id="btnEditImage" class="hidden p-2.5 bg-slate-900/90 text-slate-400 rounded-full border border-slate-600/50 shadow-[0_0_15px_rgba(0,0,0,0.5)] hover:bg-slate-800 hover:text-purple-400 transition-all backdrop-blur-md" title="ปรับแก้ภาพเบี้ยว">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
-        </button>
-    </div>
-
-    <aside id="sidebar" class="flex-shrink-0 h-full flex flex-col glass-panel sidebar-collapsed shadow-2xl relative z-50">
-        <div class="pt-6 pb-4 px-5 border-b border-slate-700/50 flex justify-between items-center bg-slate-900/80">
-            <h1 class="text-lg font-bold gold-gradient-text flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                Luopan 3D Pro
-            </h1>
-            <button id="sidebarCloseBtn" class="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800/80 rounded-lg transition-colors border border-transparent hover:border-slate-700" title="ปิดเมนู">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+        <!-- Top Right Controls -->
+        <div class="absolute top-4 right-4 z-30 flex flex-col gap-3 pointer-events-auto">
+            <!-- Live Compass Button -->
+            <button id="compassBtn" class="bg-indigo-600/90 text-white p-3 rounded-full shadow-lg border border-indigo-400 hover:bg-indigo-500 transition-all flex items-center justify-center w-12 h-12">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+            </button>
+            <!-- AR Camera Button -->
+            <button id="arBtn" class="bg-slate-800/90 text-emerald-400 p-3 rounded-full shadow-lg border border-slate-600 hover:bg-slate-700 transition-all flex items-center justify-center w-12 h-12">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            </button>
+            <!-- Import Image Button -->
+            <button id="importImgBtn" class="bg-slate-800/90 text-blue-400 p-3 rounded-full shadow-lg border border-slate-600 hover:bg-slate-700 transition-all flex items-center justify-center w-12 h-12 relative overflow-hidden">
+                <input type="file" id="imageInput" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+            </button>
+            <!-- Edit Image Button (Hidden initially) -->
+            <button id="editImgBtn" class="hidden bg-yellow-600/90 text-white p-3 rounded-full shadow-lg border border-yellow-400 hover:bg-yellow-500 transition-all flex items-center justify-center w-12 h-12">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
             </button>
         </div>
 
-        <div class="flex border-b border-slate-800 bg-slate-950/50 text-[11px] font-medium">
-            <button class="tab-btn flex-1 py-3 border-b-2 border-yellow-500 text-yellow-400" data-tab="config">⚙️ ตั้งค่า (Config)</button>
-            <button class="tab-btn flex-1 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200" data-tab="analysis">📊 วิเคราะห์ (Analysis)</button>
-        </div>
+        <!-- Sidebar Configuration -->
+        <div id="sidebar" class="absolute top-0 left-0 w-80 h-full glass-panel z-40 overflow-y-auto border-r border-yellow-500/30 flex flex-col pointer-events-auto">
+            <div class="sticky top-0 bg-slate-900/95 p-4 border-b border-slate-700/80 flex justify-between items-center z-10 shadow-md">
+                <h1 class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-500 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Luopan 3D Pro
+                </h1>
+                <button id="closeSidebarBtn" class="text-slate-400 hover:text-white p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
 
-        <div class="flex-grow overflow-y-auto p-4 space-y-4">
-            <div id="tab-config" class="tab-content block space-y-4">
+            <!-- Tab Navigation -->
+            <div class="flex border-b border-slate-700/80 bg-slate-900/50">
+                <button class="tab-btn flex-1 py-3 text-[12px] font-medium text-yellow-400 border-b-2 border-yellow-500 transition-colors" data-tab="config">
+                    ⚙️ ตั้งค่า (Config)
+                </button>
+                <button class="tab-btn flex-1 py-3 text-[12px] font-medium text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition-colors" data-tab="analysis">
+                    📊 วิเคราะห์ (Analysis)
+                </button>
+            </div>
+
+            <!-- Tab Content: Config -->
+            <div id="tab-config" class="p-4 space-y-6 flex-1">
                 
-                <!-- 1. Time Input -->
-                <div class="space-y-2 bg-slate-800/40 p-3.5 rounded-xl border border-slate-700/50">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-yellow-500 font-semibold text-[11px] flex items-center gap-2">🕒 กาลเวลาจร (Time)</h3>
-                        <button id="btnSetNow" class="bg-blue-600/30 hover:bg-blue-500/50 text-blue-300 px-2.5 py-1 rounded text-[10px] border border-blue-500/50 transition-colors shadow-sm font-medium">ปัจจุบัน</button>
-                    </div>
-                    <input type="datetime-local" id="targetDate" class="w-full bg-slate-950 border border-slate-600 rounded-lg px-3 py-2 text-white focus:border-yellow-500 outline-none transition-all font-mono text-[11px]">
-                    
-                    <div class="pt-3 mt-3 border-t border-slate-700/50">
-                        <div class="flex justify-between items-center mb-2">
-                            <label class="block text-[10px] font-medium text-slate-300">แสดงทิศร้าย (Affliction Layers)</label>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button class="check-toggle active flex items-center justify-between px-2.5 py-1.5 bg-slate-800 border border-yellow-600 text-yellow-400 rounded text-[10px] shadow-sm transition-all" data-type="year">
-                                ปี (Year) <span class="icon text-sm">☑</span>
-                            </button>
-                            <button class="check-toggle active flex items-center justify-between px-2.5 py-1.5 bg-slate-800 border border-yellow-600 text-yellow-400 rounded text-[10px] shadow-sm transition-all" data-type="month">
-                                เดือน (Month) <span class="icon text-sm">☑</span>
-                            </button>
-                            <button class="check-toggle active flex items-center justify-between px-2.5 py-1.5 bg-slate-800 border border-yellow-600 text-yellow-400 rounded text-[10px] shadow-sm transition-all" data-type="day">
-                                วัน (Day) <span class="icon text-sm">☑</span>
-                            </button>
-                            <button class="check-toggle active flex items-center justify-between px-2.5 py-1.5 bg-slate-800 border border-yellow-600 text-yellow-400 rounded text-[10px] shadow-sm transition-all" data-type="hour">
-                                ยาม (Hour) <span class="icon text-sm">☑</span>
-                            </button>
-                        </div>
+                <!-- View Modes (Forced Individual Modes) -->
+                <div class="space-y-2">
+                    <label class="block text-[11px] font-medium text-slate-300">โหมดแสดงผลหน้าปัด (View Mode)</label>
+                    <div class="flex flex-col gap-1.5">
+                        <button class="layer-btn active px-3 py-2.5 bg-slate-800 border border-yellow-600 text-yellow-400 rounded-lg text-[12px] text-left transition-all flex items-center gap-2" data-layer="TIME"><span class="text-red-400">🕒</span> แสดงทิศร้ายกาลเวลา (Afflictions)</button>
+                        <button class="layer-btn px-3 py-2.5 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[12px] text-left transition-all flex items-center gap-2" data-layer="KUA"><span class="text-emerald-400">👤</span> แสดงทิศมงคลบุคคล (8 Mansions)</button>
+                        <button class="layer-btn px-3 py-2.5 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[12px] text-left transition-all flex items-center gap-2" data-layer="STARS"><span class="text-blue-400">⭐</span> แสดงดาวเหินประจำปี (Flying Stars)</button>
                     </div>
                 </div>
 
-                <!-- 2. Person Input -->
-                <div class="space-y-3 bg-slate-800/40 p-3.5 rounded-xl border border-slate-700/50">
-                    <h3 class="text-yellow-500 font-semibold text-[11px] flex items-center gap-2">👤 ข้อมูลบุคคล (Person)</h3>
-                    <div class="space-y-2">
+                <!-- Time Config -->
+                <div class="bg-slate-800/40 rounded-xl p-3 border border-slate-700/50 relative">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="text-[12px] font-semibold text-yellow-500 flex items-center gap-1.5">
+                            <span class="text-slate-400">🕒</span> กาลเวลาจร (Time)
+                        </label>
+                        <button id="setNowBtn" class="text-[10px] bg-blue-600/80 hover:bg-blue-500 text-white px-2 py-1 rounded">ปัจจุบัน</button>
+                    </div>
+                    <input type="datetime-local" id="targetDate" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:border-yellow-500 focus:outline-none mb-3">
+                    
+                    <div class="text-[10px] text-slate-400 mb-1.5 font-medium">เปิดเช็คทิศชง/อสูร (Affliction Layers):</div>
+                    <div class="grid grid-cols-2 gap-2 text-[11px]">
+                        <label class="flex items-center gap-2 bg-slate-900/60 px-2 py-1.5 rounded border border-slate-700"><input type="checkbox" id="togYear" checked class="rounded border-slate-600 bg-slate-800"> <span>ปี (Year)</span></label>
+                        <label class="flex items-center gap-2 bg-slate-900/60 px-2 py-1.5 rounded border border-slate-700"><input type="checkbox" id="togMonth" checked class="rounded border-slate-600 bg-slate-800"> <span>เดือน (Month)</span></label>
+                        <label class="flex items-center gap-2 bg-slate-900/60 px-2 py-1.5 rounded border border-slate-700"><input type="checkbox" id="togDay" checked class="rounded border-slate-600 bg-slate-800"> <span>วัน (Day)</span></label>
+                        <label class="flex items-center gap-2 bg-slate-900/60 px-2 py-1.5 rounded border border-slate-700"><input type="checkbox" id="togHour" checked class="rounded border-slate-600 bg-slate-800"> <span>ยาม (Hour)</span></label>
+                    </div>
+                </div>
+
+                <!-- Person Config -->
+                <div class="bg-slate-800/40 rounded-xl p-3 border border-slate-700/50">
+                    <label class="block text-[12px] font-semibold text-yellow-500 mb-3 flex items-center gap-1.5">
+                        <span class="text-slate-400">👤</span> ข้อมูลบุคคล (Person)
+                    </label>
+                    <div class="space-y-3">
                         <div>
-                            <span class="text-[10px] text-slate-400 block mb-1">วันเกิด/เวลาเกิด</span>
-                            <input type="datetime-local" id="birthDate" value="1990-01-01T12:00" class="w-full bg-slate-950 border border-slate-600 rounded-lg px-3 py-2 text-white outline-none focus:border-yellow-500 font-mono text-[11px]">
+                            <label class="block text-[10px] text-slate-400 mb-1">วัน/เดือน/ปีเกิด และเวลา</label>
+                            <input type="datetime-local" id="birthDate" value="1981-06-25T10:16" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:border-yellow-500 focus:outline-none">
                         </div>
                         <div>
-                            <span class="text-[10px] text-slate-400 block mb-1">เพศกำเนิด</span>
-                            <select id="gender" class="w-full bg-slate-950 border border-slate-600 rounded-lg px-3 py-2 text-white outline-none focus:border-yellow-500 text-[11px]">
+                            <label class="block text-[10px] text-slate-400 mb-1">เพศ (Gender)</label>
+                            <select id="gender" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:border-yellow-500 focus:outline-none">
                                 <option value="M">ชาย (Male)</option>
-                                <option value="F">หญิง (Female)</option>
+                                <option value="F" selected>หญิง (Female)</option>
                             </select>
                         </div>
-                    </div>
-                    
-                    <div class="flex items-center justify-between bg-slate-900 border border-yellow-700/30 rounded-lg p-2.5 mt-2">
-                        <span class="text-[11px] text-yellow-200">รหัสบุคคล (Kua Number):</span>
-                        <div class="w-6 h-6 rounded-full bg-yellow-900/50 border border-yellow-500 flex items-center justify-center text-[11px] font-bold text-yellow-400" id="kuaDisplay">1</div>
+                        <div class="flex items-center justify-between bg-slate-900/80 px-3 py-2.5 rounded-lg border border-slate-700">
+                            <span class="text-[11px] text-slate-300">รหัสบุคคล (Kua Number):</span>
+                            <span id="kuaDisplay" class="text-lg font-bold text-yellow-400 bg-slate-800 w-8 h-8 flex items-center justify-center rounded-full border border-yellow-500/50 shadow-[0_0_10px_rgba(212,175,55,0.2)]">8</span>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- View Modes -->
-                <div class="space-y-2">
-                    <label class="block text-[10px] font-medium text-slate-300">โหมดแสดงผลหน้าปัด (View Mode)</label>
-                    <div class="flex flex-col gap-1.5">
-                        <button class="layer-btn active px-3 py-2 bg-slate-800 border border-yellow-600 text-yellow-400 rounded-lg text-[11px] text-left transition-all" data-layer="ALL">✨ แสดงทั้งหมด (ผสานชั้นข้อมูล)</button>
-                        <button class="layer-btn px-3 py-2 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[11px] text-left transition-all" data-layer="KUA">👤 เฉพาะทิศมงคลบุคคล (8 Mansions)</button>
-                        <button class="layer-btn px-3 py-2 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[11px] text-left transition-all" data-layer="TIME">🕒 เฉพาะทิศร้ายกาลเวลา (Afflictions)</button>
-                        <button class="layer-btn px-3 py-2 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[11px] text-left transition-all" data-layer="STARS">⭐ เฉพาะดาวเหิน (Flying Stars)</button>
-                    </div>
-                </div>
+            <!-- Tab Content: Analysis (Separated BaZi) -->
+            <div id="tab-analysis" class="p-4 hidden space-y-4 flex-1">
                 
-                <!-- BaZi Panels (Separated) -->
-                <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-3 shadow-lg mt-4 space-y-3">
-                    <div>
-                        <div class="text-[10px] text-blue-400 font-bold mb-1.5 flex items-center gap-1">🕒 4 เสากาลเวลาจร (Time)</div>
-                        <div class="grid grid-cols-2 gap-1.5 text-[10px]" id="baziPanelTime"></div>
-                    </div>
-                    <div class="pt-2 border-t border-slate-800">
-                        <div class="text-[10px] text-orange-400 font-bold mb-1.5 flex items-center gap-1">👤 4 เสาดวงบุคคล (Person)</div>
-                        <div class="grid grid-cols-2 gap-1.5 text-[10px]" id="baziPanelPerson"></div>
-                    </div>
+                <!-- Time BaZi -->
+                <div class="bg-slate-800/40 rounded-xl p-3 border border-slate-700/50">
+                    <h3 class="text-[11px] font-bold text-yellow-400 mb-2 border-b border-slate-700 pb-1">กาลเวลาจร (Time BaZi)</h3>
+                    <div class="grid grid-cols-2 gap-1.5 text-[10px]" id="timeBaziPanel"></div>
                 </div>
 
-                <!-- Strict Warnings -->
-                <div class="border border-red-800/60 bg-red-950/40 rounded-xl p-3 shadow-lg">
-                    <h3 class="text-red-500 font-bold text-[11px] flex items-center gap-1.5 mb-1.5">
-                        <svg class="w-3 h-3 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                        ระบบแจ้งเตือนทิศร้าย (ตามกาลเวลาจร)
+                <!-- Person BaZi -->
+                <div class="bg-slate-800/40 rounded-xl p-3 border border-slate-700/50">
+                    <h3 class="text-[11px] font-bold text-emerald-400 mb-2 border-b border-slate-700 pb-1">ดวงบุคคล (Person BaZi)</h3>
+                    <div class="grid grid-cols-2 gap-1.5 text-[10px]" id="personBaziPanel"></div>
+                </div>
+
+                <div class="bg-red-900/20 border border-red-900/50 rounded-xl p-3 mt-4">
+                    <h3 class="text-[12px] font-bold text-red-400 mb-2 flex items-center gap-1.5">
+                        <span>⚠️</span> สรุปทิศร้ายกาลเวลา
                     </h3>
-                    <div id="strictWarnings" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1"></div>
+                    <div id="afflictionSummary" class="text-[10px] text-slate-300 space-y-2"></div>
                 </div>
             </div>
-
-            <!-- TAB 2: ANALYSIS -->
-            <div id="tab-analysis" class="tab-content hidden space-y-4">
-                <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-3 shadow-lg">
-                    <h3 class="text-orange-400 font-bold text-[11px] mb-2 border-b border-slate-800 pb-1.5">🎯 ผลกระทบเจาะลึกบุคคล</h3>
-                    <div id="impactAnalysis" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1"></div>
-                </div>
-                <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-3 shadow-lg">
-                    <h3 class="text-green-400 font-bold text-[11px] mb-2 border-b border-slate-800 pb-1.5">☯️ คำแนะนำจัดเสริม/สลายภัย</h3>
-                    <div id="remedyAnalysis" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1"></div>
-                </div>
-            </div>
-        </div>
-    </aside>
-
-    <main id="mainArea" class="flex-1 relative overflow-hidden flex justify-center items-center h-full bg-[#050811] z-0 transition-colors duration-500 touch-none">
-        
-        <!-- Video for AR Camera -->
-        <video id="arVideo" class="absolute inset-0 w-full h-full object-cover hidden" style="z-index: 1;" autoplay playsinline muted></video>
-
-        <!-- Background Image Container (for imports/captures) -->
-        <div id="bgImageWrapper" class="absolute inset-0 w-full h-full z-[2] flex items-center justify-center overflow-hidden pointer-events-none">
-            <img id="bgImage" src="" class="hidden max-w-none origin-center shadow-2xl" style="transform: translate(0px, 0px) scale(1) rotateZ(0deg) rotateX(0deg) rotateY(0deg);" />
-        </div>
-
-        <!-- Radial background - hides when AR/Image is on -->
-        <div id="radialBg" class="absolute inset-0 pointer-events-none transition-opacity duration-500" style="background: radial-gradient(circle at center, transparent 30%, #050811 100%); z-index: 3;"></div>
-
-        <!-- Image Edit Control Panel -->
-        <div id="imageControlPanel" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-[90vw] max-w-[400px] bg-slate-900/95 p-4 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] z-50 hidden flex-col gap-3 backdrop-blur-xl border border-purple-500/50 pointer-events-auto">
-            <div class="text-center text-purple-400 font-bold text-[11px] mb-1">🛠️ เครื่องมือปรับแก้ภาพแปลน (ใช้นิ้วลากเพื่อแพนรูป)</div>
             
-            <div><div class="slider-label"><span>ย่อ-ขยาย (Zoom)</span><span id="lblZoom">1.0x</span></div>
-            <input type="range" id="slZoom" class="transform-slider" min="0.1" max="3" step="0.05" value="1"></div>
-            
-            <div><div class="slider-label"><span>หมุนเอียง (Rotate)</span><span id="lblRotZ">0°</span></div>
-            <input type="range" id="slRotZ" class="transform-slider" min="-180" max="180" step="1" value="0"></div>
-            
-            <div><div class="slider-label"><span>แก้คางหมูแนวตั้ง (Perspective Y)</span><span id="lblRotX">0°</span></div>
-            <input type="range" id="slRotX" class="transform-slider" min="-60" max="60" step="1" value="0"></div>
-            
-            <div><div class="slider-label"><span>แก้คางหมูแนวนอน (Perspective X)</span><span id="lblRotY">0°</span></div>
-            <input type="range" id="slRotY" class="transform-slider" min="-60" max="60" step="1" value="0"></div>
-            
-            <div class="flex justify-between mt-2 gap-2">
-                <button id="btnResetImg" class="px-3 py-1.5 bg-slate-700 text-white rounded text-[11px] flex-1 hover:bg-slate-600">รีเซ็ต</button>
-                <button id="btnFinishEdit" class="px-3 py-1.5 bg-purple-600 text-white rounded font-bold text-[11px] flex-1 hover:bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)]">บันทึก & เสร็จสิ้น</button>
+            <!-- Author signature -->
+            <div class="text-center pb-4 text-[9px] text-slate-600 mt-auto">
+                Luopan 3D Pro - Engine v2.0
             </div>
         </div>
 
-        <!-- Live Degree Display Box (Positioned exactly on top rim of Luopan) -->
+        <!-- Live Degree Display Box (Positioned properly to not overflow) -->
         <div id="degreeDisplay" class="absolute z-20 flex flex-col items-center pointer-events-none transition-opacity duration-300 w-full" style="top: calc(50% - min(47vw, 47vh)); left: 50%; transform: translate(-50%, -100%);">
             
-            <!-- Advice Box (Moved ABOVE the degree box) -->
-            <div id="dirAdvice" class="mb-3 bg-white/95 backdrop-blur-sm border-2 border-red-500 rounded-lg px-4 py-3 shadow-[0_10px_25px_rgba(0,0,0,0.5)] text-center w-max max-w-[90vw] transition-all duration-300 pointer-events-auto opacity-0 scale-95 origin-bottom hidden">
-                <div id="adviceTitle" class="text-black font-bold text-[13px] tracking-wide leading-tight"></div>
-                <div id="adviceRemedy" class="text-slate-700 text-[11px] mt-1.5 leading-tight"></div>
+            <!-- Advice Box (Above the degree box) -->
+            <div id="dirAdvice" class="mb-1.5 bg-white/95 backdrop-blur-sm border-2 border-slate-300 rounded-lg px-3 py-2 shadow-[0_10px_25px_rgba(0,0,0,0.5)] text-center w-max max-w-[85vw] transition-all duration-300 pointer-events-auto opacity-0 scale-95 origin-bottom hidden">
+                <div id="adviceTitle" class="text-black font-bold text-[11px] tracking-wide leading-tight"></div>
+                <div id="adviceRemedy" class="text-slate-700 text-[10px] mt-1 leading-tight"></div>
             </div>
 
-            <!-- Main Black Degree Box -->
-            <div class="bg-slate-900/95 backdrop-blur-md border border-yellow-500/80 rounded-xl px-6 py-2.5 shadow-[0_8px_30px_rgba(0,0,0,0.8)] text-center relative pointer-events-auto">
-                <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-slate-900 border-b border-r border-yellow-500/80 rotate-45"></div>
-                <span id="degreeValue" class="text-yellow-400 font-bold text-3xl font-mono relative z-10 drop-shadow-md">0.0°</span>
-                <div id="dirLabel" class="text-slate-300 text-[12px] font-semibold mt-0.5 relative z-10 uppercase tracking-wider">เหนือ (N)</div>
+            <!-- Main Black Degree Box (Scaled down 20%) -->
+            <div class="bg-slate-900/95 backdrop-blur-md border border-yellow-500/80 rounded-xl px-3 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.8)] text-center relative pointer-events-auto">
+                <div class="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-slate-900 border-b border-r border-yellow-500/80 rotate-45"></div>
+                <span id="degreeValue" class="text-yellow-400 font-bold text-xl font-mono relative z-10 drop-shadow-md">0.0°</span>
+                <div id="dirLabel" class="text-slate-300 text-[9px] font-semibold mt-0.5 relative z-10 uppercase tracking-wider">เหนือ (N)</div>
             </div>
         </div>
 
-        <!-- Status Badge & Legend (Moved to Bottom) -->
-        <div id="statusBadge" class="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-30 bg-slate-900/90 text-yellow-400 border border-yellow-600/50 px-5 py-2 rounded-xl text-[11px] font-semibold tracking-wide shadow-[0_4px_15px_rgba(0,0,0,0.5)] backdrop-blur-md transition-all pointer-events-none text-center w-max max-w-[95vw]">
-            <!-- Content injected via JS -->
+        <!-- Status Badge & Legend (Bottom) -->
+        <div class="absolute bottom-16 w-full flex justify-center pointer-events-none z-10">
+            <div id="statusBadge" class="bg-slate-900/80 backdrop-blur-md border border-slate-700 rounded-xl px-4 py-2 text-[11px] text-center shadow-lg font-medium tracking-wide">
+                <!-- Status content injected by JS -->
+            </div>
         </div>
 
-        <!-- Manual Compass Slider -->
-        <div id="manualCompassControl" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-[85vw] max-w-[500px] z-40 bg-slate-900/80 p-3 rounded-xl border border-slate-600/50 backdrop-blur-md flex flex-col gap-2 items-center shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
-            <span class="text-yellow-400 text-[11px] font-bold">👆 เลื่อนปรับองศาจานหล่อแกด้วยตนเอง</span>
-            <input type="range" id="manualSlider" min="0" max="360" step="0.1" value="0">
+        <!-- Manual Rotation Slider (Hidden when Live Compass is ON) -->
+        <div id="manualRotationControl" class="absolute bottom-4 w-full px-8 flex flex-col items-center pointer-events-none z-20">
+            <label class="text-[10px] text-yellow-400 mb-1 font-medium bg-slate-900/80 px-2 py-0.5 rounded pointer-events-auto">👆 เลื่อนปรับองศาจานหล่อแกด้วยตนเอง</label>
+            <input type="range" id="manualDegree" min="0" max="360" step="0.1" value="0" class="w-full max-w-md pointer-events-auto bg-slate-700 rounded-lg h-2 appearance-none">
         </div>
-        
-        <canvas id="luopanCanvas" class="hidden" width="3072" height="3072"></canvas>
-        <div id="canvas3dContainer" class="w-full h-full cursor-default relative transition-opacity duration-300" style="z-index: 10;"></div>
-        
-        <!-- Fixed Crosshair -->
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-70" style="z-index: 15;">
-            <div class="w-[1px] h-[120vh] bg-red-500 absolute left-1/2 -top-[60vh] shadow-[0_0_8px_rgba(239,68,68,0.8)]"></div>
-            <div class="h-[1px] w-[120vw] bg-red-500 absolute top-1/2 -left-[60vw] shadow-[0_0_8px_rgba(239,68,68,0.8)]"></div>
-            <div class="w-8 h-8 border-[2px] border-red-500 rounded-full absolute -top-4 -left-4 bg-transparent shadow-[0_0_12px_rgba(239,68,68,0.8)]"></div>
+
+        <!-- Image Edit Controls Panel (Hidden by default) -->
+        <div id="imageEditPanel" class="hidden absolute bottom-0 left-0 w-full bg-slate-900/95 backdrop-blur-md p-4 rounded-t-2xl z-50 text-slate-200 text-[10px] shadow-[0_-10px_40px_rgba(0,0,0,0.8)] border-t border-slate-700 pointer-events-auto">
+            <div class="flex justify-between items-center mb-3 border-b border-slate-700 pb-2">
+               <span class="font-bold text-yellow-400 text-xs flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg> เครื่องมือปรับแต่งรูปแปลนบ้าน</span>
+               <button id="closeImageEditBtn" class="text-red-400 font-bold bg-red-900/30 px-3 py-1 rounded hover:bg-red-900/50">ปิด (Done)</button>
+            </div>
+            <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+                <div><label class="flex justify-between"><span>ขนาด (Zoom)</span><span id="valImgScale">1.0</span></label><input type="range" id="imgScale" min="0.1" max="5" step="0.05" value="1" class="w-full"></div>
+                <div><label class="flex justify-between"><span>หมุน (Rotate)</span><span id="valImgRotZ">0°</span></label><input type="range" id="imgRotZ" min="-180" max="180" step="0.5" value="0" class="w-full"></div>
+                <div><label class="flex justify-between text-indigo-300"><span>เบี้ยวซ้าย-ขวา (Tilt X)</span><span id="valImgRotY">0°</span></label><input type="range" id="imgRotY" min="-60" max="60" step="0.5" value="0" class="w-full"></div>
+                <div><label class="flex justify-between text-indigo-300"><span>เบี้ยวบน-ล่าง (Tilt Y)</span><span id="valImgRotX">0°</span></label><input type="range" id="imgRotX" min="-60" max="60" step="0.5" value="0" class="w-full"></div>
+                <div><label class="flex justify-between text-emerald-300"><span>เลื่อนซ้าย-ขวา (Pan X)</span><span id="valImgPosX">0</span></label><input type="range" id="imgPosX" min="-15" max="15" step="0.1" value="0" class="w-full"></div>
+                <div><label class="flex justify-between text-emerald-300"><span>เลื่อนขึ้น-ลง (Pan Y)</span><span id="valImgPosY">0</span></label><input type="range" id="imgPosY" min="-15" max="15" step="0.1" value="0" class="w-full"></div>
+            </div>
+            <div class="mt-3 flex justify-end">
+                <button id="resetImgBtn" class="text-[9px] text-slate-400 underline">รีเซ็ตค่าเริ่มต้น (Reset)</button>
+            </div>
         </div>
-    </main>
+
+    </div>
 
     <script>
+        // --- Core Feng Shui Data ---
         const branches = [
-            { name: "ชวด (Rat)", branch: "Zi", dir: 'N', angle: 0 },
-            { name: "ฉลู (Ox)", branch: "Chou", dir: 'NE', angle: 30 },
-            { name: "ขาล (Tiger)", branch: "Yin", dir: 'NE', angle: 60 },
-            { name: "เถาะ (Rabbit)", branch: "Mao", dir: 'E', angle: 90 },
-            { name: "มะโรง (Dragon)", branch: "Chen", dir: 'SE', angle: 120 },
-            { name: "มะเส็ง (Snake)", branch: "Si", dir: 'SE', angle: 150 },
-            { name: "มะเมีย (Horse)", branch: "Wu", dir: 'S', angle: 180 },
-            { name: "มะแม (Goat)", branch: "Wei", dir: 'SW', angle: 210 },
-            { name: "วอก (Monkey)", branch: "Shen", dir: 'SW', angle: 240 },
-            { name: "ระกา (Rooster)", branch: "You", dir: 'W', angle: 270 },
-            { name: "จอ (Dog)", branch: "Xu", dir: 'NW', angle: 300 },
-            { name: "กุน (Pig)", branch: "Hai", dir: 'NW', angle: 330 }
+            { branch: '子', p: 'ชวด', el: 'น้ำ', name: 'Zi ชวด', deg: 0 },
+            { branch: '丑', p: 'ฉลู', el: 'ดิน', name: 'Chou ฉลู', deg: 30 },
+            { branch: '寅', p: 'ขาล', el: 'ไม้', name: 'Yin ขาล', deg: 60 },
+            { branch: '卯', p: 'เถาะ', el: 'ไม้', name: 'Mao เถาะ', deg: 90 },
+            { branch: '辰', p: 'มะโรง', el: 'ดิน', name: 'Chen มะโรง', deg: 120 },
+            { branch: '巳', p: 'มะเส็ง', el: 'ไฟ', name: 'Si มะเส็ง', deg: 150 },
+            { branch: '午', p: 'มะเมีย', el: 'ไฟ', name: 'Wu มะเมีย', deg: 180 },
+            { branch: '未', p: 'มะแม', el: 'ดิน', name: 'Wei มะแม', deg: 210 },
+            { branch: '申', p: 'วอก', el: 'ทอง', name: 'Shen วอก', deg: 240 },
+            { branch: '酉', p: 'ระกา', el: 'ทอง', name: 'You ระกา', deg: 270 },
+            { branch: '戌', p: 'จอ', el: 'ดิน', name: 'Xu จอ', deg: 300 },
+            { branch: '亥', p: 'กุน', el: 'น้ำ', name: 'Hai กุน', deg: 330 }
+        ];
+
+        const mountains24 = [
+            { name: "Ren เหริน", deg: 345 }, { name: "Zi ชวด", deg: 0 }, { name: "Gui กุ่ย", deg: 15 },
+            { name: "Chou ฉลู", deg: 30 }, { name: "Gen เกิน", deg: 45 }, { name: "Yin ขาล", deg: 60 },
+            { name: "Jia เจี๋ย", deg: 75 }, { name: "Mao เถาะ", deg: 90 }, { name: "Yi อี้", deg: 105 },
+            { name: "Chen มะโรง", deg: 120 }, { name: "Xun ซวิ่น", deg: 135 }, { name: "Si มะเส็ง", deg: 150 },
+            { name: "Bing ปิ่ง", deg: 165 }, { name: "Wu มะเมีย", deg: 180 }, { name: "Ding ติง", deg: 195 },
+            { name: "Wei มะแม", deg: 210 }, { name: "Kun คุน", deg: 225 }, { name: "Shen วอก", deg: 240 },
+            { name: "Geng เกิง", deg: 255 }, { name: "You ระกา", deg: 270 }, { name: "Xin ซิน", deg: 285 },
+            { name: "Xu จอ", deg: 300 }, { name: "Qian เฉียน", deg: 315 }, { name: "Hai กุน", deg: 330 }
         ];
 
         const dirs8 = {
-            'N':  { name: 'เหนือ', start: 337.5, end: 22.5, element: 'Water', bagua: 'Kan' },
-            'NE': { name: 'ต.อ.เฉียงเหนือ', start: 22.5, end: 67.5, element: 'Earth', bagua: 'Gen' },
-            'E':  { name: 'ตะวันออก', start: 67.5, end: 112.5, element: 'Wood', bagua: 'Zhen' },
-            'SE': { name: 'ต.อ.เฉียงใต้', start: 112.5, end: 157.5, element: 'Wood', bagua: 'Xun' },
-            'S':  { name: 'ใต้', start: 157.5, end: 202.5, element: 'Fire', bagua: 'Li' },
-            'SW': { name: 'ต.ต.เฉียงใต้', start: 202.5, end: 247.5, element: 'Earth', bagua: 'Kun' },
-            'W':  { name: 'ตะวันตก', start: 247.5, end: 292.5, element: 'Metal', bagua: 'Dui' },
-            'NW': { name: 'ต.ต.เฉียงเหนือ', start: 292.5, end: 337.5, element: 'Metal', bagua: 'Qian' }
+            N: { name: 'เหนือ', start: 337.5, end: 22.5 },
+            NE: { name: 'ต.อ.เฉียงเหนือ', start: 22.5, end: 67.5 },
+            E: { name: 'ตะวันออก', start: 67.5, end: 112.5 },
+            SE: { name: 'ต.อ.เฉียงใต้', start: 112.5, end: 157.5 },
+            S: { name: 'ใต้', start: 157.5, end: 202.5 },
+            SW: { name: 'ต.ต.เฉียงใต้', start: 202.5, end: 247.5 },
+            W: { name: 'ตะวันตก', start: 247.5, end: 292.5 },
+            NW: { name: 'ต.ต.เฉียงเหนือ', start: 292.5, end: 337.5 }
         };
 
-        const mountains24 = [
-            "Zi", "Gui", "Chou", "Gen", "Yin", "Jia", "Mao", "Yi", 
-            "Chen", "Xun", "Si", "Bing", "Wu", "Ding", "Wei", "Kun", 
-            "Shen", "Geng", "You", "Xin", "Xu", "Qian", "Hai", "Ren"
-        ];
-        const mountains24TH = [
-            "ชวด", "กุ่ย", "ฉลู", "เกิน", "ขาล", "เจี่ย", "เถาะ", "อี่", 
-            "มะโรง", "ซวิ่น", "มะเส็ง", "ปิ่ง", "มะเมีย", "ติง", "มะแม", "คุน", 
-            "วอก", "เกิง", "ระกา", "ซิน", "จอ", "เฉียน", "กุน", "เหริน"
-        ];
-
-        const baguaImpactMap = {
-            'N': { member: 'ลูกชายคนกลาง', organ: 'ไต, หู, ระบบไหลเวียน', career: 'ความก้าวหน้าในอาชีพชะงัก' },
-            'NE': { member: 'ลูกชายคนเล็ก', organ: 'มือ, กระดูกสันหลัง, ระบบย่อย', career: 'การเรียนและสติปัญญาสะดุด' },
-            'E': { member: 'ลูกชายคนโต', organ: 'ตับ, เส้นเอ็น, แขนขา', career: 'ความอบอุ่นในบ้าน, การเริ่มต้นใหม่ล้มเหลว' },
-            'SE': { member: 'ลูกสาวคนโต', organ: 'ถุงน้ำดี, ต้นขา, ลำไส้', career: 'สูญเสียโชคลาภทางการเงินกะทันหัน' },
-            'S': { member: 'ลูกสาวคนกลาง', organ: 'หัวใจ, สายตา, ระบบเลือด', career: 'เสียชื่อเสียง, คดีความ, เกียรติยศหมอง' },
-            'SW': { member: 'แม่ / ผู้นำหญิง', organ: 'ช่องท้อง, ผิวหนัง, มดลูก', career: 'ความสัมพันธ์สมรสร้าวฉาน, วุ่นวายในบ้าน' },
-            'W': { member: 'ลูกสาวคนเล็ก', organ: 'ปอด, ระบบหายใจ, ช่องปาก', career: 'บริวารตีจาก, โชคการค้าหดหาย' },
-            'NW': { member: 'พ่อ / ผู้นำชาย', organ: 'ศีรษะ, สมอง, กระดูก', career: 'เสื่อมอำนาจบารมี, เลื่อนตำแหน่งยาก' }
+        const starsInfo = {
+            1: { type: 'good', desc: 'ดาว 1 โชคเสริม ธุรกิจ การเดินทาง ปรับตัว', remedy: 'ตั้งน้ำพุ น้ำตก นาฬิกาลูกตุ้มโลหะ' },
+            2: { type: 'bad', desc: 'ดาว 2 เจ็บป่วย เรื้อรัง ซึมเศร้า แท้งบุตร', remedy: 'แขวนน้ำเต้าทองเหลือง เหรียญจีน 6 จักรพรรดิ' },
+            3: { type: 'bad', desc: 'ดาว 3 ทะเลาะ คดีความ อารมณ์ร้อน โดนขโมย', remedy: 'เปิดไฟสว่าง วางพรมแดง โคมไฟสีแดง' },
+            4: { type: 'neutral', desc: 'ดาว 4 การศึกษา เสน่ห์ ความรัก (ดีถ้าวางถูก)', remedy: 'ต้นไม้ไผ่กวนอิม 4 ต้น พู่กันจีน' },
+            5: { type: 'fatal', desc: 'ดาว 5 วิบัติ หายนะ อุบัติเหตุ ล้มละลาย', remedy: 'ระฆังลมโลหะ 6 หลอด เสียงเปียโน ห้ามเจาะทุบ' },
+            6: { type: 'neutral', desc: 'ดาว 6 อำนาจ บารมี เลื่อนขั้น (แต่อาจเหงา)', remedy: 'ก้อนทอง ดินเผา เซรามิก ลูกแก้วคริสตัล' },
+            7: { type: 'bad', desc: 'ดาว 7 โจรภัย แข่งขัน สูญเสีย เลือดตกยางออก', remedy: 'อ่างน้ำนิ่งสีฟ้า/ดำ แร่พลอยสีน้ำเงิน' },
+            8: { type: 'good', desc: 'ดาว 8 โชคลาภปัจจุบัน มั่นคง การเงิน', remedy: 'พัดลม นาฬิกาเดิน น้ำพุ สิ่งเคลื่อนไหว' },
+            9: { type: 'good', desc: 'ดาว 9 โชคลาภอนาคต ชื่อเสียง ยินดี งานแต่ง', remedy: 'ต้นไม้สวยงาม โคมไฟสว่าง สิ่งของสีแดง/ม่วง' }
         };
 
-        const kuaData = {
-            1: { aus: ['SE','E','S','N'], inaus: ['W','NE','NW','SW'] },
-            2: { aus: ['NE','W','NW','SW'], inaus: ['E','SE','S','N'] },
-            3: { aus: ['S','N','SE','E'], inaus: ['SW','NW','NE','W'] },
-            4: { aus: ['N','S','E','SE'], inaus: ['NW','SW','W','NE'] },
-            6: { aus: ['W','NE','SW','NW'], inaus: ['SE','E','N','S'] },
-            7: { aus: ['NW','SW','NE','W'], inaus: ['E','SE','S','N'] },
-            8: { aus: ['SW','NW','W','NE'], inaus: ['S','N','SE','E'] },
-            9: { aus: ['E','SE','N','S'], inaus: ['NE','W','SW','NW'] }
-        };
-
-        const starMeanings = {
-            1: { title: "ดาว 1 โชคเสริม ธุรกิจ การเดินทาง ปรับตัว", remedy: "วางอุปกรณ์ เช่น น้ำพุ, น้ำตก, ตู้ปลา, พัดลม, นาฬิกาลูกตุ้มโลหะ" },
-            2: { title: "ดาว 2 ป่วยไข้ อุปสรรค ปัญหาเรื้อรัง", remedy: "ห้ามกระตุ้น! แขวนน้ำเต้าโลหะ หรือ เหรียญจีน 6 จักรพรรดิ" },
-            3: { title: "ดาว 3 ทะเลาะเบาะแว้ง คดีความ อารมณ์ร้อน", remedy: "สลายพลังด้วย สีแดง เช่น พรม โคมไฟสว่าง ของตกแต่งสีแดง" },
-            4: { title: "ดาว 4 ความรัก เสน่ห์ การศึกษา ปัญญา", remedy: "วางต้นไผ่กวนอิม 4 ต้น ดอกไม้สด ต้นไม้สวยงาม หรือพู่กันจีน" },
-            5: { title: "ดาว 5 วิบัติ ภัยพิบัติ อุบัติเหตุ เสียทรัพย์", remedy: "⚠️ ห้ามเคาะเจาะตอกเด็ดขาด! แขวนระฆังลมโลหะ 6 หลอด" },
-            6: { title: "ดาว 6 อำนาจ บารมี ผู้อุปถัมภ์ เลื่อนขั้น", remedy: "กระตุ้นด้วย ก้อนทอง ดินเผา เซรามิก หรือลูกแก้วคริสตัล" },
-            7: { title: "ดาว 7 โจรภัย แข่งขัน สูญเสีย เลือดตกยางออก", remedy: "วางอ่างน้ำนิ่งสีฟ้า/ดำ แร่พลอยสีน้ำเงิน เพื่อถ่ายเทพลังร้าย" },
-            8: { title: "ดาว 8 โชคลาภ มั่งคั่ง ร่ำรวย (ดาวดีที่สุด)", remedy: "เปิดไฟสว่าง วางน้ำพุ พัดลม วัตถุเคลื่อนไหว เพื่อกระตุ้นโชค" },
-            9: { title: "ดาว 9 ชื่อเสียง ยินดี สำเร็จรวดเร็ว งานมงคล", remedy: "วางต้นไม้สวยงาม ดอกไม้สด โคมไฟสว่าง หรือของตกแต่งสีแดง" }
-        };
-
+        // --- State Management ---
         let state = {
             date: new Date(),
-            birthDate: new Date(1990, 0, 1),
-            gender: 'M',
-            viewMode: 'ALL',
+            birthDate: new Date(1981, 5, 25, 10, 16),
+            gender: 'F',
+            viewMode: 'TIME',
             toggles: { year: true, month: true, day: true, hour: true },
-            calc: { timeBazi: {}, personBazi: {}, afflictions: {}, stars: {}, kua: 1, auspiciousDirs: [], inauspiciousDirs: [] },
-            sidebarOpen: false 
+            calc: { timeBazi: {}, personBazi: {}, afflictions: {}, stars: {}, kua: 8, auspiciousDirs: [], inauspiciousDirs: [] },
+            sidebarOpen: false,
+            isCompassActive: false,
+            currentDegree: 0
         };
+
+        let isARTransparent = false;
 
         const els = {
             targetDate: document.getElementById('targetDate'),
-            btnSetNow: document.getElementById('btnSetNow'),
+            setNowBtn: document.getElementById('setNowBtn'),
             birthDate: document.getElementById('birthDate'),
             gender: document.getElementById('gender'),
-            toggles: document.querySelectorAll('.check-toggle'),
-            layerBtns: document.querySelectorAll('.layer-btn'),
-            layerCycleBtn: document.getElementById('layerCycleBtn'),
-            baziPanelTime: document.getElementById('baziPanelTime'),
-            baziPanelPerson: document.getElementById('baziPanelPerson'),
             kuaDisplay: document.getElementById('kuaDisplay'),
-            canvas: document.getElementById('luopanCanvas'),
-            strictWarnings: document.getElementById('strictWarnings'),
-            impactAnalysis: document.getElementById('impactAnalysis'),
-            remedyAnalysis: document.getElementById('remedyAnalysis'),
-            tabBtns: document.querySelectorAll('.tab-btn'),
-            tabContents: document.querySelectorAll('.tab-content'),
-            sidebar: document.getElementById('sidebar'),
-            sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
-            sidebarCloseBtn: document.getElementById('sidebarCloseBtn'),
-            compassBtn: document.getElementById('compassBtn'),
-            compassIcon: document.getElementById('compassIcon'),
-            cameraBtn: document.getElementById('cameraBtn'),
-            arVideo: document.getElementById('arVideo'),
-            mainArea: document.getElementById('mainArea'),
-            radialBg: document.getElementById('radialBg'),
-            statusBadge: document.getElementById('statusBadge'),
-            degreeDisplay: document.getElementById('degreeDisplay'),
+            togYear: document.getElementById('togYear'),
+            togMonth: document.getElementById('togMonth'),
+            togDay: document.getElementById('togDay'),
+            togHour: document.getElementById('togHour'),
+            layerBtns: document.querySelectorAll('.layer-btn'),
+            timeBaziPanel: document.getElementById('timeBaziPanel'),
+            personBaziPanel: document.getElementById('personBaziPanel'),
+            afflictionSummary: document.getElementById('afflictionSummary'),
             degreeValue: document.getElementById('degreeValue'),
             dirLabel: document.getElementById('dirLabel'),
             dirAdvice: document.getElementById('dirAdvice'),
             adviceTitle: document.getElementById('adviceTitle'),
             adviceRemedy: document.getElementById('adviceRemedy'),
-            manualCompassControl: document.getElementById('manualCompassControl'),
-            manualSlider: document.getElementById('manualSlider'),
+            statusBadge: document.getElementById('statusBadge'),
+            compassBtn: document.getElementById('compassBtn'),
+            arBtn: document.getElementById('arBtn'),
+            manualDegree: document.getElementById('manualDegree'),
+            manualRotationControl: document.getElementById('manualRotationControl'),
+            menuBtn: document.getElementById('menuBtn'),
+            sidebar: document.getElementById('sidebar'),
+            closeSidebarBtn: document.getElementById('closeSidebarBtn'),
+            tabBtns: document.querySelectorAll('.tab-btn'),
             
-            // Image Upload Elements
-            btnUpload: document.getElementById('imageUploader'),
-            btnShutter: document.getElementById('btnShutter'),
-            btnEditImage: document.getElementById('btnEditImage'),
-            bgImageWrapper: document.getElementById('bgImageWrapper'),
-            bgImage: document.getElementById('bgImage'),
-            imageControlPanel: document.getElementById('imageControlPanel'),
-            btnFinishEdit: document.getElementById('btnFinishEdit'),
-            btnResetImg: document.getElementById('btnResetImg'),
-            slZoom: document.getElementById('slZoom'), slRotZ: document.getElementById('slRotZ'),
-            slRotX: document.getElementById('slRotX'), slRotY: document.getElementById('slRotY'),
-            lblZoom: document.getElementById('lblZoom'), lblRotZ: document.getElementById('lblRotZ'),
-            lblRotX: document.getElementById('lblRotX'), lblRotY: document.getElementById('lblRotY')
+            // Image edit UI
+            importImgBtn: document.getElementById('importImgBtn'),
+            imageInput: document.getElementById('imageInput'),
+            editImgBtn: document.getElementById('editImgBtn'),
+            imageEditPanel: document.getElementById('imageEditPanel'),
+            closeImageEditBtn: document.getElementById('closeImageEditBtn'),
+            resetImgBtn: document.getElementById('resetImgBtn'),
+            
+            // Image Sliders
+            imgScale: document.getElementById('imgScale'),
+            imgRotZ: document.getElementById('imgRotZ'),
+            imgRotY: document.getElementById('imgRotY'),
+            imgRotX: document.getElementById('imgRotX'),
+            imgPosX: document.getElementById('imgPosX'),
+            imgPosY: document.getElementById('imgPosY'),
+            // Value displays
+            valImgScale: document.getElementById('valImgScale'),
+            valImgRotZ: document.getElementById('valImgRotZ'),
+            valImgRotY: document.getElementById('valImgRotY'),
+            valImgRotX: document.getElementById('valImgRotX'),
+            valImgPosX: document.getElementById('valImgPosX'),
+            valImgPosY: document.getElementById('valImgPosY')
         };
-        const ctx = els.canvas.getContext('2d', { alpha: true });
-        const pNames = { year: 'ปี', month: 'เดือน', day: 'วัน', hour: 'ยาม' };
-        
+
+        // Initialize Dates
+        const tzOffset = (new Date()).getTimezoneOffset() * 60000;
+        els.targetDate.value = (new Date(Date.now() - tzOffset)).toISOString().slice(0, 16);
+        els.birthDate.value = (new Date(state.birthDate - tzOffset)).toISOString().slice(0, 16);
+
+        els.setNowBtn.addEventListener('click', () => {
+            const now = new Date();
+            els.targetDate.value = (new Date(now - tzOffset)).toISOString().slice(0, 16);
+            calculateAll();
+        });
+
         function updateStatusBadge() {
-            let modeName = "ผสานชั้นข้อมูลทั้งหมด";
-            if (state.viewMode === 'KUA') modeName = "ทิศมงคลบุคคล";
-            if (state.viewMode === 'TIME') modeName = "ทิศร้ายกาลเวลา";
-            if (state.viewMode === 'STARS') modeName = "ดาวเหินประจำปี";
+            let modeName = "";
+            let legendHtml = "";
             
-            // Build the string detailing the active branches
-            let activeDetails = [];
-            if (state.calc && state.calc.timeBazi) {
-                if (state.toggles.year && state.calc.timeBazi.year !== undefined) activeDetails.push(`ปี${branches[state.calc.timeBazi.year].name.split(' ')[0]}`);
-                if (state.toggles.month && state.calc.timeBazi.month !== undefined) activeDetails.push(`เดือน${branches[state.calc.timeBazi.month].name.split(' ')[0]}`);
-                if (state.toggles.day && state.calc.timeBazi.day !== undefined) activeDetails.push(`วัน${branches[state.calc.timeBazi.day].name.split(' ')[0]}`);
-                if (state.toggles.hour && state.calc.timeBazi.hour !== undefined) activeDetails.push(`ยาม${branches[state.calc.timeBazi.hour].name.split(' ')[0]}`);
+            // Hide Status Badge if AR is on (to keep screen clean)
+            if (isARTransparent) {
+                els.statusBadge.parentElement.style.display = 'none';
+                return;
+            } else {
+                els.statusBadge.parentElement.style.display = 'flex';
             }
 
-            let activeText = activeDetails.length > 0 ? `<br><span class="text-[10px] font-normal text-yellow-200">(เช็ค: ${activeDetails.join(', ')})</span>` : '<br><span class="text-[10px] font-normal text-slate-400">(ปิดการเช็คทิศร้าย)</span>';
-            let mainText = (state.viewMode === 'ALL' || state.viewMode === 'TIME') ? `โหมด: ${modeName} ${activeText}` : `โหมด: ${modeName}`;
-            
-            // Generate Legend HTML if not in AR mode
-            let legendHtml = '';
-            if (!isARTransparent) {
-                let legendItems = [];
-                if (state.viewMode === 'ALL' || state.viewMode === 'TIME') {
-                    legendItems.push(`<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-600 shadow-[0_0_4px_rgba(220,38,38,0.8)]"></span>ทิศแตก (ชง)</span>`);
-                    legendItems.push(`<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_4px_rgba(249,115,22,0.8)]"></span>ทิศอสูร</span>`);
+            if (state.viewMode === 'KUA') {
+                modeName = "แสดงทิศมงคลบุคคล (8 Mansions)";
+                legendHtml = `<div class="flex justify-center gap-4 mt-1.5 pt-1 border-t border-slate-700/80">
+                    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full border border-emerald-500"></span>ทิศมงคล (ขอบเขียว)</span>
+                    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full border border-red-500"></span>ทิศร้าย (ขอบแดง)</span>
+                </div>`;
+            }
+            if (state.viewMode === 'TIME') {
+                let activeDetails = [];
+                if (state.calc && state.calc.timeBazi) {
+                    if (state.toggles.year && state.calc.timeBazi.year !== undefined) activeDetails.push(`ปี${branches[state.calc.timeBazi.year].name.split(' ')[0]}`);
+                    if (state.toggles.month && state.calc.timeBazi.month !== undefined) activeDetails.push(`เดือน${branches[state.calc.timeBazi.month].name.split(' ')[0]}`);
+                    if (state.toggles.day && state.calc.timeBazi.day !== undefined) activeDetails.push(`วัน${branches[state.calc.timeBazi.day].name.split(' ')[0]}`);
+                    if (state.toggles.hour && state.calc.timeBazi.hour !== undefined) activeDetails.push(`ยาม${branches[state.calc.timeBazi.hour].name.split(' ')[0]}`);
                 }
-                if (state.viewMode === 'ALL' || state.viewMode === 'KUA') {
-                    legendItems.push(`<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_4px_rgba(16,185,129,0.8)]"></span>ทิศมงคล (บุคคล)</span>`);
-                }
-                if (legendItems.length > 0) {
-                    legendHtml = `<div class="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-2 pt-1.5 border-t border-slate-700/80 text-[10px] text-slate-300 font-medium">
-                        ${legendItems.join('')}
-                    </div>`;
-                }
+                let activeText = activeDetails.length > 0 ? `(เช็ค: ${activeDetails.join(', ')})` : '(ปิดการเช็ค)';
+                modeName = `<span class="text-yellow-400">แสดงทิศร้ายกาลเวลา</span><br><span class="text-[9px] text-slate-300 font-normal">${activeText}</span>`;
+                
+                legendHtml = `<div class="flex justify-center gap-4 mt-1.5 pt-1 border-t border-slate-700/80">
+                    <span class="flex items-center gap-1"><span class="w-2 h-2 bg-red-600 rounded-sm"></span>ทิศแตก (ชง)</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-1 bg-orange-500 rounded-full"></span>ทิศอสูร (เส้นขอบ)</span>
+                </div>`;
+            }
+            if (state.viewMode === 'STARS') {
+                modeName = "แสดงดาวเหินประจำปี (Flying Stars)";
+                legendHtml = `<div class="flex justify-center gap-3 mt-1.5 pt-1 border-t border-slate-700/80 text-[9px]">
+                    <span class="flex items-center gap-1 text-emerald-400">⭐มงคล</span>
+                    <span class="flex items-center gap-1 text-red-400">⭐ร้าย</span>
+                    <span class="flex items-center gap-1 text-yellow-400">⭐วิบัติ</span>
+                    <span class="flex items-center gap-1 text-slate-400">⭐กลาง</span>
+                </div>`;
             }
 
-            els.statusBadge.innerHTML = `<div class="flex flex-col">${mainText}${legendHtml}</div>`;
+            els.statusBadge.innerHTML = `<div class="flex flex-col text-yellow-500">โหมด: ${modeName}</div>${legendHtml}`;
         }
 
+        // Logic functions
         function getPillars(dt) {
-            const y = dt.getFullYear(), m = dt.getMonth() + 1, d = dt.getDate(), h = dt.getHours();
+            const y = dt.getFullYear();
+            const yBranch = (y - 4) % 12;
+            const m = dt.getMonth() + 1;
+            const d = dt.getDate();
+            const hour = dt.getHours();
             
-            // Absolute Accurate Day Engine (Using Jan 1, 2024 as Jia Zi / Index 0)
-            const diffDays = Math.floor((Date.UTC(y, m-1, d) - Date.UTC(2024, 0, 1)) / 86400000);
-            const dayBranch = ((diffDays % 12) + 12) % 12; 
+            // Simplified Month Branch (Approximation based on lunar/solar boundary)
+            let mBranch = (m + 1) % 12; 
             
-            let solarYear = y;
-            if (m < 2 || (m === 2 && d < 4)) solarYear -= 1;
-            const yearBranch = ((solarYear - 4) % 12 + 12) % 12;
+            // Simplified Day Branch (Rough julian approximation)
+            const jd = Math.floor(dt.getTime() / 86400000) + 2440588;
+            const dBranch = (jd + 1) % 12;
             
-            const cutoffs = [0, 5, 4, 6, 5, 6, 6, 7, 8, 8, 8, 7, 7];
-            let solarMonth = m;
-            if (d < cutoffs[m]) solarMonth = (m === 1) ? 12 : m - 1;
-            const mToBranch = { 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9, 10:10, 11:11, 12:0 };
-            const monthBranch = mToBranch[solarMonth];
+            // Hour Branch
+            const hBranch = Math.floor((hour + 1) % 24 / 2);
             
-            const hourBranch = Math.floor(((h + 1) % 24) / 2);
-            return { year: yearBranch, month: monthBranch, day: dayBranch, hour: hourBranch };
-        }
-
-        function sumDigits(n) {
-            let s = n.toString().split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
-            return s > 9 ? sumDigits(s) : s;
-        }
-
-        function renderBaziTable(panelEl, baziData) {
-            panelEl.innerHTML = Object.keys(pNames).map(p => `
-                <div class="bg-slate-950 rounded px-2 py-1.5 border border-slate-700/50 flex justify-between items-center shadow-inner">
-                    <span class="text-slate-400 font-medium">${pNames[p]}:</span>
-                    <span class="text-white font-medium">${branches[baziData[p]].name}</span>
-                </div>
-            `).join('');
+            return { year: yBranch, month: mBranch, day: dBranch, hour: hBranch };
         }
 
         function calculateAll() {
-            if(!els.targetDate.value) return;
             state.date = new Date(els.targetDate.value);
             state.birthDate = new Date(els.birthDate.value);
             state.gender = els.gender.value;
-
+            
+            // 1. Time BaZi
             state.calc.timeBazi = getPillars(state.date);
+            
+            // 2. Person BaZi
             state.calc.personBazi = getPillars(state.birthDate);
-            
-            renderBaziTable(els.baziPanelTime, state.calc.timeBazi);
-            renderBaziTable(els.baziPanelPerson, state.calc.personBazi);
 
-            // Afflictions Engine based on Time BaZi
-            ['year', 'month', 'day', 'hour'].forEach(pillar => {
-                const bIdx = state.calc.timeBazi[pillar];
-                const suiPoBranchIndex = (bIdx + 6) % 12; 
-                const clashAngle = branches[suiPoBranchIndex].angle; 
-                const suiPoStart = (clashAngle - 15 + 360) % 360;
-                const suiPoEnd = (clashAngle + 15) % 360;
-
-                let ssStart, ssEnd, ssDir;
-                if ([8, 0, 4].includes(bIdx)) { ssStart = 135; ssEnd = 225; ssDir = 'S'; } 
-                else if ([11, 3, 7].includes(bIdx)) { ssStart = 225; ssEnd = 315; ssDir = 'W'; } 
-                else if ([2, 6, 10].includes(bIdx)) { ssStart = 315; ssEnd = 45; ssDir = 'N'; } 
-                else { ssStart = 45; ssEnd = 135; ssDir = 'E'; }
-
-                state.calc.afflictions[pillar] = { 
-                    suiPoBranch: suiPoBranchIndex, suiPoStart, suiPoEnd, ssStart, ssEnd, clashAngle 
-                };
-            });
-
-            // Flying Stars (using Target Date)
-            let solarYear = state.date.getFullYear();
-            if (state.date.getMonth() + 1 < 2 || (state.date.getMonth() + 1 === 2 && state.date.getDate() < 4)) solarYear -= 1;
-            let baseStar = sumDigits(solarYear); 
-            let yearStar = 11 - baseStar;
-            if (yearStar > 9) yearStar = sumDigits(yearStar);
-            if (yearStar === 0) yearStar = 9;
-            if (yearStar === 5) yearStar = 5; 
-            
-            const luoShuPath = ['Center', 'NW', 'W', 'NE', 'S', 'N', 'SW', 'E', 'SE'];
-            let stars = {};
-            for(let i=0; i<9; i++) { 
-                let s = yearStar + i; 
-                if(s > 9) s -= 9; 
-                stars[luoShuPath[i]] = s; 
-            }
-            state.calc.stars.year = stars;
-
-            // Personal Kua (using Birth Date)
-            const bYear = state.birthDate.getFullYear();
-            let baseKua = sumDigits(bYear);
-            let kua = state.gender === 'M' ? 11 - baseKua : 4 + baseKua;
-            if (kua > 9) kua = sumDigits(kua);
-            if (kua === 0) kua = 9;
+            // 3. Kua Number (Person)
+            const by = state.birthDate.getFullYear();
+            let sum = by.toString().split('').reduce((a, b) => a + parseInt(b), 0);
+            while (sum > 9) sum = sum.toString().split('').reduce((a, b) => a + parseInt(b), 0);
+            let kua = state.gender === 'M' ? 11 - sum : 4 + sum;
+            if (kua > 9) kua -= 9;
             if (kua === 5) kua = state.gender === 'M' ? 2 : 8;
-            
             state.calc.kua = kua;
-            state.calc.auspiciousDirs = kuaData[kua].aus;
-            state.calc.inauspiciousDirs = kuaData[kua].inaus;
-            els.kuaDisplay.textContent = kua;
+            els.kuaDisplay.innerText = kua;
 
-            updateStatusBadge();
-            draw2DTexture();
-            generateAnalysis();
+            // Kua Auspicious/Inauspicious Logic
+            const kuaGroups = {
+                east: [1, 3, 4, 9],
+                west: [2, 6, 7, 8]
+            };
+            const dirGroups = {
+                east: ['N', 'S', 'E', 'SE'],
+                west: ['W', 'NW', 'SW', 'NE']
+            };
             
-            // Force degree update to refresh advice box
-            if (!isCompassActive) updateDegreeDisplay(targetRotation);
-        }
+            const group = kuaGroups.east.includes(kua) ? 'east' : 'west';
+            state.calc.auspiciousDirs = dirGroups[group];
+            state.calc.inauspiciousDirs = dirGroups[group === 'east' ? 'west' : 'east'];
 
-        function draw2DTexture() {
-            const size = 3072;
-            ctx.clearRect(0, 0, size, size);
-            const cx = size / 2, cy = size / 2;
-            const radius = (size / 2) - 15; 
+            // 4. Afflictions (Time)
+            const getAffliction = (branchIdx) => {
+                const clash = (branchIdx + 6) % 12;
+                const trines = [[8,0,4], [11,3,7], [2,6,10], [5,9,1]]; // Water, Wood, Fire, Metal
+                let ssStart = 0, ssEnd = 0, ssName = '';
+                if(trines[0].includes(branchIdx)) { ssStart = 135; ssEnd = 225; ssName = 'ใต้'; } // Water -> Fire (South)
+                else if(trines[1].includes(branchIdx)) { ssStart = 225; ssEnd = 315; ssName = 'ตะวันตก'; } // Wood -> Metal (West)
+                else if(trines[2].includes(branchIdx)) { ssStart = 315; ssEnd = 45; ssName = 'เหนือ'; } // Fire -> Water (North)
+                else if(trines[3].includes(branchIdx)) { ssStart = 45; ssEnd = 135; ssName = 'ตะวันออก'; } // Metal -> Wood (East)
+                return { clash, ssStart, ssEnd, ssName };
+            };
 
-            ctx.save();
-            ctx.translate(cx, cy);
-            ctx.rotate(-Math.PI / 2); 
-
-            const rBase = radius;
-            const rTicks = radius * 0.96;
-            const rMnt = radius * 0.80;
-            const rBrn = radius * 0.60;
-            const rDir = radius * 0.42;
-            const rStar = radius * 0.28;
-            const rTai = radius * 0.16;
-
-            function drawSeg(rIn, rOut, sDeg, eDeg, fill, stroke, lineWidth=1) {
-                const sRad = sDeg * Math.PI / 180;
-                let eRad = eDeg * Math.PI / 180;
-                if (eDeg < sDeg) eRad += 2 * Math.PI;
-                ctx.beginPath(); ctx.arc(0, 0, rOut, sRad, eRad); ctx.arc(0, 0, rIn, eRad, sRad, true); ctx.closePath();
-                if (fill && fill !== 'transparent') { ctx.fillStyle = fill; ctx.fill(); }
-                if (stroke) { ctx.lineWidth = lineWidth; ctx.strokeStyle = stroke; ctx.stroke(); }
-            }
-
-            function drawTxt(txt, r, deg, color, font, shadowColor=null, shadowBlur=0, strokeColor=null, strokeWidth=0) {
-                ctx.save();
-                ctx.rotate(deg * Math.PI / 180); ctx.translate(r, 0); ctx.rotate(Math.PI / 2);
-                if(shadowColor) { ctx.shadowColor = shadowColor; ctx.shadowBlur = shadowBlur; }
-                ctx.font = font; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                if (strokeColor && strokeWidth > 0) {
-                    ctx.lineJoin = "round"; ctx.lineWidth = strokeWidth; ctx.strokeStyle = strokeColor;
-                    ctx.strokeText(txt, 0, 0); ctx.shadowBlur = 0; 
-                }
-                ctx.fillStyle = color; ctx.fillText(txt, 0, 0);
-                ctx.restore();
-            }
-
-            // Normal Mode Backgrounds
-            if (!isARTransparent) {
-                const bgGrad = ctx.createRadialGradient(0, 0, radius*0.2, 0, 0, radius);
-                bgGrad.addColorStop(0, '#1e293b'); bgGrad.addColorStop(0.6, '#0f172a'); bgGrad.addColorStop(1, '#020617');
-                ctx.beginPath(); ctx.arc(0, 0, radius, 0, 2*Math.PI); ctx.fillStyle = bgGrad; ctx.fill();
-                
-                ctx.lineWidth = 15; ctx.strokeStyle = '#b8860b'; ctx.beginPath(); ctx.arc(0, 0, radius - 7, 0, 2*Math.PI); ctx.stroke();
-                ctx.lineWidth = 4; ctx.strokeStyle = '#fef08a'; ctx.beginPath(); ctx.arc(0, 0, radius - 18, 0, 2*Math.PI); ctx.stroke();
-                ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(254,240,138,0.5)'; ctx.beginPath(); ctx.arc(0, 0, radius - 25, 0, 2*Math.PI); ctx.stroke();
-                
-                for (let i = 0; i < 360; i++) {
-                    const rad = i * Math.PI / 180;
-                    const isMajor = i % 15 === 0; const isMinor = i % 5 === 0;
-                    let len = isMajor ? (rBase - rTicks) * 0.8 : (isMinor ? (rBase - rTicks) * 0.5 : (rBase - rTicks) * 0.3);
-                    let col = isMajor ? '#ef4444' : (isMinor ? '#d4af37' : 'rgba(212,175,55,0.4)');
-                    let lw = isMajor ? 5 : (isMinor ? 3 : 2);
-                    ctx.beginPath(); ctx.moveTo(Math.cos(rad) * rTicks, Math.sin(rad) * rTicks);
-                    ctx.lineTo(Math.cos(rad) * (rTicks + len), Math.sin(rad) * (rTicks + len));
-                    ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.stroke();
-                }
-
-                const ringColor = 'rgba(212,175,55,0.6)';
-                for(let i = 0; i < 24; i++) drawSeg(rBrn, rTicks, i*15-7.5, i*15+7.5, i%2===0?'rgba(255,255,255,0.03)':'transparent', ringColor, 2);
-                for(let i = 0; i < 12; i++) drawSeg(rDir, rBrn, i*30-15, i*30+15, i%2===0?'rgba(0,0,0,0.4)':'transparent', ringColor, 3);
-                for(let i = 0; i < 8; i++) drawSeg(rStar, rDir, i*45-22.5, i*45+22.5, 'rgba(15,23,42,0.8)', ringColor, 4);
-                for(let i = 0; i < 8; i++) drawSeg(rTai, rStar, i*45-22.5, i*45+22.5, 'rgba(2,6,23,1)', '#d4af37', 5);
-
-                const vm = state.viewMode;
-                ctx.globalCompositeOperation = 'screen';
-                if (vm === 'ALL' || vm === 'KUA') {
-                    state.calc.auspiciousDirs.forEach(dCode => {
-                        drawSeg(rTai, rTicks, dirs8[dCode].start, dirs8[dCode].end, 'rgba(16, 185, 129, 0.35)', null);
-                    });
-                }
-                if (vm === 'ALL' || vm === 'TIME') {
-                    Object.keys(state.toggles).filter(k => state.toggles[k]).forEach(p => {
-                        const aff = state.calc.afflictions[p];
-                        drawSeg(rTai, rTicks, aff.ssStart, aff.ssEnd, 'rgba(249, 115, 22, 0.45)', null);
-                        drawSeg(rTai, rTicks, aff.suiPoStart, aff.suiPoEnd, 'rgba(225, 29, 72, 0.55)', null);
-                    });
-                }
-                ctx.globalCompositeOperation = 'source-over'; 
-            }
-
-            const baseFontSize = size * 0.035; 
-            const innerFontSize = baseFontSize * 0.5;
-
-            // 24 Mountains
-            for (let i = 0; i < 24; i++) {
-                const mr = rBrn + (rTicks - rBrn) / 2;
-                let tColor = isARTransparent ? '#ff3333' : '#fde047'; 
-                let tColorTH = isARTransparent ? '#ff3333' : '#e2e8f0'; 
-                let strokeCol = isARTransparent ? 'rgba(255,255,255,1)' : null; 
-                let strokeW = isARTransparent ? 12 : 0; 
-                let shadowBlur = isARTransparent ? 0 : 6;
-                const finalMr = isARTransparent ? mr + 20 : mr;
-                drawTxt(mountains24[i], finalMr + baseFontSize*0.7, i * 15, tColor, `bold ${baseFontSize*0.9}px Arial`, 'rgba(0,0,0,1)', shadowBlur, strokeCol, strokeW);
-                drawTxt(mountains24TH[i], finalMr - baseFontSize*0.7, i * 15, tColorTH, `500 ${baseFontSize*0.95 * 1.5}px Prompt`, 'rgba(0,0,0,1)', shadowBlur, strokeCol, strokeW);
-            }
-            
-            // Inner Rings (Hidden in AR)
-            if (!isARTransparent) {
-                // Determine active Sui Po for highlighting
-                const activeSuiPos = Object.keys(state.toggles).filter(k => state.toggles[k]).map(k => ({ p: pNames[k], branch: state.calc.afflictions[k].suiPoBranch }));
-                
-                // 12 Branches
-                for (let i = 0; i < 12; i++) {
-                    const clashData = activeSuiPos.filter(a => a.branch === i);
-                    let branchBgColor = 'transparent';
-                    if (clashData.length > 0 && (state.viewMode === 'ALL' || state.viewMode === 'TIME')) {
-                        // Highligh Red Background + Pulse effect
-                        branchBgColor = `rgba(239, 68, 68, ${0.6 + Math.sin(Date.now() / 200) * 0.2})`; 
-                        drawSeg(rDir, rBrn, i*30-15, i*30+15, branchBgColor, '#ef4444', 4);
-                        
-                        // Add small label
-                        const clashLabel = `ชง${clashData.map(c=>c.p).join(',')}`;
-                        drawTxt(clashLabel, rDir + 25, i * 30, '#fef08a', `700 ${innerFontSize * 0.9}px Prompt`, 'rgba(0,0,0,1)', 10);
-                    }
-                    
-                    drawTxt(branches[i].branch, rDir + (rBrn - rDir) * 0.70, i * 30, '#ffffff', `bold ${innerFontSize * 1.3}px Arial`, 'rgba(0,0,0,0.9)', 10);
-                    drawTxt(branches[i].name.split(' ')[0], rDir + (rBrn - rDir) * 0.35, i * 30, '#ffffff', `600 ${innerFontSize * 2.3}px Prompt`, 'rgba(0,0,0,0.9)', 10);
-                }
-                
-                // 8 Directions (Responsive TH size)
-                Object.keys(dirs8).forEach(k => {
-                    const d = dirs8[k];
-                    let mid = (d.start + d.end) / 2; if (d.start > d.end) mid = (d.start + d.end + 360) / 2;
-                    drawTxt(k, rStar + (rDir - rStar) * 0.72, mid, '#d4af37', `900 ${innerFontSize * 1.75}px Arial`, 'rgba(0,0,0,0.9)', 15);
-                    // Dynamically reduce TH font size if name is long (e.g. ต.ต.เฉียงเหนือ)
-                    const isLong = d.name.length > 7;
-                    const thSize = isLong ? innerFontSize * 1.15 : innerFontSize * 1.6;
-                    drawTxt(d.name, rStar + (rDir - rStar) * 0.28, mid, '#cbd5e1', `500 ${thSize}px Prompt`, 'rgba(0,0,0,0.8)', 8);
-                });
-                
-                // Flying Stars
-                if (state.viewMode === 'ALL' || state.viewMode === 'STARS') {
-                    Object.keys(dirs8).forEach(k => {
-                        const d = dirs8[k];
-                        let mid = (d.start + d.end) / 2; if (d.start > d.end) mid = (d.start + d.end + 360) / 2;
-                        const starNum = state.calc.stars.year[k];
-                        let sCol = '#94a3b8';
-                        if ([9, 1, 8].includes(starNum)) sCol = '#4ade80';
-                        if ([5, 2, 7, 3].includes(starNum)) sCol = '#f87171';
-                        if (starNum === 5) sCol = '#facc15'; 
-                        drawTxt(starNum, rTai + (rStar - rTai) * 0.5, mid, sCol, `900 ${innerFontSize * 2.25}px Arial`, 'rgba(0,0,0,0.9)', 20);
-                    });
-                }
-
-                // Center Taiji
-                ctx.restore(); ctx.save(); ctx.translate(cx, cy);
-                ctx.beginPath();
-                for(let i = 0; i < 8; i++) {
-                    const ang = (i * 45 + 22.5) * Math.PI / 180;
-                    ctx[i === 0 ? 'moveTo' : 'lineTo'](Math.cos(ang) * rTai, Math.sin(ang) * rTai);
-                }
-                ctx.closePath(); ctx.fillStyle = '#0f172a'; ctx.fill(); ctx.lineWidth = 10; ctx.strokeStyle = '#d4af37'; ctx.stroke();
-                const tr = rTai * 0.65;
-                ctx.shadowBlur = 35; ctx.shadowColor = 'rgba(212,175,55,0.6)'; ctx.rotate(-Math.PI / 2);
-                ctx.beginPath(); ctx.arc(0, 0, tr, 0, 2 * Math.PI); ctx.fillStyle = '#f8fafc'; ctx.fill();
-                ctx.shadowBlur = 0;
-                ctx.beginPath(); ctx.arc(0, 0, tr, Math.PI / 2, 3 * Math.PI / 2); ctx.fillStyle = '#020617'; ctx.fill();
-                ctx.beginPath(); ctx.arc(0, -tr / 2, tr / 2, 0, 2 * Math.PI); ctx.fillStyle = '#f8fafc'; ctx.fill();
-                ctx.beginPath(); ctx.arc(0, tr / 2, tr / 2, 0, 2 * Math.PI); ctx.fillStyle = '#020617'; ctx.fill();
-                ctx.beginPath(); ctx.arc(0, -tr / 2, tr / 6, 0, 2 * Math.PI); ctx.fillStyle = '#020617'; ctx.fill();
-                ctx.beginPath(); ctx.arc(0, tr / 2, tr / 6, 0, 2 * Math.PI); ctx.fillStyle = '#f8fafc'; ctx.fill();
-                ctx.beginPath(); ctx.arc(0, 0, tr, 0, 2 * Math.PI); ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 6; ctx.stroke();
-            }
-            
-            ctx.restore();
-            if(window.update3DTexture) window.update3DTexture();
-        }
-
-        function checkOverlap(tS, tE, aS, aE) {
-            let cur = tS; let count = 0;
-            while(count < 72) {
-                let inRange = (aS < aE) ? (cur >= aS && cur <= aE) : (cur >= aS || cur <= aE);
-                if(inRange) return true;
-                if(Math.abs(cur - tE) < 5) break;
-                cur = (cur + 5) % 360; count++;
-            }
-            return false;
-        }
-
-        function generateAnalysis() {
-            els.strictWarnings.innerHTML = ''; els.impactAnalysis.innerHTML = ''; els.remedyAnalysis.innerHTML = '';
-            const active = Object.keys(state.toggles).filter(k => state.toggles[k]);
-            let hasWarnings = false;
-
-            Object.keys(dirs8).forEach(dCode => {
-                const dir = dirs8[dCode];
-                let hits = [];
-                let isAuspicious = state.calc.auspiciousDirs.includes(dCode);
-                let fsStar = state.calc.stars.year[dCode];
-
-                active.forEach(p => {
-                    const aff = state.calc.afflictions[p];
-                    if (checkOverlap(dir.start, dir.end, aff.suiPoStart, aff.suiPoEnd)) hits.push(`ทิศแตก (${pNames[p]})`);
-                    if (checkOverlap(dir.start, dir.end, aff.ssStart, aff.ssEnd)) hits.push(`ทิศอสูร (${pNames[p]})`);
-                });
-                if (fsStar === 5) hits.push(`ดาว 5 วิบัติ`);
-
-                if (hits.length > 0) {
-                    hasWarnings = true;
-                    let warningPrefix = isAuspicious ? `<span class="text-yellow-400">แม้เป็นทิศมงคล แต่</span>` : '';
-                    els.strictWarnings.insertAdjacentHTML('beforeend', `
-                        <div class="border-l-2 border-red-500 bg-red-900/40 p-2 rounded text-[10px] mb-2 shadow-sm">
-                            <span class="text-white font-bold block">⚠️ คำเตือน: ทิศ ${dir.name} (${dCode})</span> 
-                            ${warningPrefix} ติดปะทะ: <span class="text-red-400 font-bold">${hits.join(' และ ')}</span>
-                            <div class="mt-1 text-red-200/90 leading-tight">ห้ามทำการตอก เจาะ ย้ายเตียง หรือขุดดินเด็ดขาด</div>
-                        </div>
-                    `);
-
-                    const impact = baguaImpactMap[dCode];
-                    let eventWarn = hits.some(h => h.includes('แตก') || h.includes('อสูร') || h.includes('5')) 
-                        ? 'ระวังอุบัติเหตุกะทันหัน, เจ็บป่วยรักษายาก, เสียทรัพย์กะทันหัน' 
-                        : 'พลังงานแปรปรวนชะงักงัน';
-                    els.impactAnalysis.insertAdjacentHTML('beforeend', `
-                        <div class="bg-slate-800/50 border border-slate-700/50 rounded p-2.5 text-[10px] mb-2 shadow-sm">
-                            <div class="font-bold text-red-400 mb-1.5 border-b border-slate-700/50 pb-1">หากละเมิดทิศ ${dir.name}</div>
-                            <div class="text-slate-300 mb-1">👤 <strong class="text-white">กระทบ:</strong> ${impact.member}</div>
-                            <div class="text-slate-300 mb-1">🫀 <strong class="text-white">สุขภาพ:</strong> ${impact.organ}</div>
-                            <div class="text-slate-300 mb-1">💼 <strong class="text-white">ชีวิต/งาน:</strong> ${impact.career}</div>
-                            <div class="text-slate-300">⚠️ <strong class="text-red-300">ระวังเหตุ:</strong> ${eventWarn}</div>
-                        </div>
-                    `);
-                    els.remedyAnalysis.insertAdjacentHTML('beforeend', `
-                        <div class="bg-slate-800/50 border-l-2 border-red-500 rounded p-2.5 text-[10px] text-slate-300 mb-2 shadow-sm">
-                            <strong class="text-white block mb-1">🛡️ วิธีสลายภัยทิศ ${dir.name}:</strong> 
-                            ใช้อ่างน้ำนิ่งขนาดใหญ่ หรือวัตถุโลหะกลมวาวหนักๆ เพื่อสลายพลังร้าย
-                        </div>
-                    `);
-                } else if (isAuspicious) {
-                    els.remedyAnalysis.insertAdjacentHTML('beforeend', `
-                        <div class="bg-emerald-900/20 border-l-2 border-emerald-500 rounded p-2.5 text-[10px] text-slate-300 mb-2 shadow-sm">
-                            <strong class="text-emerald-400 block mb-1">✨ ทิศมงคล ${dir.name}:</strong> 
-                            ${[9, 1, 8].includes(fsStar) ? 'ดาวมงคลหนุนนำ แนะนำให้เปิดไฟสว่าง พัดลม หรือน้ำพุ เพื่อกระตุ้นโชคเต็มที่' : 'ทิศมงคลประจำตัว ใช้นั่งทำงานหรือนอนเพื่อรับปราณมงคลได้ดี การเคาะกระตุ้นทำได้ปลอดภัย'}
-                        </div>
-                    `);
-                }
+            ['year', 'month', 'day', 'hour'].forEach(p => {
+                state.calc.afflictions[p] = getAffliction(state.calc.timeBazi[p]);
             });
 
-            if (!hasWarnings) {
-                els.strictWarnings.innerHTML = '<div class="text-green-400 text-[10px] text-center py-3 bg-green-900/20 rounded-lg border border-green-800/50">✅ ปลอดภัยทุกทิศในกาลเวลานี้</div>';
-                els.impactAnalysis.innerHTML = '<div class="text-slate-500 text-[10px] text-center py-3">- ไม่มีทิศปะทะร้ายแรง -</div>';
-            }
+            // 5. Flying Stars (Time - Year only simplified)
+            const baseYear = 2024;
+            const baseStar = 3; 
+            const diff = state.date.getFullYear() - baseYear;
+            let centerStar = baseStar - (diff % 9);
+            if (centerStar <= 0) centerStar += 9;
+
+            const luoShuPath = ['Center', 'NW', 'W', 'NE', 'S', 'N', 'SW', 'E', 'SE'];
+            const yearStars = {};
+            let currentStar = centerStar;
+            luoShuPath.forEach((dir, i) => {
+                if (dir !== 'Center') yearStars[dir] = currentStar;
+                currentStar = currentStar === 9 ? 1 : currentStar + 1;
+            });
+            state.calc.stars = { year: yearStars, center: centerStar };
+
+            updateUI();
+            if(!isARTransparent) draw2DTexture();
+            updateStatusBadge();
+            updateAdviceBox(state.currentDegree);
         }
 
-        let isCompassActive = false;
-        let targetRotation = 0; 
-        let currentRotation = 0; 
-        
-        function shortestPathLerpAngle(current, target, factor) {
-            let diff = target - current;
-            while (diff > Math.PI) diff -= Math.PI * 2;
-            while (diff < -Math.PI) diff += Math.PI * 2;
-            return current + diff * factor;
+        function updateUI() {
+            const formatPillar = (b) => `<div class="bg-slate-900 border border-slate-700 rounded px-2 py-1 flex justify-between items-center"><span class="text-slate-400 mr-2"></span><span class="font-medium text-white">${branches[b].name}</span></div>`;
+            
+            // Time Panels
+            els.timeBaziPanel.innerHTML = `
+                ${formatPillar(state.calc.timeBazi.year).replace('<span>', '<span class="text-slate-400 mr-2">ปี:</span>')}
+                ${formatPillar(state.calc.timeBazi.month).replace('<span>', '<span class="text-slate-400 mr-2">เดือน:</span>')}
+                ${formatPillar(state.calc.timeBazi.day).replace('<span>', '<span class="text-slate-400 mr-2">วัน:</span>')}
+                ${formatPillar(state.calc.timeBazi.hour).replace('<span>', '<span class="text-slate-400 mr-2">ยาม:</span>')}
+            `;
+
+            // Person Panels
+            els.personBaziPanel.innerHTML = `
+                ${formatPillar(state.calc.personBazi.year).replace('<span>', '<span class="text-slate-400 mr-2">ปี:</span>')}
+                ${formatPillar(state.calc.personBazi.month).replace('<span>', '<span class="text-slate-400 mr-2">เดือน:</span>')}
+                ${formatPillar(state.calc.personBazi.day).replace('<span>', '<span class="text-slate-400 mr-2">วัน:</span>')}
+                ${formatPillar(state.calc.personBazi.hour).replace('<span>', '<span class="text-slate-400 mr-2">ยาม:</span>')}
+            `;
+
+            let sumHtml = '';
+            Object.keys(state.toggles).forEach(k => {
+                if (!state.toggles[k]) return;
+                const aff = state.calc.afflictions[k];
+                const bName = branches[state.calc.timeBazi[k]].name.split(' ')[0];
+                const label = k==='year'?'ปี':k==='month'?'เดือน':k==='day'?'วัน':'ยาม';
+                sumHtml += `
+                    <div class="border-b border-red-900/30 pb-1 mb-1">
+                        <span class="text-red-400 font-bold">▲ คำเตือน ทิศร้าย ${label}${bName}</span><br>
+                        <span class="text-red-300">ทิศแตก (ชง):</span> ${branches[aff.clash].p} (${branches[aff.clash].name.split(' ')[0]}) | 
+                        <span class="text-orange-400">ทิศอสูร (San Sha):</span> ${aff.ssName}
+                    </div>
+                `;
+            });
+            els.afflictionSummary.innerHTML = sumHtml || '<div class="text-emerald-400">ไม่มีทิศร้ายจร (หรือปิดการแสดงผลไว้)</div>';
         }
 
-        function updateDegreeDisplay(rad) {
-            let deg = (rad * 180 / Math.PI) % 360;
-            if (deg < 0) deg += 360;
-            els.degreeValue.textContent = deg.toFixed(1) + '°';
+        // UI Interactions
+        els.layerBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                els.layerBtns.forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                state.viewMode = e.target.getAttribute('data-layer');
+                updateStatusBadge();
+                if(!isARTransparent) draw2DTexture();
+            });
+        });
 
-            let label = "";
-            let currentDirCode = "";
-            for (const [code, info] of Object.entries(dirs8)) {
-                let start = info.start, end = info.end;
-                let inRange = (start > end) ? (deg >= start || deg < end) : (deg >= start && deg < end);
-                if (inRange) { 
-                    label = `${info.name.split(' ')[0]} (${code})`; currentDirCode = code; break; 
-                }
-            }
-            els.dirLabel.textContent = label;
-
-            if (currentDirCode && state.calc.stars && state.calc.stars.year) {
-                let starNum = state.calc.stars.year[currentDirCode];
-                let advice = starMeanings[starNum];
-                
-                let isAfflicted = false;
-                let afflictionNames = [];
-                const active = Object.keys(state.toggles).filter(k => state.toggles[k]);
-                active.forEach(p => {
-                    const aff = state.calc.afflictions[p];
-                    if (checkOverlap(dirs8[currentDirCode].start, dirs8[currentDirCode].end, aff.suiPoStart, aff.suiPoEnd)) {
-                        isAfflicted = true; afflictionNames.push(`ทิศแตก(${pNames[p]})`);
-                    }
-                    if (checkOverlap(dirs8[currentDirCode].start, dirs8[currentDirCode].end, aff.ssStart, aff.ssEnd)) {
-                        isAfflicted = true; afflictionNames.push(`ทิศอสูร(${pNames[p]})`);
-                    }
+        els.tabBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                els.tabBtns.forEach(b => {
+                    b.classList.remove('text-yellow-400', 'border-yellow-500');
+                    b.classList.add('text-slate-400', 'border-transparent');
                 });
-
-                if (advice) {
-                    let titleHtml = advice.title;
-                    els.dirAdvice.classList.remove('border-red-500', 'border-blue-300', 'border-yellow-400');
-                    if (isAfflicted || starNum === 5) {
-                         titleHtml += ` <br><span class="text-red-600 font-bold animate-pulse mt-1 inline-block">(⚠️ ติด ${[...new Set(afflictionNames)].join(',')})</span>`;
-                         els.dirAdvice.classList.add('border-red-500');
-                    } else if ([1,8,9].includes(starNum)) {
-                         els.dirAdvice.classList.add('border-blue-300');
-                    } else {
-                         els.dirAdvice.classList.add('border-yellow-400');
-                    }
-                    els.adviceTitle.innerHTML = titleHtml;
-                    els.adviceRemedy.innerHTML = advice.remedy;
-                    
-                    els.dirAdvice.classList.remove('hidden');
-                    // Small timeout to allow display:block to apply before animating opacity
-                    setTimeout(() => {
-                        els.dirAdvice.classList.remove('opacity-0', 'scale-95');
-                        els.dirAdvice.classList.add('opacity-100', 'scale-100');
-                    }, 10);
-                }
-            }
-        }
-
-        function handleOrientation(event) {
-            if (!isCompassActive) return;
-            let heading = null;
-            if (event.webkitCompassHeading !== undefined) heading = event.webkitCompassHeading;
-            else if (event.alpha !== null) {
-                let screenOrientation = (window.screen && window.screen.orientation) ? window.screen.orientation.angle : (window.orientation || 0);
-                heading = 360 - event.alpha;
-                if (screenOrientation !== 0) heading = (heading - screenOrientation + 360) % 360;
-            }
-            if (heading !== null) {
-                targetRotation = heading * (Math.PI / 180);
-            }
-        }
-
-        function checkManualControlVisibility() {
-            if (!isCompassActive && !isImageEditMode) {
-                els.manualCompassControl.classList.remove('hidden');
-                els.manualSlider.value = (targetRotation * 180 / Math.PI) % 360;
-                els.statusBadge.classList.replace('bottom-4', 'bottom-24'); // Move up if slider is visible
-            } else {
-                els.manualCompassControl.classList.add('hidden');
-                els.statusBadge.classList.replace('bottom-24', 'bottom-4'); // Move down if slider is hidden
-            }
-        }
-
-        els.compassBtn.addEventListener('click', () => {
-            isCompassActive = !isCompassActive;
-            if (isCompassActive) {
-                els.compassBtn.classList.add('btn-active-blue');
-                els.compassBtn.classList.remove('bg-slate-900/90', 'text-slate-400', 'border-slate-600/50');
-                if ('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', handleOrientation);
-                else window.addEventListener('deviceorientation', handleOrientation);
-            } else {
-                els.compassBtn.classList.remove('btn-active-blue');
-                els.compassBtn.classList.add('bg-slate-900/90', 'text-slate-400', 'border-slate-600/50');
-                window.removeEventListener('deviceorientationabsolute', handleOrientation);
-                window.removeEventListener('deviceorientation', handleOrientation);
-            }
-            checkManualControlVisibility();
-        });
-
-        els.manualSlider.addEventListener('input', (e) => {
-            targetRotation = e.target.value * (Math.PI / 180);
-            updateDegreeDisplay(targetRotation); // Force instant update for smooth dragging feedback
-        });
-
-        let isARActive = false;
-        let videoStream = null;
-        let isARTransparent = false;
-        let isImageEditMode = false;
-        let needsPulse = false;
-        
-        function updateARState() {
-            // Check if either Camera or an Uploaded Image is active
-            const hasBackground = isARActive || (els.bgImage.src && els.bgImage.src !== window.location.href && els.bgImage.style.display !== 'none');
-            
-            if (hasBackground) {
-                isARTransparent = true;
-                els.mainArea.classList.remove('bg-[#050811]');
-                els.mainArea.classList.add('bg-transparent');
-                els.radialBg.classList.add('opacity-0');
-                els.degreeDisplay.classList.remove('opacity-0');
+                e.target.classList.remove('text-slate-400', 'border-transparent');
+                e.target.classList.add('text-yellow-400', 'border-yellow-500');
                 
-                if (luopanMesh && luopanMesh.geometry.type !== 'RingGeometry') {
-                    luopanMesh.geometry.dispose();
-                    luopanMesh.geometry = new THREE.RingGeometry(5 * 0.60, 5, 128); 
-                }
-            } else {
-                isARTransparent = false;
-                els.mainArea.classList.add('bg-[#050811]');
-                els.mainArea.classList.remove('bg-transparent');
-                els.radialBg.classList.remove('opacity-0');
-                els.degreeDisplay.classList.remove('opacity-0');
-                
-                if (luopanMesh && luopanMesh.geometry.type !== 'CircleGeometry') {
-                    luopanMesh.geometry.dispose();
-                    luopanMesh.geometry = new THREE.CircleGeometry(5, 128);
-                }
-            }
-            draw2DTexture();
-            updateStatusBadge(); // Update badge to hide/show legend based on AR state
-        }
-
-        els.cameraBtn.addEventListener('click', async () => {
-            if (isARActive) {
-                isARActive = false;
-                if (videoStream) videoStream.getTracks().forEach(track => track.stop());
-                els.arVideo.classList.add('hidden');
-                els.cameraBtn.classList.remove('text-green-400', 'border-green-500', 'bg-green-900/30');
-                els.btnShutter.classList.add('hidden');
-            } else {
-                try {
-                    videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                    els.arVideo.srcObject = videoStream;
-                    els.arVideo.classList.remove('hidden');
-                    isARActive = true;
-                    els.cameraBtn.classList.add('text-green-400', 'border-green-500', 'bg-green-900/30');
-                    els.btnShutter.classList.remove('hidden');
-                    
-                    // Hide static image if open
-                    els.bgImage.style.display = 'none';
-                    els.bgImage.src = '';
-                    els.btnEditImage.classList.add('hidden');
-                } catch (err) { alert("ไม่สามารถเปิดกล้องได้: " + err.message); }
-            }
-            updateARState();
+                document.getElementById('tab-config').classList.add('hidden');
+                document.getElementById('tab-analysis').classList.add('hidden');
+                document.getElementById(`tab-${e.target.getAttribute('data-tab')}`).classList.remove('hidden');
+            });
         });
 
-        els.btnUpload.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                if(isARActive) els.cameraBtn.click(); // turn off camera
-                els.bgImage.src = event.target.result;
-                els.bgImage.style.display = 'block';
-                els.bgImage.classList.remove('hidden');
-                els.btnEditImage.classList.remove('hidden');
-                resetImageTransform();
-                updateARState();
-            };
-            reader.readAsDataURL(file);
+        els.menuBtn.addEventListener('click', () => {
+            els.sidebar.classList.add('open');
+            els.menuBtn.style.display = 'none'; // Hide menu button
         });
 
-        els.btnShutter.addEventListener('click', () => {
-            // Capture video frame to canvas then to image
-            const canvas = document.createElement('canvas');
-            canvas.width = els.arVideo.videoWidth;
-            canvas.height = els.arVideo.videoHeight;
-            canvas.getContext('2d').drawImage(els.arVideo, 0, 0);
-            
-            els.cameraBtn.click(); // Turn off live camera to save battery
-            
-            els.bgImage.src = canvas.toDataURL('image/jpeg');
-            els.bgImage.style.display = 'block';
-            els.bgImage.classList.remove('hidden');
-            els.btnEditImage.classList.remove('hidden');
-            resetImageTransform();
-            updateARState();
+        els.closeSidebarBtn.addEventListener('click', () => {
+            els.sidebar.classList.remove('open');
+            setTimeout(() => {
+                els.menuBtn.style.display = 'block'; // Show menu button after transition
+            }, 400); // Matches CSS transition duration
         });
 
-        let imgState = { x: 0, y: 0, scale: 1, rZ: 0, rX: 0, rY: 0 };
-        let isDraggingImg = false;
-        let startX, startY;
-
-        function applyImgTransform() {
-            els.bgImage.style.transform = `translate(${imgState.x}px, ${imgState.y}px) scale(${imgState.scale}) rotateZ(${imgState.rZ}deg) rotateX(${imgState.rX}deg) rotateY(${imgState.rY}deg)`;
-        }
-
-        function resetImageTransform() {
-            imgState = { x: 0, y: 0, scale: 1, rZ: 0, rX: 0, rY: 0 };
-            els.slZoom.value = 1; els.slRotZ.value = 0; els.slRotX.value = 0; els.slRotY.value = 0;
-            els.lblZoom.textContent = '1.0x'; els.lblRotZ.textContent = '0°'; els.lblRotX.textContent = '0°'; els.lblRotY.textContent = '0°';
-            applyImgTransform();
-        }
-
-        els.btnEditImage.addEventListener('click', () => {
-            isImageEditMode = true;
-            document.body.classList.add('edit-mode-active');
-            els.imageControlPanel.classList.remove('hidden');
-            els.btnEditImage.classList.add('hidden');
-            checkManualControlVisibility();
-            // Enable panning
-            els.bgImageWrapper.style.pointerEvents = 'auto';
+        ['togYear', 'togMonth', 'togDay', 'togHour'].forEach(id => {
+            els[id].addEventListener('change', (e) => {
+                state.toggles[id.replace('tog', '').toLowerCase()] = e.target.checked;
+                updateUI();
+                updateStatusBadge();
+                if(!isARTransparent) draw2DTexture();
+            });
         });
 
-        els.btnFinishEdit.addEventListener('click', () => {
-            isImageEditMode = false;
-            document.body.classList.remove('edit-mode-active');
-            els.imageControlPanel.classList.add('hidden');
-            els.btnEditImage.classList.remove('hidden');
-            checkManualControlVisibility();
-            els.bgImageWrapper.style.pointerEvents = 'none';
-        });
+        // --- Three.js & Canvas 2D Setup ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas3dContainer').appendChild(renderer.domElement);
 
-        els.btnResetImg.addEventListener('click', resetImageTransform);
+        const canvas2d = document.createElement('canvas');
+        const ctx = canvas2d.getContext('2d');
+        const texSize = 2048;
+        canvas2d.width = texSize; canvas2d.height = texSize;
+        const texture = new THREE.CanvasTexture(canvas2d);
+        texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
-        els.slZoom.addEventListener('input', e => { imgState.scale = e.target.value; els.lblZoom.textContent = e.target.value+'x'; applyImgTransform(); });
-        els.slRotZ.addEventListener('input', e => { imgState.rZ = e.target.value; els.lblRotZ.textContent = e.target.value+'°'; applyImgTransform(); });
-        els.slRotX.addEventListener('input', e => { imgState.rX = e.target.value; els.lblRotX.textContent = e.target.value+'°'; applyImgTransform(); });
-        els.slRotY.addEventListener('input', e => { imgState.rY = e.target.value; els.lblRotY.textContent = e.target.value+'°'; applyImgTransform(); });
+        // Luopan Mesh (Plane instead of Cylinder for AR pass-through ease)
+        const geometry = new THREE.PlaneGeometry(10, 10);
+        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+        const luopanMesh = new THREE.Mesh(geometry, material);
+        luopanMesh.rotation.x = -Math.PI / 2; // Flat on ground
+        scene.add(luopanMesh);
 
-        // Pan Image (Drag)
-        els.bgImageWrapper.addEventListener('pointerdown', (e) => {
-            if(!isImageEditMode) return;
-            isDraggingImg = true;
-            startX = e.clientX - imgState.x;
-            startY = e.clientY - imgState.y;
-        });
-        window.addEventListener('pointermove', (e) => {
-            if(!isDraggingImg || !isImageEditMode) return;
-            imgState.x = e.clientX - startX;
-            imgState.y = e.clientY - startY;
-            applyImgTransform();
-        });
-        window.addEventListener('pointerup', () => { isDraggingImg = false; });
+        // Grid/Crosshair Mesh
+        const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 2, transparent: true, opacity: 0.6 });
+        const lineGeo = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(0, -5, 0.05), new THREE.Vector3(0, 5, 0.05),
+            new THREE.Vector3(-5, 0, 0.05), new THREE.Vector3(5, 0, 0.05)
+        ]);
+        const crosshair = new THREE.LineSegments(lineGeo, lineMat);
+        crosshair.rotation.x = -Math.PI / 2;
+        scene.add(crosshair);
 
-        let scene, camera, renderer, luopanMesh;
+        // Center ring for crosshair
+        const centerRingGeo = new THREE.RingGeometry(0.3, 0.35, 32);
+        const centerRingMat = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
+        const centerRing = new THREE.Mesh(centerRingGeo, centerRingMat);
+        centerRing.rotation.x = -Math.PI / 2;
+        centerRing.position.y = 0.05;
+        scene.add(centerRing);
 
-        function init3D() {
-            els.targetDate.value = new Date().toLocaleString("sv-SE").slice(0, 16); // Setup initial date strings
-            calculateAll(); 
-            
-            const container = document.getElementById('canvas3dContainer');
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(35, 1, 0.1, 1000);
-            
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.setClearColor(0x000000, 0); 
-            container.appendChild(renderer.domElement);
-
-            scene.add(new THREE.AmbientLight(0xffffff, 0.95));
-            const dirLight = new THREE.DirectionalLight(0xfff7e6, 0.35); 
-            dirLight.position.set(0, 0, 10); 
-            scene.add(dirLight);
-
-            const texture = new THREE.CanvasTexture(els.canvas);
-            texture.generateMipmaps = true;
-            texture.minFilter = THREE.LinearMipmapLinearFilter;
-            texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-
-            const material = new THREE.MeshStandardMaterial({ map: texture, transparent: true, alphaTest: 0.1, side: THREE.DoubleSide });
-            luopanMesh = new THREE.Mesh(new THREE.CircleGeometry(5, 128), material);
-            scene.add(luopanMesh);
-
-            window.update3DTexture = function() {
-                if (luopanMesh && luopanMesh.material.map) luopanMesh.material.map.needsUpdate = true;
-            };
-            window.update3DTexture();
-
-            const resizeObserver = new ResizeObserver(() => onWindowResize());
-            resizeObserver.observe(container);
-            setTimeout(onWindowResize, 50);
-
-            function animate() {
-                requestAnimationFrame(animate);
-                
-                // Pulse logic for red background in Sui Po
-                if(!isARTransparent && (state.viewMode === 'ALL' || state.viewMode === 'TIME')) {
-                     const activeSuiPos = Object.keys(state.toggles).filter(k => state.toggles[k]);
-                     if(activeSuiPos.length > 0) {
-                         draw2DTexture(); // Redraw constantly if pulsing is needed
-                     }
-                }
-
-                if (luopanMesh) {
-                    currentRotation = shortestPathLerpAngle(currentRotation, targetRotation, 0.12);
-                    luopanMesh.rotation.z = -currentRotation;
-                    // Only run degree logic once per frame when moving
-                    if (Math.abs(currentRotation - targetRotation) > 0.001) updateDegreeDisplay(currentRotation);
-                }
-                renderer.render(scene, camera);
-            }
-            animate();
-            
-            checkManualControlVisibility();
-        }
+        // Image Mesh (For imported plans)
+        let userImageMesh = null;
 
         function onWindowResize() {
             const container = document.getElementById('canvas3dContainer');
@@ -1139,96 +634,551 @@
             const aspect = width / height;
             camera.aspect = aspect;
             const fovRad = (camera.fov / 2) * (Math.PI / 180);
-            const safeRadius = 5.3; 
-            camera.position.set(0, 0, aspect < 1 ? (safeRadius / aspect) / Math.tan(fovRad) : safeRadius / Math.tan(fovRad));
+            const safeRadius = 6.2; // Increased for narrow screens (S23 Ultra)
+            camera.position.set(0, aspect < 1 ? (safeRadius / aspect) / Math.tan(fovRad) : safeRadius / Math.tan(fovRad), 0);
             camera.lookAt(0, 0, 0);
             camera.updateProjectionMatrix();
             renderer.setSize(width, height);
         }
 
-        els.targetDate.addEventListener('change', calculateAll);
-        els.birthDate.addEventListener('change', calculateAll);
-        els.gender.addEventListener('change', calculateAll);
-        els.btnSetNow.addEventListener('click', () => { 
-            els.targetDate.value = new Date().toLocaleString("sv-SE").slice(0, 16);
-            calculateAll(); 
-        });
+        window.addEventListener('resize', onWindowResize);
+        onWindowResize(); // Initial call
 
-        els.toggles.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const t = e.currentTarget;
-                const type = t.getAttribute('data-type');
-                state.toggles[type] = !state.toggles[type];
-                if (state.toggles[type]) {
-                    t.classList.add('active', 'border-yellow-600', 'text-yellow-400', 'bg-slate-800');
-                    t.classList.remove('border-slate-700', 'text-slate-400', 'bg-slate-800/50');
-                    t.querySelector('.icon').textContent = '☑';
-                } else {
-                    t.classList.remove('active', 'border-yellow-600', 'text-yellow-400', 'bg-slate-800');
-                    t.classList.add('border-slate-700', 'text-slate-400', 'bg-slate-800/50');
-                    t.querySelector('.icon').textContent = '☐';
+        // Draw 2D Canvas Function
+        function draw2DTexture() {
+            const size = texSize;
+            const cx = size / 2;
+            const cy = size / 2;
+            ctx.clearRect(0, 0, size, size);
+
+            const rTicks = size * 0.48;
+            const rBrn = size * 0.38;
+            const rDir = size * 0.28;
+            const rStar = size * 0.16;
+            const rTai = size * 0.08;
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            
+            // Helper function for arcs
+            const drawSeg = (rIn, rOut, sDeg, eDeg, fill, stroke, lWidth = 2) => {
+                ctx.beginPath();
+                ctx.arc(0, 0, rOut, (sDeg - 90) * Math.PI / 180, (eDeg - 90) * Math.PI / 180);
+                ctx.arc(0, 0, rIn, (eDeg - 90) * Math.PI / 180, (sDeg - 90) * Math.PI / 180, true);
+                ctx.closePath();
+                if (fill !== 'transparent') { ctx.fillStyle = fill; ctx.fill(); }
+                if (stroke !== 'transparent') { ctx.strokeStyle = stroke; ctx.lineWidth = lWidth; ctx.stroke(); }
+            };
+
+            const drawTxt = (txt, radius, deg, color, font, outline = 'transparent', lw = 2) => {
+                ctx.save();
+                ctx.rotate((deg - 90) * Math.PI / 180);
+                ctx.translate(radius, 0);
+                // Rotate text to face upright relative to center
+                ctx.rotate(Math.PI / 2); 
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.font = font;
+                if(outline !== 'transparent') {
+                    ctx.strokeStyle = outline; ctx.lineWidth = lw; ctx.lineJoin = 'round'; ctx.strokeText(txt, 0, 0);
                 }
-                calculateAll();
-            });
-        });
+                ctx.fillStyle = color; ctx.fillText(txt, 0, 0);
+                ctx.restore();
+            };
 
-        els.layerBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                els.layerBtns.forEach(b => {
-                    b.classList.remove('active', 'bg-slate-800', 'border-yellow-600', 'text-yellow-400');
-                    b.classList.add('bg-slate-900', 'border-slate-700', 'text-slate-400');
+            if (isARTransparent) {
+                // AR Mode: Only outer rim and 24 mountains text in bright red
+                const ringColor = 'rgba(212,175,55,1)';
+                drawSeg(rBrn, rTicks, 0, 360, 'transparent', ringColor, 4);
+                
+                const baseFontSize = size * 0.035; 
+                mountains24.forEach(m => {
+                    const txt = m.name.split(' ');
+                    drawTxt(txt[0], rBrn + (rTicks - rBrn) * 0.7, m.deg, '#ef4444', `900 ${baseFontSize * 0.9}px Arial`, '#ffffff', 6);
+                    drawTxt(txt[1], rBrn + (rTicks - rBrn) * 0.35, m.deg, '#ef4444', `900 ${baseFontSize * 1.2}px Prompt`, '#ffffff', 8);
                 });
-                const t = e.target;
-                t.classList.add('active', 'bg-slate-800', 'border-yellow-600', 'text-yellow-400');
-                t.classList.remove('bg-slate-900', 'border-slate-700', 'text-slate-400');
-                state.viewMode = t.getAttribute('data-layer');
-                calculateAll();
-            });
-        });
 
-        const layerModes = ['ALL', 'TIME', 'KUA', 'STARS'];
-        let currentLayerIdx = 0;
-        els.layerCycleBtn.addEventListener('click', () => {
-            currentLayerIdx = (currentLayerIdx + 1) % layerModes.length;
-            els.layerBtns.forEach(b => { if(b.getAttribute('data-layer') === layerModes[currentLayerIdx]) b.click(); });
-        });
-
-        els.tabBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                els.tabBtns.forEach(b => {
-                    b.classList.remove('border-yellow-500', 'text-yellow-400');
-                    b.classList.add('border-transparent', 'text-slate-400');
-                });
-                els.tabContents.forEach(c => { c.classList.remove('block'); c.classList.add('hidden'); });
-                btn.classList.remove('border-transparent', 'text-slate-400');
-                btn.classList.add('border-yellow-500', 'text-yellow-400');
-                document.getElementById(`tab-${btn.getAttribute('data-tab')}`).classList.remove('hidden');
-                document.getElementById(`tab-${btn.getAttribute('data-tab')}`).classList.add('block');
-            });
-        });
-
-        function toggleSidebar() {
-            state.sidebarOpen = !state.sidebarOpen;
-            if (state.sidebarOpen) {
-                els.sidebar.classList.add('sidebar-expanded');
-                els.sidebar.classList.remove('sidebar-collapsed');
-                els.sidebarToggleBtn.classList.add('btn-hidden'); 
             } else {
-                els.sidebar.classList.remove('sidebar-expanded');
-                els.sidebar.classList.add('sidebar-collapsed');
-                els.sidebarToggleBtn.classList.remove('btn-hidden'); 
+                // Normal Mode: Clean UI based on User Feedback
+                
+                // Base Black Background
+                ctx.beginPath();
+                ctx.arc(0,0, rTicks, 0, 2*Math.PI);
+                ctx.fillStyle = '#0a0f1d';
+                ctx.fill();
+
+                // Draw standard grid lines (Gold)
+                const ringColor = 'rgba(212,175,55,0.4)';
+                for(let i = 0; i < 24; i++) drawSeg(rBrn, rTicks, i*15-7.5, i*15+7.5, 'transparent', ringColor, 2);
+                for(let i = 0; i < 12; i++) drawSeg(rDir, rBrn, i*30-15, i*30+15, 'transparent', ringColor, 2);
+                for(let i = 0; i < 8; i++) drawSeg(rStar, rDir, i*45-22.5, i*45+22.5, 'transparent', ringColor, 2);
+                drawSeg(rTai, rStar, 0, 360, 'transparent', ringColor, 2); // Star ring
+                
+                const vm = state.viewMode;
+                const baseFontSize = size * 0.035; 
+                const innerFontSize = baseFontSize * 0.5;
+
+                // --- Mode: KUA (8 Mansions) ---
+                if (vm === 'KUA') {
+                    state.calc.auspiciousDirs.forEach(dCode => {
+                        drawSeg(rStar, rTicks, dirs8[dCode].start, dirs8[dCode].end, 'transparent', 'rgba(16, 185, 129, 0.8)', 6); // Green border
+                    });
+                    state.calc.inauspiciousDirs.forEach(dCode => {
+                        drawSeg(rStar, rTicks, dirs8[dCode].start, dirs8[dCode].end, 'transparent', 'rgba(239, 68, 68, 0.8)', 6); // Red border
+                    });
+                }
+
+                // --- Mode: TIME (Afflictions) ---
+                const activeSuiPos = [];
+                if (vm === 'TIME') {
+                    Object.keys(state.toggles).filter(k => state.toggles[k]).forEach(p => {
+                        const aff = state.calc.afflictions[p];
+                        activeSuiPos.push({ branch: aff.clash, p: p });
+                        
+                        // San Sha - Orange Arc on outer edge ONLY
+                        ctx.beginPath();
+                        const ssSRad = (aff.ssStart - 90) * Math.PI / 180;
+                        let ssERad = (aff.ssEnd - 90) * Math.PI / 180;
+                        if (ssERad < ssSRad) ssERad += 2 * Math.PI;
+                        ctx.arc(0, 0, rTicks - 8, ssSRad, ssERad);
+                        ctx.strokeStyle = '#f97316'; // Orange
+                        ctx.lineWidth = 16;
+                        ctx.stroke();
+                    });
+                }
+
+                // 24 Mountains Text
+                mountains24.forEach((m, i) => {
+                    const txt = m.name.split(' ');
+                    drawTxt(txt[0], rBrn + (rTicks - rBrn) * 0.70, m.deg, '#fcd34d', `bold ${baseFontSize * 0.65}px Arial`, 'rgba(0,0,0,0.8)', 4);
+                    drawTxt(txt[1], rBrn + (rTicks - rBrn) * 0.35, m.deg, '#ffffff', `600 ${baseFontSize * 0.9}px Prompt`, 'rgba(0,0,0,0.8)', 4);
+                });
+
+                // 12 Branches Text & Sui Po
+                for (let i = 0; i < 12; i++) {
+                    const clashData = activeSuiPos.filter(a => a.branch === i);
+                    
+                    // Sui Po Highlight (Flashing Box)
+                    if (clashData.length > 0 && vm === 'TIME') {
+                        const pulse = 0.6 + Math.sin(Date.now() / 200) * 0.4;
+                        const branchBgColor = `rgba(239, 68, 68, ${pulse})`; 
+                        drawSeg(rDir, rBrn, i*30-15, i*30+15, branchBgColor, '#ef4444', 4);
+                    }
+                    
+                    drawTxt(branches[i].branch, rDir + (rBrn - rDir) * 0.70, i * 30, '#ffffff', `bold ${innerFontSize * 1.3}px Arial`, 'rgba(0,0,0,0.9)', 4);
+                    drawTxt(branches[i].name.split(' ')[0], rDir + (rBrn - rDir) * 0.35, i * 30, '#ffffff', `600 ${innerFontSize * 2.3}px Prompt`, 'rgba(0,0,0,0.9)', 4);
+                }
+
+                // 8 Directions Text (Changes color in KUA mode)
+                Object.keys(dirs8).forEach(k => {
+                    const d = dirs8[k];
+                    let mid = (d.start + d.end) / 2; if (d.start > d.end) mid = (d.start + d.end + 360) / 2;
+                    
+                    let engColor = '#d4af37';
+                    let thColor = '#cbd5e1';
+                    
+                    if (vm === 'KUA') {
+                        if (state.calc.auspiciousDirs.includes(k)) {
+                            engColor = '#34d399'; thColor = '#10b981'; // Emerald
+                        } else if (state.calc.inauspiciousDirs.includes(k)) {
+                            engColor = '#f87171'; thColor = '#ef4444'; // Red
+                        }
+                    }
+
+                    drawTxt(k, rStar + (rDir - rStar) * 0.72, mid, engColor, `900 ${innerFontSize * 1.75}px Arial`, 'rgba(0,0,0,0.9)', 4);
+                    const isLong = d.name.length > 7;
+                    const thSize = isLong ? innerFontSize * 1.15 : innerFontSize * 1.6;
+                    drawTxt(d.name, rStar + (rDir - rStar) * 0.28, mid, thColor, `500 ${thSize}px Prompt`, 'rgba(0,0,0,0.8)', 4);
+                });
+
+                // Flying Stars
+                if (vm === 'STARS') {
+                    Object.keys(dirs8).forEach(k => {
+                        const d = dirs8[k];
+                        let mid = (d.start + d.end) / 2; if (d.start > d.end) mid = (d.start + d.end + 360) / 2;
+                        const starNum = state.calc.stars.year[k];
+                        let sCol = '#94a3b8'; // Gray
+                        if ([9, 1, 8].includes(starNum)) sCol = '#4ade80'; // Green
+                        if ([2, 7, 3].includes(starNum)) sCol = '#f87171'; // Red
+                        if (starNum === 5) sCol = '#facc15'; // Yellow
+                        
+                        const starRad = rTai + (rStar - rTai) * 0.5;
+                        
+                        ctx.save();
+                        ctx.rotate((mid - 90) * Math.PI / 180);
+                        ctx.translate(starRad, 0);
+                        // Rotate back to upright for the number
+                        ctx.rotate(Math.PI / 2);
+                        
+                        // Circle Border
+                        ctx.beginPath();
+                        ctx.arc(0, 0, innerFontSize * 1.8, 0, 2*Math.PI);
+                        ctx.strokeStyle = sCol;
+                        ctx.lineWidth = 4;
+                        ctx.fillStyle = '#0f172a'; // Dark bg for circle
+                        ctx.fill();
+                        ctx.stroke();
+                        
+                        // Text
+                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillStyle = sCol;
+                        ctx.font = `900 ${innerFontSize * 2.2}px Arial`;
+                        ctx.fillText(starNum, 0, 0);
+                        ctx.restore();
+                    });
+                }
+
+                // Center Taiji
+                ctx.beginPath(); ctx.arc(0, 0, rTai, 0, 2*Math.PI); ctx.fillStyle = '#0f172a'; ctx.fill();
+                const tj = rTai * 0.8;
+                ctx.beginPath(); ctx.arc(0, 0, tj, Math.PI/2, Math.PI*1.5); ctx.fillStyle = '#ffffff'; ctx.fill();
+                ctx.beginPath(); ctx.arc(0, 0, tj, Math.PI*1.5, Math.PI/2); ctx.fillStyle = '#000000'; ctx.fill();
+                ctx.beginPath(); ctx.arc(0, -tj/2, tj/2, 0, 2*Math.PI); ctx.fillStyle = '#ffffff'; ctx.fill();
+                ctx.beginPath(); ctx.arc(0, tj/2, tj/2, 0, 2*Math.PI); ctx.fillStyle = '#000000'; ctx.fill();
+                ctx.beginPath(); ctx.arc(0, -tj/2, tj/6, 0, 2*Math.PI); ctx.fillStyle = '#000000'; ctx.fill();
+                ctx.beginPath(); ctx.arc(0, tj/2, tj/6, 0, 2*Math.PI); ctx.fillStyle = '#ffffff'; ctx.fill();
+                
+                // Red Crosshairs overlay
+                ctx.strokeStyle = 'rgba(255,0,0,0.5)';
+                ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.moveTo(-size/2, 0); ctx.lineTo(size/2, 0); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, -size/2); ctx.lineTo(0, size/2); ctx.stroke();
+            }
+
+            ctx.restore();
+            texture.needsUpdate = true;
+        }
+
+        // Determine Direction Logic
+        function getDirectionData(deg) {
+            for (let k in dirs8) {
+                let d = dirs8[k];
+                if (d.start > d.end) {
+                    if (deg >= d.start || deg <= d.end) return { code: k, name: d.name };
+                } else {
+                    if (deg >= d.start && deg <= d.end) return { code: k, name: d.name };
+                }
+            }
+            return { code: 'N', name: 'เหนือ' };
+        }
+
+        function updateAdviceBox(deg) {
+            const dirData = getDirectionData(deg);
+            const dirCode = dirData.code;
+            
+            els.dirLabel.innerText = `${dirData.name} (${dirCode})`;
+            els.degreeValue.innerText = deg.toFixed(1) + '°';
+
+            let title = "", remedy = "", hasBad = false;
+
+            if (state.viewMode === 'STARS') {
+                const starNum = state.calc.stars.year[dirCode];
+                if (starNum) {
+                    title = starsInfo[starNum].desc;
+                    remedy = starsInfo[starNum].remedy;
+                    if(starsInfo[starNum].type === 'fatal') {
+                        els.dirAdvice.classList.replace('border-slate-300', 'border-red-500');
+                        els.adviceTitle.classList.add('text-red-600');
+                        hasBad = true;
+                    } else if (starsInfo[starNum].type === 'bad') {
+                         els.dirAdvice.classList.replace('border-slate-300', 'border-orange-500');
+                         els.adviceTitle.classList.add('text-orange-600');
+                    } else {
+                        els.dirAdvice.classList.replace('border-red-500', 'border-slate-300');
+                        els.dirAdvice.classList.replace('border-orange-500', 'border-slate-300');
+                        els.adviceTitle.classList.remove('text-red-600', 'text-orange-600');
+                    }
+                }
+            } else if (state.viewMode === 'KUA') {
+                if (state.calc.auspiciousDirs.includes(dirCode)) {
+                    title = "ทิศมงคลประจำตัว"; remedy = "ส่งเสริมโชคลาภ สุขภาพ ความสัมพันธ์";
+                } else {
+                    title = "ทิศร้ายประจำตัว"; remedy = "หลีกเลี่ยงการหันหัวเตียง หรือโต๊ะทำงาน";
+                    els.dirAdvice.classList.replace('border-slate-300', 'border-red-500');
+                    els.adviceTitle.classList.add('text-red-600');
+                    hasBad = true;
+                }
+                if(!hasBad) {
+                    els.dirAdvice.classList.replace('border-red-500', 'border-slate-300');
+                    els.adviceTitle.classList.remove('text-red-600');
+                }
+            } else if (state.viewMode === 'TIME') {
+                // Check if current degree hits San Sha or Sui Po
+                let badTitle = [];
+                // Simple approx for current branch based on deg
+                let currentBranch = Math.floor((deg + 15) % 360 / 30);
+                
+                Object.keys(state.toggles).filter(k=>state.toggles[k]).forEach(p => {
+                     const aff = state.calc.afflictions[p];
+                     if(aff.clash === currentBranch) badTitle.push(`ทิศชง(${p})`);
+                     
+                     let inSS = false;
+                     if(aff.ssStart > aff.ssEnd) {
+                         if(deg >= aff.ssStart || deg <= aff.ssEnd) inSS = true;
+                     } else {
+                         if(deg >= aff.ssStart && deg <= aff.ssEnd) inSS = true;
+                     }
+                     if(inSS) badTitle.push(`ทิศอสูร(${p})`);
+                });
+
+                if(badTitle.length > 0) {
+                     title = "⚠️ " + badTitle.join(', ');
+                     remedy = "ห้ามเคาะ เจาะ ทุบ ตอก ซ่อมแซม ในทิศนี้เด็ดขาด!";
+                     els.dirAdvice.classList.replace('border-slate-300', 'border-red-500');
+                     els.adviceTitle.classList.add('text-red-600');
+                     hasBad = true;
+                } else {
+                     title = "ทิศปกติ (กาลเวลา)";
+                     remedy = "ไม่มีดาวร้ายจรปะทะ สามารถใช้งานได้ปกติ";
+                     els.dirAdvice.classList.replace('border-red-500', 'border-slate-300');
+                     els.adviceTitle.classList.remove('text-red-600');
+                }
+            }
+
+            if(title) {
+                els.adviceTitle.innerText = title;
+                els.adviceRemedy.innerText = remedy;
+                els.dirAdvice.classList.remove('hidden');
+                setTimeout(() => {
+                    els.dirAdvice.classList.remove('opacity-0', 'scale-95');
+                    els.dirAdvice.classList.add('opacity-100', 'scale-100');
+                }, 50);
+            } else {
+                els.dirAdvice.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => els.dirAdvice.classList.add('hidden'), 300);
             }
         }
 
-        els.sidebarToggleBtn.addEventListener('click', toggleSidebar);
-        els.sidebarCloseBtn.addEventListener('click', toggleSidebar);
+        // --- Compass Logic (Shortest Path Lerp) ---
+        let targetDegree = 0;
+        let displayDegree = 0;
         
-        // Hide sidebar when clicking outside on mobile
-        els.mainArea.addEventListener('click', (e) => {
-            if (state.sidebarOpen && window.innerWidth <= 768) toggleSidebar();
+        function lerpAngle(start, end, amount) {
+            let difference = Math.abs(end - start);
+            if (difference > 180) {
+                if (end > start) start += 360;
+                else end += 360;
+            }
+            let value = (start + ((end - start) * amount));
+            return (value >= 0 && value < 360) ? value : value % 360;
+        }
+
+        function handleOrientation(event) {
+            if (!state.isCompassActive) return;
+            let compass = event.webkitCompassHeading || Math.abs(event.alpha - 360);
+            if (compass !== null) {
+                targetDegree = compass;
+            }
+        }
+
+        els.compassBtn.addEventListener('click', async () => {
+            if (!state.isCompassActive) {
+                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    try {
+                        const permission = await DeviceOrientationEvent.requestPermission();
+                        if (permission === 'granted') {
+                            window.addEventListener('deviceorientation', handleOrientation);
+                            startCompass();
+                        } else {
+                            alert("ต้องอนุญาตให้เข้าถึงเข็มทิศก่อนครับ");
+                        }
+                    } catch (e) { alert(e); }
+                } else {
+                    window.addEventListener('deviceorientationabsolute', handleOrientation);
+                    startCompass();
+                }
+            } else {
+                stopCompass();
+            }
         });
 
-        window.onload = init3D;
+        function startCompass() {
+            state.isCompassActive = true;
+            els.compassBtn.classList.replace('bg-indigo-600/90', 'bg-red-600/90');
+            els.compassBtn.innerHTML = '<svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg>';
+            els.manualRotationControl.classList.add('hidden'); // Hide manual slider
+        }
+
+        function stopCompass() {
+            state.isCompassActive = false;
+            window.removeEventListener('deviceorientation', handleOrientation);
+            window.removeEventListener('deviceorientationabsolute', handleOrientation);
+            els.compassBtn.classList.replace('bg-red-600/90', 'bg-indigo-600/90');
+            els.compassBtn.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>';
+            els.manualRotationControl.classList.remove('hidden'); // Show manual slider
+            
+            // Sync slider to current stopped position
+            els.manualDegree.value = displayDegree;
+        }
+
+        // Manual Rotation
+        els.manualDegree.addEventListener('input', (e) => {
+            targetDegree = parseFloat(e.target.value);
+            // Instantly snap for slider
+            displayDegree = targetDegree; 
+            if(luopanMesh) luopanMesh.rotation.z = -displayDegree * (Math.PI / 180);
+            updateAdviceBox(displayDegree);
+            state.currentDegree = displayDegree;
+        });
+
+        // --- AR Camera Logic ---
+        const video = document.getElementById('videoBackground');
+        
+        els.arBtn.addEventListener('click', async () => {
+            if (!isARTransparent) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    isARTransparent = true;
+                    els.arBtn.classList.replace('bg-slate-800/90', 'bg-emerald-600/90');
+                    els.arBtn.classList.replace('text-emerald-400', 'text-white');
+                    document.body.style.backgroundColor = 'transparent';
+                    
+                    // Show capture (shutter) button for Image background
+                    els.importImgBtn.querySelector('svg').innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>`;
+                    
+                    updateStatusBadge();
+                } catch(err) { alert("ไม่สามารถเปิดกล้องได้: " + err.message); }
+            } else {
+                const stream = video.srcObject;
+                if (stream) stream.getTracks().forEach(track => track.stop());
+                video.style.display = 'none';
+                isARTransparent = false;
+                els.arBtn.classList.replace('bg-emerald-600/90', 'bg-slate-800/90');
+                els.arBtn.classList.replace('text-white', 'text-emerald-400');
+                document.body.style.backgroundColor = '#020617';
+                
+                // Restore folder icon
+                els.importImgBtn.querySelector('svg').innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>`;
+                
+                updateStatusBadge();
+            }
+            draw2DTexture();
+        });
+
+        // --- Image Upload & Transformation Logic ---
+        function applyUserImage(src) {
+            const textureLoader = new THREE.TextureLoader();
+            textureLoader.load(src, function(tex) {
+                if(userImageMesh) scene.remove(userImageMesh);
+                
+                const aspect = tex.image.width / tex.image.height;
+                // Create plane, size 20 width base
+                const geo = new THREE.PlaneGeometry(20, 20 / aspect);
+                const mat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide });
+                userImageMesh = new THREE.Mesh(geo, mat);
+                
+                // Push it back behind the luopan and grid
+                userImageMesh.position.y = -1; // Y in Threejs coords here is depth due to camera looking down
+                userImageMesh.rotation.x = -Math.PI / 2; // Flat on ground parallel to luopan
+                
+                scene.add(userImageMesh);
+                
+                // Show Edit Button
+                els.editImgBtn.classList.remove('hidden');
+                resetImgTransforms();
+            });
+        }
+
+        els.imageInput.addEventListener('change', (e) => {
+            if(e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (ev) => applyUserImage(ev.target.result);
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        // If in AR mode, clicking the folder button acts as a shutter
+        els.importImgBtn.addEventListener('click', (e) => {
+            if(isARTransparent && video.readyState === video.HAVE_ENOUGH_DATA) {
+                e.preventDefault(); // Stop file picker
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = video.videoWidth;
+                tempCanvas.height = video.videoHeight;
+                tempCanvas.getContext('2d').drawImage(video, 0, 0);
+                applyUserImage(tempCanvas.toDataURL('image/jpeg'));
+                
+                // Auto turn off AR video to show captured image
+                els.arBtn.click();
+            }
+        });
+
+        els.editImgBtn.addEventListener('click', () => {
+            els.imageEditPanel.classList.remove('hidden');
+            // Dim Luopan for better visibility of plan
+            if(luopanMesh) luopanMesh.material.opacity = 0.3;
+        });
+
+        els.closeImageEditBtn.addEventListener('click', () => {
+            els.imageEditPanel.classList.add('hidden');
+            if(luopanMesh) luopanMesh.material.opacity = 1.0;
+        });
+
+        function updateImageTransform() {
+            if(!userImageMesh) return;
+            const sc = parseFloat(els.imgScale.value);
+            const rZ = parseFloat(els.imgRotZ.value);
+            const rX = parseFloat(els.imgRotX.value); // Tilt Y
+            const rY = parseFloat(els.imgRotY.value); // Tilt X
+            const pX = parseFloat(els.imgPosX.value);
+            const pY = parseFloat(els.imgPosY.value);
+
+            userImageMesh.scale.set(sc, sc, sc);
+            // Apply rotations relative to the flat plane
+            userImageMesh.rotation.set(-Math.PI/2 + THREE.MathUtils.degToRad(rX), THREE.MathUtils.degToRad(rY), THREE.MathUtils.degToRad(rZ), 'ZXY');
+            userImageMesh.position.set(pX, -1, -pY); // -pY because in our cam setup, -z is up on screen
+
+            // Update Labels
+            els.valImgScale.innerText = sc.toFixed(2);
+            els.valImgRotZ.innerText = rZ.toFixed(1) + '°';
+            els.valImgRotX.innerText = rX.toFixed(1) + '°';
+            els.valImgRotY.innerText = rY.toFixed(1) + '°';
+            els.valImgPosX.innerText = pX.toFixed(1);
+            els.valImgPosY.innerText = pY.toFixed(1);
+        }
+
+        ['imgScale', 'imgRotZ', 'imgRotX', 'imgRotY', 'imgPosX', 'imgPosY'].forEach(id => {
+            els[id].addEventListener('input', updateImageTransform);
+        });
+
+        function resetImgTransforms() {
+            els.imgScale.value = 1;
+            els.imgRotZ.value = 0;
+            els.imgRotX.value = 0;
+            els.imgRotY.value = 0;
+            els.imgPosX.value = 0;
+            els.imgPosY.value = 0;
+            updateImageTransform();
+        }
+        els.resetImgBtn.addEventListener('click', resetImgTransforms);
+
+        // --- Render Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Flashing Red Box for TIME mode
+            if(!isARTransparent && state.viewMode === 'TIME') {
+                 draw2DTexture(); 
+            }
+
+            if (luopanMesh) {
+                if (state.isCompassActive) {
+                    displayDegree = lerpAngle(displayDegree, targetDegree, 0.15);
+                    luopanMesh.rotation.z = -displayDegree * (Math.PI / 180);
+                    
+                    // Throttle DOM updates for performance
+                    if(Math.abs(state.currentDegree - displayDegree) > 0.5) {
+                        updateAdviceBox(displayDegree);
+                        state.currentDegree = displayDegree;
+                    }
+                }
+            }
+            renderer.render(scene, camera);
+        }
+
+        // Init
+        calculateAll();
+        animate();
     </script>
 </body>
 </html>
