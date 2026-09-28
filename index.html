@@ -12,11 +12,10 @@
         #canvas3dContainer { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
         #uiLayer { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 10; pointer-events: none; }
         .pointer-events-auto { pointer-events: auto; }
-        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass-panel { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .layer-btn.active { background: rgba(30, 41, 59, 0.9); border-color: #d4af37; color: #fde047; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
         input[type="range"] { accent-color: #d4af37; }
         
-        /* Sidebar Smooth Transition */
         #sidebar {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             transform: translateX(-100%);
@@ -34,57 +33,53 @@
             object-fit: cover; z-index: 0; display: none;
         }
 
-        /* Improved Top Margin for Degree Box to touch the rim (Adjusted lower) */
+        /* ปรับกล่องตัวเลของศาและคำแนะนำให้อยู่ชิดขอบบนของจานหล่อแก */
         #degreeDisplay {
-            top: calc(50% - min(39vw, 39vh));
-            transform: translate(-50%, -100%);
+            top: 50%;
+            transform: translate(-50%, calc(-100% - max(42vw, 42vh)));
         }
-        /* Mobile specific adjustment for safe area (Adjusted lower) */
         @media (max-aspect-ratio: 3/4) {
              #degreeDisplay {
-                top: calc(50% - min(43vw, 43vh)); 
+                transform: translate(-50%, calc(-100% - max(46vw, 46vh))); 
+            }
+        }
+        @media (max-aspect-ratio: 9/16) {
+             #degreeDisplay {
+                transform: translate(-50%, calc(-100% - max(48vw, 48vh))); 
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- Camera Background for AR Mode -->
     <video id="videoBackground" autoplay playsinline></video>
-
-    <!-- 3D Canvas -->
     <div id="canvas3dContainer"></div>
 
-    <!-- UI Layer -->
     <div id="uiLayer">
         
-        <!-- Top Left Controls -->
-        <div id="topLeftControls" class="absolute top-20 left-4 z-30 flex flex-col gap-3 pointer-events-none transition-opacity duration-300">
-            <button id="menuBtn" class="pointer-events-auto bg-slate-900/90 border border-slate-700 text-yellow-500 p-3 rounded-xl shadow-lg hover:bg-slate-800 transition-all flex items-center justify-center w-12 h-12">
+        <!-- Top Left Controls (เลื่อนลงมาหลบ Address Bar) -->
+        <div id="topLeftControls" class="absolute top-24 left-4 z-30 flex flex-col gap-4 pointer-events-none transition-opacity duration-300">
+            <button id="menuBtn" class="pointer-events-auto bg-slate-900/95 border-2 border-slate-700 text-yellow-500 p-3 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:bg-slate-800 transition-all flex items-center justify-center w-12 h-12">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
-            <button id="quickLayerBtn" class="pointer-events-auto bg-slate-900/90 border border-slate-700 text-yellow-400 p-3 rounded-xl shadow-lg hover:bg-slate-800 transition-all flex items-center justify-center w-12 h-12" title="สลับหน้าปัดด่วน">
+            <button id="quickLayerBtn" class="pointer-events-auto bg-slate-900/95 border-2 border-indigo-500 text-indigo-400 p-3 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:bg-slate-800 transition-all flex items-center justify-center w-12 h-12" title="สลับโหมดหน้าปัดทั้งหมด">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
             </button>
         </div>
 
-        <!-- Top Right Controls -->
-        <div class="absolute top-20 right-4 z-30 flex flex-col gap-3 pointer-events-auto">
-            <!-- Live Compass Button -->
-            <button id="compassBtn" class="bg-indigo-600/90 text-white p-3 rounded-full shadow-lg border border-indigo-400 hover:bg-indigo-500 transition-all flex items-center justify-center w-12 h-12">
+        <!-- Top Right Controls (เลื่อนลงมาหลบ Address Bar) -->
+        <div class="absolute top-24 right-4 z-30 flex flex-col gap-4 pointer-events-auto">
+            <button id="compassBtn" class="bg-indigo-600/95 text-white p-3 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.5)] border-2 border-indigo-400 hover:bg-indigo-500 transition-all flex items-center justify-center w-12 h-12">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
             </button>
-            <!-- AR Camera Button -->
-            <button id="arBtn" class="bg-slate-800/90 text-emerald-400 p-3 rounded-full shadow-lg border border-slate-600 hover:bg-slate-700 transition-all flex items-center justify-center w-12 h-12">
+            <button id="arBtn" class="bg-slate-800/95 text-emerald-400 p-3 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.5)] border-2 border-slate-600 hover:bg-slate-700 transition-all flex items-center justify-center w-12 h-12">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             </button>
-            <!-- Import Image Button -->
-            <button id="importImgBtn" class="bg-slate-800/90 text-blue-400 p-3 rounded-full shadow-lg border border-slate-600 hover:bg-slate-700 transition-all flex items-center justify-center w-12 h-12 relative overflow-hidden">
+            <button id="importImgBtn" class="bg-slate-800/95 text-blue-400 p-3 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] border-2 border-slate-600 hover:bg-slate-700 transition-all flex items-center justify-center w-12 h-12 relative overflow-hidden">
                 <input type="file" id="imageInput" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
             </button>
-            <!-- Edit Image Button (Hidden initially) -->
-            <button id="editImgBtn" class="hidden bg-yellow-600/90 text-white p-3 rounded-full shadow-lg border border-yellow-400 hover:bg-yellow-500 transition-all flex items-center justify-center w-12 h-12">
+            <button id="editImgBtn" class="hidden bg-yellow-600/95 text-white p-3 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] border-2 border-yellow-400 hover:bg-yellow-500 transition-all flex items-center justify-center w-12 h-12">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
             </button>
         </div>
@@ -102,28 +97,21 @@
 
             <!-- Tab Navigation -->
             <div class="flex border-b border-slate-700/80 bg-slate-900/50">
-                <button class="tab-btn flex-1 py-3 text-[12px] font-medium text-yellow-400 border-b-2 border-yellow-500 transition-colors" data-tab="config">
-                    ⚙️ ตั้งค่า (Config)
-                </button>
-                <button class="tab-btn flex-1 py-3 text-[12px] font-medium text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition-colors" data-tab="analysis">
-                    📊 วิเคราะห์ (Analysis)
-                </button>
+                <button class="tab-btn flex-1 py-3 text-[12px] font-medium text-yellow-400 border-b-2 border-yellow-500 transition-colors" data-tab="config">⚙️ ตั้งค่า (Config)</button>
+                <button class="tab-btn flex-1 py-3 text-[12px] font-medium text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition-colors" data-tab="analysis">📊 วิเคราะห์ (Analysis)</button>
             </div>
 
             <!-- Tab Content: Config -->
             <div id="tab-config" class="p-4 space-y-6 flex-1">
                 
-                <!-- Time Config -->
-                <div class="bg-slate-800/40 rounded-xl p-3 border border-slate-700/50 relative">
+                <div class="bg-slate-800/40 rounded-xl p-3 border border-slate-700/50">
                     <div class="flex justify-between items-center mb-3">
-                        <label class="text-[12px] font-semibold text-yellow-500 flex items-center gap-1.5">
-                            <span class="text-slate-400">🕒</span> กาลเวลาจร (Time)
-                        </label>
+                        <label class="text-[12px] font-semibold text-yellow-500 flex items-center gap-1.5"><span class="text-slate-400">🕒</span> กาลเวลาจร (Time)</label>
                         <button id="setNowBtn" class="text-[10px] bg-blue-600/80 hover:bg-blue-500 text-white px-2 py-1 rounded">ปัจจุบัน</button>
                     </div>
                     <input type="datetime-local" id="targetDate" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:border-yellow-500 focus:outline-none mb-3">
                     
-                    <div class="text-[10px] text-slate-400 mb-1.5 font-medium">เปิดเช็คข้อมูล (ชั้นกาลเวลาจร):</div>
+                    <div class="text-[10px] text-slate-400 mb-1.5 font-medium">เปิดเช็คข้อมูลทิศร้ายกาลเวลา:</div>
                     <div class="grid grid-cols-2 gap-2 text-[11px]">
                         <label class="flex items-center gap-2 bg-slate-900/60 px-2 py-1.5 rounded border border-slate-700"><input type="checkbox" id="togYear" checked class="rounded border-slate-600 bg-slate-800"> <span>ปี (Year)</span></label>
                         <label class="flex items-center gap-2 bg-slate-900/60 px-2 py-1.5 rounded border border-slate-700"><input type="checkbox" id="togMonth" checked class="rounded border-slate-600 bg-slate-800"> <span>เดือน (Month)</span></label>
@@ -132,11 +120,8 @@
                     </div>
                 </div>
 
-                <!-- Person Config -->
                 <div class="bg-slate-800/40 rounded-xl p-3 border border-slate-700/50">
-                    <label class="block text-[12px] font-semibold text-yellow-500 mb-3 flex items-center gap-1.5">
-                        <span class="text-slate-400">👤</span> ข้อมูลบุคคล (Person)
-                    </label>
+                    <label class="block text-[12px] font-semibold text-yellow-500 mb-3 flex items-center gap-1.5"><span class="text-slate-400">👤</span> ข้อมูลบุคคล (Person)</label>
                     <div class="space-y-3">
                         <div>
                             <label class="block text-[10px] text-slate-400 mb-1">วัน/เดือน/ปีเกิด และเวลา</label>
@@ -151,12 +136,11 @@
                         </div>
                         <div class="flex items-center justify-between bg-slate-900/80 px-3 py-2.5 rounded-lg border border-slate-700">
                             <span class="text-[11px] text-slate-300">รหัสบุคคล (Kua Number):</span>
-                            <span id="kuaDisplay" class="text-lg font-bold text-yellow-400 bg-slate-800 w-8 h-8 flex items-center justify-center rounded-full border border-yellow-500/50 shadow-[0_0_10px_rgba(212,175,55,0.2)]">8</span>
+                            <span id="kuaDisplay" class="text-lg font-bold text-yellow-400 bg-slate-800 w-8 h-8 flex items-center justify-center rounded-full border border-yellow-500/50">8</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- View Modes (Exclusive selection) -->
                 <div class="space-y-2 pb-4">
                     <label class="block text-[11px] font-medium text-slate-300 border-b border-slate-700 pb-1">โหมดแสดงผลหน้าปัด (View Mode)</label>
                     <div class="flex flex-col gap-1.5 pt-1">
@@ -169,74 +153,62 @@
 
             <!-- Tab Content: Analysis -->
             <div id="tab-analysis" class="p-4 hidden space-y-4 flex-1">
-                
-                <!-- Time BaZi -->
                 <div class="bg-slate-800/40 rounded-xl p-3 border border-slate-700/50">
                     <h3 class="text-[11px] font-bold text-yellow-400 mb-2 border-b border-slate-700 pb-1">กาลเวลาจร (Time BaZi)</h3>
                     <div class="grid grid-cols-2 gap-1.5 text-[10px]" id="timeBaziPanel"></div>
                 </div>
-
-                <!-- Person BaZi -->
                 <div class="bg-slate-800/40 rounded-xl p-3 border border-slate-700/50">
                     <h3 class="text-[11px] font-bold text-emerald-400 mb-2 border-b border-slate-700 pb-1">ดวงบุคคล (Person BaZi)</h3>
                     <div class="grid grid-cols-2 gap-1.5 text-[10px]" id="personBaziPanel"></div>
                 </div>
-
                 <div class="bg-red-900/20 border border-red-900/50 rounded-xl p-3 mt-4">
-                    <h3 class="text-[12px] font-bold text-red-400 mb-2 flex items-center gap-1.5">
-                        <span>⚠️</span> สรุปทิศร้ายกาลเวลา
-                    </h3>
+                    <h3 class="text-[12px] font-bold text-red-400 mb-2 flex items-center gap-1.5"><span>⚠️</span> สรุปทิศร้ายกาลเวลา</h3>
                     <div id="afflictionSummary" class="text-[10px] text-slate-300 space-y-2"></div>
                 </div>
             </div>
-            
-            <!-- Author signature -->
-            <div class="text-center pb-4 text-[9px] text-slate-600 mt-auto">
-                Luopan 3D Pro - Engine v3.3
-            </div>
         </div>
 
-        <!-- Live Degree Display Box -->
+        <!-- Live Degree Display Box & Advice Box (จัดกลุ่มและดึงลงมาแนบจาน) -->
         <div id="degreeDisplay" class="absolute z-20 flex flex-col items-center pointer-events-none transition-opacity duration-300 w-full left-1/2">
             
-            <!-- Advice Box (Above the degree box) -->
-            <div id="dirAdvice" class="mb-1.5 bg-white/95 backdrop-blur-sm border-2 border-slate-300 rounded-xl px-4 py-2 shadow-[0_10px_25px_rgba(0,0,0,0.5)] text-center w-max max-w-[85vw] transition-all duration-300 pointer-events-auto opacity-0 scale-95 origin-bottom hidden flex flex-col items-center justify-end">
+            <!-- Advice Box -->
+            <div id="dirAdvice" class="mb-2 bg-white/95 backdrop-blur-sm border-2 border-slate-300 rounded-xl px-4 py-2 shadow-[0_10px_25px_rgba(0,0,0,0.5)] text-center w-max max-w-[85vw] transition-all duration-300 pointer-events-auto opacity-0 scale-95 origin-bottom hidden flex flex-col items-center justify-end">
                 <div id="adviceTitle" class="text-black font-bold text-[11px] tracking-wide leading-tight mb-1"></div>
                 <div id="adviceRemedy" class="text-slate-700 text-[10px] leading-tight font-medium"></div>
             </div>
 
-            <!-- Main Black Degree Box -->
-            <div class="bg-slate-900/95 backdrop-blur-md border border-yellow-500/80 rounded-xl px-4 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.8)] text-center relative pointer-events-auto scale-90">
+            <!-- Main Black Degree Box (ลดขนาด 20%) -->
+            <div class="bg-slate-900/95 backdrop-blur-md border border-yellow-500/80 rounded-xl px-3 py-1 shadow-[0_8px_30px_rgba(0,0,0,0.8)] text-center relative pointer-events-auto scale-90">
                 <div class="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-slate-900 border-b border-r border-yellow-500/80 rotate-45"></div>
-                <span id="degreeValue" class="text-yellow-400 font-bold text-lg font-mono relative z-10 drop-shadow-md tracking-wider">0.0°</span>
-                <div id="dirLabel" class="text-slate-300 text-[9px] font-semibold mt-0 relative z-10 uppercase tracking-wider">เหนือ (N)</div>
+                <span id="degreeValue" class="text-yellow-400 font-bold text-base font-mono relative z-10 drop-shadow-md tracking-wider">0.0°</span>
+                <div id="dirLabel" class="text-slate-300 text-[8px] font-semibold mt-0 relative z-10 uppercase tracking-wider">เหนือ (N)</div>
             </div>
         </div>
 
         <!-- Status Badge & Legend (Bottom) -->
         <div class="absolute bottom-[4.5rem] w-full flex justify-center pointer-events-none z-10">
-            <div id="statusBadge" class="bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-2xl px-5 py-3 text-[11px] text-center shadow-[0_10px_30px_rgba(0,0,0,0.8)] font-medium tracking-wide w-[90%] max-w-sm">
-                <!-- Status content injected by JS -->
+            <div id="statusBadge" class="bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-2xl px-5 py-3 text-[11px] text-center shadow-[0_10px_30px_rgba(0,0,0,0.8)] font-medium tracking-wide w-[90%] max-w-sm pointer-events-auto transition-opacity">
+                <!-- Injected by JS -->
             </div>
         </div>
 
         <!-- Manual Rotation Slider -->
         <div id="manualRotationControl" class="absolute bottom-5 w-full px-8 flex flex-col items-center pointer-events-none z-20">
-            <label class="text-[10px] text-yellow-400 mb-1.5 font-medium bg-slate-900/90 px-3 py-1 rounded-full border border-yellow-600/30 shadow-lg pointer-events-auto flex items-center gap-1.5"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg> เลื่อนปรับองศาจานหล่อแกด้วยตนเอง</label>
+            <label class="text-[10px] text-yellow-400 mb-1.5 font-medium bg-slate-900/90 px-3 py-1 rounded-full border border-yellow-600/30 shadow-lg pointer-events-auto flex items-center gap-1.5">👆 เลื่อนปรับองศาจานหล่อแกด้วยตนเอง</label>
             <input type="range" id="manualDegree" min="0" max="360" step="0.1" value="0" class="w-full max-w-md pointer-events-auto bg-slate-700 rounded-lg h-2.5 appearance-none shadow-inner border border-slate-600">
         </div>
 
         <!-- Image Edit Controls Panel -->
         <div id="imageEditPanel" class="hidden absolute bottom-0 left-0 w-full bg-slate-900/95 backdrop-blur-md p-5 rounded-t-3xl z-50 text-slate-200 text-[11px] shadow-[0_-15px_50px_rgba(0,0,0,0.9)] border-t border-slate-700 pointer-events-auto transition-transform">
             <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
-               <span class="font-bold text-yellow-400 text-sm flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg> เครื่องมือปรับแก้ภาพแปลนบ้าน (Perspective)</span>
+               <span class="font-bold text-yellow-400 text-sm flex items-center gap-2">📐 เครื่องมือแก้ภาพเบี้ยว (Perspective)</span>
                <button id="closeImageEditBtn" class="text-white font-bold bg-indigo-600 px-4 py-1.5 rounded-lg hover:bg-indigo-500 shadow-lg">เสร็จสิ้น</button>
             </div>
             <div class="grid grid-cols-2 gap-x-6 gap-y-4">
                 <div><label class="flex justify-between text-yellow-300 font-medium mb-1"><span>ขนาด (Zoom)</span><span id="valImgScale">1.0</span></label><input type="range" id="imgScale" min="0.1" max="5" step="0.05" value="1" class="w-full h-2"></div>
                 <div><label class="flex justify-between text-yellow-300 font-medium mb-1"><span>หมุน (Rotate)</span><span id="valImgRotZ">0°</span></label><input type="range" id="imgRotZ" min="-180" max="180" step="0.5" value="0" class="w-full h-2"></div>
-                <div><label class="flex justify-between text-indigo-300 font-medium mb-1"><span>เบี้ยวซ้าย-ขวา (Tilt X)</span><span id="valImgRotY">0°</span></label><input type="range" id="imgRotY" min="-60" max="60" step="0.5" value="0" class="w-full h-2"></div>
                 <div><label class="flex justify-between text-indigo-300 font-medium mb-1"><span>เบี้ยวบน-ล่าง (Tilt Y)</span><span id="valImgRotX">0°</span></label><input type="range" id="imgRotX" min="-60" max="60" step="0.5" value="0" class="w-full h-2"></div>
+                <div><label class="flex justify-between text-indigo-300 font-medium mb-1"><span>เบี้ยวซ้าย-ขวา (Tilt X)</span><span id="valImgRotY">0°</span></label><input type="range" id="imgRotY" min="-60" max="60" step="0.5" value="0" class="w-full h-2"></div>
                 <div><label class="flex justify-between text-emerald-300 font-medium mb-1"><span>เลื่อนซ้าย-ขวา (Pan X)</span><span id="valImgPosX">0</span></label><input type="range" id="imgPosX" min="-15" max="15" step="0.1" value="0" class="w-full h-2"></div>
                 <div><label class="flex justify-between text-emerald-300 font-medium mb-1"><span>เลื่อนขึ้น-ลง (Pan Y)</span><span id="valImgPosY">0</span></label><input type="range" id="imgPosY" min="-15" max="15" step="0.1" value="0" class="w-full h-2"></div>
             </div>
@@ -244,24 +216,23 @@
                 <button id="resetImgBtn" class="text-[10px] text-slate-400 hover:text-white underline">รีเซ็ตค่าเริ่มต้น (Reset)</button>
             </div>
         </div>
-
     </div>
 
     <script>
         // --- Core Feng Shui Data ---
         const branches = [
-            { branch: '子', p: 'ชวด', el: 'น้ำ', name: 'Zi ชวด', deg: 0 },
-            { branch: '丑', p: 'ฉลู', el: 'ดิน', name: 'Chou ฉลู', deg: 30 },
-            { branch: '寅', p: 'ขาล', el: 'ไม้', name: 'Yin ขาล', deg: 60 },
-            { branch: '卯', p: 'เถาะ', el: 'ไม้', name: 'Mao เถาะ', deg: 90 },
-            { branch: '辰', p: 'มะโรง', el: 'ดิน', name: 'Chen มะโรง', deg: 120 },
-            { branch: '巳', p: 'มะเส็ง', el: 'ไฟ', name: 'Si มะเส็ง', deg: 150 },
-            { branch: '午', p: 'มะเมีย', el: 'ไฟ', name: 'Wu มะเมีย', deg: 180 },
-            { branch: '未', p: 'มะแม', el: 'ดิน', name: 'Wei มะแม', deg: 210 },
-            { branch: '申', p: 'วอก', el: 'ทอง', name: 'Shen วอก', deg: 240 },
-            { branch: '酉', p: 'ระกา', el: 'ทอง', name: 'You ระกา', deg: 270 },
-            { branch: '戌', p: 'จอ', el: 'ดิน', name: 'Xu จอ', deg: 300 },
-            { branch: '亥', p: 'กุน', el: 'น้ำ', name: 'Hai กุน', deg: 330 }
+            { branch: '子', p: 'ชวด', thai: 'ชวด', el: 'น้ำ', name: 'Zi ชวด', deg: 0 },
+            { branch: '丑', p: 'ฉลู', thai: 'ฉลู', el: 'ดิน', name: 'Chou ฉลู', deg: 30 },
+            { branch: '寅', p: 'ขาล', thai: 'ขาล', el: 'ไม้', name: 'Yin ขาล', deg: 60 },
+            { branch: '卯', p: 'เถาะ', thai: 'เถาะ', el: 'ไม้', name: 'Mao เถาะ', deg: 90 },
+            { branch: '辰', p: 'มะโรง', thai: 'มะโรง', el: 'ดิน', name: 'Chen มะโรง', deg: 120 },
+            { branch: '巳', p: 'มะเส็ง', thai: 'มะเส็ง', el: 'ไฟ', name: 'Si มะเส็ง', deg: 150 },
+            { branch: '午', p: 'มะเมีย', thai: 'มะเมีย', el: 'ไฟ', name: 'Wu มะเมีย', deg: 180 },
+            { branch: '未', p: 'มะแม', thai: 'มะแม', el: 'ดิน', name: 'Wei มะแม', deg: 210 },
+            { branch: '申', p: 'วอก', thai: 'วอก', el: 'ทอง', name: 'Shen วอก', deg: 240 },
+            { branch: '酉', p: 'ระกา', thai: 'ระกา', el: 'ทอง', name: 'You ระกา', deg: 270 },
+            { branch: '戌', p: 'จอ', thai: 'จอ', el: 'ดิน', name: 'Xu จอ', deg: 300 },
+            { branch: '亥', p: 'กุน', thai: 'กุน', el: 'น้ำ', name: 'Hai กุน', deg: 330 }
         ];
 
         const mountains24 = [
@@ -287,15 +258,15 @@
         };
 
         const starsInfo = {
-            1: { type: 'good', desc: 'ดาว 1 โชคเสริม ธุรกิจ การเดินทาง ปรับตัว', remedy: 'วางอุปกรณ์ เช่น น้ำพุ, น้ำตก, ตู้ปลา, พัดลม, นาฬิกาลูกตุ้มโลหะ' },
-            2: { type: 'bad', desc: 'ดาว 2 เจ็บป่วย เรื้อรัง ซึมเศร้า แท้งบุตร', remedy: 'แขวนน้ำเต้าทองเหลือง หรือ เหรียญจีน 6 จักรพรรดิ เพื่อสลายพลังร้าย' },
-            3: { type: 'bad', desc: 'ดาว 3 ทะเลาะ คดีความ อารมณ์ร้อน โดนขโมย', remedy: 'สลายพลังด้วย สีแดง เช่น พรม โคมไฟสว่าง ของตกแต่งสีแดง' },
-            4: { type: 'neutral', desc: 'ดาว 4 การศึกษา เสน่ห์ ความรัก', remedy: 'กระตุ้นด้วย ต้นไม้ไผ่กวนอิม 4 ต้น หรือ พู่กันจีน' },
-            5: { type: 'fatal', desc: 'ดาว 5 วิบัติ หายนะ อุบัติเหตุ ล้มละลาย', remedy: 'ห้ามเคาะเจาะทุบ! แขวนระฆังลมโลหะ 6 หลอด หรือเสียงเปียโน' },
-            6: { type: 'neutral', desc: 'ดาว 6 อำนาจ บารมี เลื่อนขั้น', remedy: 'กระตุ้นด้วย ก้อนทอง ดินเผา เซรามิก หรือลูกแก้วคริสตัล' },
-            7: { type: 'bad', desc: 'ดาว 7 โจรภัย แข่งขัน สูญเสีย เลือดตกยางออก', remedy: 'วางอ่างน้ำนิ่งสีฟ้า/ดำ แร่พลอยสีน้ำเงิน เพื่อถ่ายเทพลังร้าย' },
-            8: { type: 'good', desc: 'ดาว 8 โชคลาภปัจจุบัน มั่นคง การเงิน', remedy: 'กระตุ้นด้วย สิ่งเคลื่อนไหว เช่น พัดลม นาฬิกาเดิน น้ำพุ' },
-            9: { type: 'good', desc: 'ดาว 9 โชคลาภอนาคต ชื่อเสียง ยินดี งานแต่ง', remedy: 'กระตุ้นด้วย ต้นไม้สวยงาม โคมไฟสว่าง สิ่งของสีแดง/ม่วง' }
+            1: { type: 'good', desc: 'ดาว 1 โชคเสริม ธุรกิจ ปรับตัว', remedy: 'วางอุปกรณ์น้ำ น้ำพุ นาฬิกาลูกตุ้ม' },
+            2: { type: 'bad', desc: 'ดาว 2 เจ็บป่วย เรื้อรัง ซึมเศร้า', remedy: 'แขวนน้ำเต้า หรือเหรียญ 6 จักรพรรดิ' },
+            3: { type: 'bad', desc: 'ดาว 3 ทะเลาะ คดีความ โดนขโมย', remedy: 'สลายพลังด้วย สีแดง โคมไฟ พรมแดง' },
+            4: { type: 'neutral', desc: 'ดาว 4 การศึกษา เสน่ห์ ความรัก', remedy: 'กระตุ้นด้วย ต้นไผ่กวนอิม หรือพู่กันจีน' },
+            5: { type: 'fatal', desc: 'ดาว 5 วิบัติ หายนะ อุบัติเหตุ', remedy: 'ห้ามเคาะเจาะทุบ! แขวนระฆังลมโลหะ 6 หลอด' },
+            6: { type: 'neutral', desc: 'ดาว 6 อำนาจ บารมี เลื่อนขั้น', remedy: 'กระตุ้นด้วย เซรามิก ดินเผา หรือลูกแก้ว' },
+            7: { type: 'bad', desc: 'ดาว 7 โจรภัย แข่งขัน เสียเลือด', remedy: 'วางอ่างน้ำนิ่งสีฟ้า/ดำ แร่พลอยสีน้ำเงิน' },
+            8: { type: 'good', desc: 'ดาว 8 โชคลาภปัจจุบัน มั่นคง', remedy: 'กระตุ้นด้วย สิ่งเคลื่อนไหว พัดลม น้ำพุ' },
+            9: { type: 'good', desc: 'ดาว 9 โชคลาภอนาคต ชื่อเสียง ยินดี', remedy: 'กระตุ้นด้วย ต้นไม้ โคมไฟสว่าง สิ่งของสีแดง' }
         };
 
         // --- State Management ---
@@ -304,6 +275,7 @@
             birthDate: new Date(1981, 5, 25, 10, 16),
             gender: 'F',
             viewMode: 'TIME', 
+            is64GuaMode: false,
             toggles: { year: true, month: true, day: true, hour: true },
             calc: { timeBazi: {}, personBazi: {}, afflictions: {}, stars: {}, kua: 8, auspiciousDirs: [], inauspiciousDirs: [] },
             isCompassActive: false,
@@ -342,16 +314,12 @@
             closeSidebarBtn: document.getElementById('closeSidebarBtn'),
             tabBtns: document.querySelectorAll('.tab-btn'),
             topLeftControls: document.getElementById('topLeftControls'),
-            
-            // Image edit UI
             importImgBtn: document.getElementById('importImgBtn'),
             imageInput: document.getElementById('imageInput'),
             editImgBtn: document.getElementById('editImgBtn'),
             imageEditPanel: document.getElementById('imageEditPanel'),
             closeImageEditBtn: document.getElementById('closeImageEditBtn'),
             resetImgBtn: document.getElementById('resetImgBtn'),
-            
-            // Image Sliders
             imgScale: document.getElementById('imgScale'),
             imgRotZ: document.getElementById('imgRotZ'),
             imgRotY: document.getElementById('imgRotY'),
@@ -366,7 +334,6 @@
             valImgPosY: document.getElementById('valImgPosY')
         };
 
-        // Initialize Dates
         const tzOffset = (new Date()).getTimezoneOffset() * 60000;
         els.targetDate.value = (new Date(Date.now() - tzOffset)).toISOString().slice(0, 16);
         els.birthDate.value = (new Date(state.birthDate - tzOffset)).toISOString().slice(0, 16);
@@ -379,41 +346,46 @@
 
         function updateStatusBadge() {
             if (isARTransparent) {
-                els.statusBadge.parentElement.style.display = 'none';
+                els.statusBadge.style.opacity = '0';
+                setTimeout(() => { els.statusBadge.parentElement.style.display = 'none'; }, 300);
                 return;
             } else {
                 els.statusBadge.parentElement.style.display = 'flex';
+                els.statusBadge.style.opacity = '1';
             }
 
             let modeName = "";
             let legendHtml = "";
             let activeDetails = [];
-            let activeText = "";
             
             if (state.calc && state.calc.timeBazi) {
-                if (state.toggles.year && state.calc.timeBazi.year !== undefined) activeDetails.push(`ปี${branches[state.calc.timeBazi.year].p}`);
-                if (state.toggles.month && state.calc.timeBazi.month !== undefined) activeDetails.push(`เดือน${branches[state.calc.timeBazi.month].p}`);
-                if (state.toggles.day && state.calc.timeBazi.day !== undefined) activeDetails.push(`วัน${branches[state.calc.timeBazi.day].p}`);
-                if (state.toggles.hour && state.calc.timeBazi.hour !== undefined) activeDetails.push(`ยาม${branches[state.calc.timeBazi.hour].p}`);
+                if (state.toggles.year && state.calc.timeBazi.year !== undefined) activeDetails.push(`ปี${branches[state.calc.timeBazi.year].thai}`);
+                if (state.toggles.month && state.calc.timeBazi.month !== undefined) activeDetails.push(`เดือน${branches[state.calc.timeBazi.month].thai}`);
+                if (state.toggles.day && state.calc.timeBazi.day !== undefined) activeDetails.push(`วัน${branches[state.calc.timeBazi.day].thai}`);
+                if (state.toggles.hour && state.calc.timeBazi.hour !== undefined) activeDetails.push(`ยาม${branches[state.calc.timeBazi.hour].thai}`);
             }
-            activeText = activeDetails.length > 0 ? `(เช็ค: ${activeDetails.join(', ')})` : '(ปิดการเช็คกาลเวลา)';
+            let activeText = activeDetails.length > 0 ? `(เช็ค: ${activeDetails.join(', ')})` : '(ปิดการเช็คกาลเวลา)';
 
-            if (state.viewMode === 'KUA') {
-                modeName = `<span class="text-yellow-400">โหมด:<br>แสดงเฉพาะทิศมงคลบุคคล</span>`;
+            if (state.is64GuaMode) {
+                modeName = `<span class="text-indigo-400 font-bold text-[13px]">📍 กำลังแสดง: ผัง 64 ข่วย (Xuan Kong Da Gua)</span>`;
+                legendHtml = `<div class="text-[10px] text-slate-300 mt-1">ใช้สำหรับการวิเคราะห์ระบบไตรลักษณ์วงนอก 64 วงใน 8</div>`;
+            } 
+            else if (state.viewMode === 'KUA') {
+                modeName = `<span class="text-yellow-400">โหมด: แสดงเฉพาะทิศมงคลบุคคล</span>`;
                 legendHtml = `<div class="flex justify-center gap-5 mt-2 pt-1.5 border-t border-slate-700/80">
-                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 border border-slate-900"></span>ทิศมงคล</span>
-                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 border border-slate-900"></span>ทิศร้าย</span>
+                    <span class="flex items-center gap-1.5 text-emerald-400"><span class="w-3 h-3 border border-emerald-500 bg-emerald-500/20 rounded-sm"></span>กรอบทิศมงคล</span>
+                    <span class="flex items-center gap-1.5 text-red-400"><span class="w-3 h-3 border border-red-500 bg-red-500/20 rounded-sm"></span>กรอบทิศร้าย</span>
                 </div>`;
             }
             else if (state.viewMode === 'TIME') {
-                modeName = `<span class="text-yellow-400">โหมด:<br>แสดงทิศร้ายกาลเวลา</span><br><span class="text-[10px] text-slate-300 font-normal mt-0.5 block">${activeText}</span>`;
+                modeName = `<span class="text-yellow-400">โหมด: แสดงทิศร้ายกาลเวลา</span><br><span class="text-[10px] text-slate-300 font-normal mt-0.5 block">${activeText}</span>`;
                 legendHtml = `<div class="flex justify-center gap-4 mt-2 pt-1.5 border-t border-slate-700/80">
-                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-red-600 rounded-sm"></span>ทิศแตก (ชง)</span>
-                    <span class="flex items-center gap-1.5"><span class="w-4 h-1.5 bg-orange-500 rounded-full"></span>ทิศอสูร (เส้นขอบ)</span>
+                    <span class="flex items-center gap-1.5 text-red-400"><span class="w-3 h-3 bg-red-600 rounded-sm"></span>ทิศแตก (ชง)</span>
+                    <span class="flex items-center gap-1.5 text-orange-400"><span class="w-4 h-1.5 bg-orange-500 rounded-full"></span>ทิศอสูร (เส้นขอบ)</span>
                 </div>`;
             }
             else if (state.viewMode === 'STARS') {
-                modeName = `<span class="text-yellow-400">โหมด:<br>ดาวเหินประจำปี</span><br><span class="text-[10px] text-slate-300 font-normal mt-0.5 block">(อิงจากปี: ${state.date.getFullYear()})</span>`;
+                modeName = `<span class="text-yellow-400">โหมด: ดาวเหินประจำปี</span><br><span class="text-[10px] text-slate-300 font-normal mt-0.5 block">(อิงจากปีปฏิทิน: ${state.date.getFullYear()})</span>`;
                 legendHtml = `<div class="flex justify-center gap-4 mt-2 pt-1.5 border-t border-slate-700/80 text-[10px]">
                     <span class="flex items-center gap-1 text-emerald-400">⭐มงคล</span>
                     <span class="flex items-center gap-1 text-red-400">⭐ร้าย</span>
@@ -444,12 +416,11 @@
             state.birthDate = new Date(els.birthDate.value);
             state.gender = els.gender.value;
             
-            // 1. Time BaZi (For afflictions & stars)
+            // แยกตรรกะ กาลเวลา และ บุคคล ชัดเจน
             state.calc.timeBazi = getPillars(state.date);
-            // 2. Person BaZi (For personal data display only)
             state.calc.personBazi = getPillars(state.birthDate);
 
-            // 3. Kua Number (from birthDate)
+            // Kua จาก birthDate
             const by = state.birthDate.getFullYear();
             let sum = by.toString().split('').reduce((a, b) => a + parseInt(b), 0);
             while (sum > 9) sum = sum.toString().split('').reduce((a, b) => a + parseInt(b), 0);
@@ -465,7 +436,7 @@
             state.calc.auspiciousDirs = dirGroups[group];
             state.calc.inauspiciousDirs = dirGroups[group === 'east' ? 'west' : 'east'];
 
-            // 4. Afflictions (Time)
+            // Afflictions (Time)
             const getAffliction = (branchIdx) => {
                 const clash = (branchIdx + 6) % 12;
                 const trines = [[8,0,4], [11,3,7], [2,6,10], [5,9,1]];
@@ -481,7 +452,7 @@
                 state.calc.afflictions[p] = getAffliction(state.calc.timeBazi[p]);
             });
 
-            // 5. Flying Stars (Based on target date)
+            // Flying Stars (Target date)
             const baseYear = 2024;
             const baseStar = 3; 
             const diff = state.date.getFullYear() - baseYear;
@@ -504,35 +475,32 @@
         }
 
         function updateUI() {
-            const formatPillar = (b) => `<div class="bg-slate-900 border border-slate-700 rounded px-2 py-1 flex justify-between items-center"><span class="text-slate-400 mr-2"></span><span class="font-medium text-white">${branches[b].name}</span></div>`;
+            const formatPillar = (b) => `<div class="bg-slate-900 border border-slate-700 rounded px-2 py-1 flex justify-between items-center"><span class="font-medium text-white">${branches[b].thai} (${branches[b].name.split(' ')[0]})</span></div>`;
             
-            // Update Time BaZi panel
             els.timeBaziPanel.innerHTML = `
-                ${formatPillar(state.calc.timeBazi.year).replace('<span>', '<span class="text-slate-400 mr-2">ปี:</span>')}
-                ${formatPillar(state.calc.timeBazi.month).replace('<span>', '<span class="text-slate-400 mr-2">เดือน:</span>')}
-                ${formatPillar(state.calc.timeBazi.day).replace('<span>', '<span class="text-slate-400 mr-2">วัน:</span>')}
-                ${formatPillar(state.calc.timeBazi.hour).replace('<span>', '<span class="text-slate-400 mr-2">ยาม:</span>')}
+                <div class="flex items-center"><span class="text-slate-400 mr-2">ปี:</span>${formatPillar(state.calc.timeBazi.year)}</div>
+                <div class="flex items-center"><span class="text-slate-400 mr-2">เดือน:</span>${formatPillar(state.calc.timeBazi.month)}</div>
+                <div class="flex items-center"><span class="text-slate-400 mr-2">วัน:</span>${formatPillar(state.calc.timeBazi.day)}</div>
+                <div class="flex items-center"><span class="text-slate-400 mr-2">ยาม:</span>${formatPillar(state.calc.timeBazi.hour)}</div>
             `;
-
-            // Update Person BaZi panel
             els.personBaziPanel.innerHTML = `
-                ${formatPillar(state.calc.personBazi.year).replace('<span>', '<span class="text-slate-400 mr-2">ปี:</span>')}
-                ${formatPillar(state.calc.personBazi.month).replace('<span>', '<span class="text-slate-400 mr-2">เดือน:</span>')}
-                ${formatPillar(state.calc.personBazi.day).replace('<span>', '<span class="text-slate-400 mr-2">วัน:</span>')}
-                ${formatPillar(state.calc.personBazi.hour).replace('<span>', '<span class="text-slate-400 mr-2">ยาม:</span>')}
+                <div class="flex items-center"><span class="text-slate-400 mr-2">ปี:</span>${formatPillar(state.calc.personBazi.year)}</div>
+                <div class="flex items-center"><span class="text-slate-400 mr-2">เดือน:</span>${formatPillar(state.calc.personBazi.month)}</div>
+                <div class="flex items-center"><span class="text-slate-400 mr-2">วัน:</span>${formatPillar(state.calc.personBazi.day)}</div>
+                <div class="flex items-center"><span class="text-slate-400 mr-2">ยาม:</span>${formatPillar(state.calc.personBazi.hour)}</div>
             `;
 
             let sumHtml = '';
             Object.keys(state.toggles).forEach(k => {
                 if (!state.toggles[k]) return;
                 const aff = state.calc.afflictions[k];
-                const bName = branches[state.calc.timeBazi[k]].p; 
                 const label = k==='year'?'ปี':k==='month'?'เดือน':k==='day'?'วัน':'ยาม';
+                const bName = branches[state.calc.timeBazi[k]].thai; 
                 sumHtml += `
                     <div class="border-b border-red-900/30 pb-1 mb-1">
                         <span class="text-red-400 font-bold">▲ คำเตือน ทิศร้าย ${label}${bName}</span><br>
-                        <span class="text-red-300">ทิศแตก (ชง):</span> ${branches[aff.clash].p} (${branches[aff.clash].name.split(' ')[0]}) | 
-                        <span class="text-orange-400">ทิศอสูร:</span> ${aff.ssName}
+                        <span class="text-red-300">ทิศแตก (ชง):</span> ทิศ${branches[aff.clash].thai}<br>
+                        <span class="text-orange-400">ทิศอสูร:</span> ฝั่งทิศ${aff.ssName}
                     </div>
                 `;
             });
@@ -544,31 +512,65 @@
                 els.layerBtns.forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
                 state.viewMode = e.target.getAttribute('data-layer');
+                state.is64GuaMode = false; // ยกเลิกโหมด 64 Gua ถากดปุ่มโหมดปกติ
+                
+                // รีเซ็ตสีปุ่มสลับหน้าปัดด้านนอก
+                els.quickLayerBtn.classList.replace('border-yellow-500', 'border-indigo-500');
+                els.quickLayerBtn.classList.replace('text-yellow-400', 'text-indigo-400');
+
                 updateStatusBadge();
                 if(!isARTransparent) draw2DTexture();
                 updateAdviceBox(state.currentDegree);
             });
         });
 
+        els.quickLayerBtn.addEventListener('click', () => {
+            // เช็คสถานะปัจจุบัน แล้วเปลี่ยนเป็นหน้าปัดถัดไป
+            if (state.is64GuaMode) {
+                state.is64GuaMode = false;
+                state.viewMode = 'TIME';
+            } else if (state.viewMode === 'TIME') {
+                state.viewMode = 'KUA';
+            } else if (state.viewMode === 'KUA') {
+                state.viewMode = 'STARS';
+            } else if (state.viewMode === 'STARS') {
+                state.is64GuaMode = true;
+            }
+
+            // อัปเดตไฮไลท์ปุ่มในเมนูด้านซ้ายให้ตรงกับโหมดปัจจุบัน
+            els.layerBtns.forEach(b => {
+                b.classList.remove('active');
+                if (!state.is64GuaMode && b.getAttribute('data-layer') === state.viewMode) {
+                    b.classList.add('active');
+                }
+            });
+
+            updateStatusBadge();
+            if(!isARTransparent) draw2DTexture();
+            updateAdviceBox(state.currentDegree);
+            
+            // เปลี่ยนสีปุ่มให้รู้ว่าเป็น 64 ข่วย
+            if(state.is64GuaMode) {
+                els.quickLayerBtn.classList.replace('border-indigo-500', 'border-yellow-500');
+                els.quickLayerBtn.classList.replace('text-indigo-400', 'text-yellow-400');
+            } else {
+                els.quickLayerBtn.classList.replace('border-yellow-500', 'border-indigo-500');
+                els.quickLayerBtn.classList.replace('text-yellow-400', 'text-indigo-400');
+            }
+        });
+
         els.tabBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                els.tabBtns.forEach(b => {
-                    b.classList.remove('text-yellow-400', 'border-yellow-500');
-                    b.classList.add('text-slate-400', 'border-transparent');
-                });
-                e.target.classList.remove('text-slate-400', 'border-transparent');
-                e.target.classList.add('text-yellow-400', 'border-yellow-500');
-                
-                document.getElementById('tab-config').classList.add('hidden');
-                document.getElementById('tab-analysis').classList.add('hidden');
+                els.tabBtns.forEach(b => { b.classList.remove('text-yellow-400', 'border-yellow-500'); b.classList.add('text-slate-400', 'border-transparent'); });
+                e.target.classList.remove('text-slate-400', 'border-transparent'); e.target.classList.add('text-yellow-400', 'border-yellow-500');
+                document.getElementById('tab-config').classList.add('hidden'); document.getElementById('tab-analysis').classList.add('hidden');
                 document.getElementById(`tab-${e.target.getAttribute('data-tab')}`).classList.remove('hidden');
             });
         });
 
-        // Sidebar Open/Close Logic (with clean hide)
         els.menuBtn.addEventListener('click', () => {
             els.sidebar.classList.add('open');
-            els.topLeftControls.style.opacity = '0'; // Soft hide
+            els.topLeftControls.style.opacity = '0';
             setTimeout(() => { els.topLeftControls.style.pointerEvents = 'none'; }, 300);
         });
 
@@ -578,20 +580,10 @@
             setTimeout(() => { els.topLeftControls.style.opacity = '1'; }, 100);
         });
 
-        const modeOrder = ['TIME', 'KUA', 'STARS'];
-        els.quickLayerBtn.addEventListener('click', () => {
-            let currentIndex = modeOrder.indexOf(state.viewMode);
-            let nextIndex = (currentIndex + 1) % modeOrder.length;
-            let nextMode = modeOrder[nextIndex];
-            const targetBtn = Array.from(els.layerBtns).find(b => b.getAttribute('data-layer') === nextMode);
-            if(targetBtn) targetBtn.click();
-        });
-
         ['togYear', 'togMonth', 'togDay', 'togHour'].forEach(id => {
             els[id].addEventListener('change', (e) => {
                 state.toggles[id.replace('tog', '').toLowerCase()] = e.target.checked;
-                updateUI();
-                updateStatusBadge();
+                updateUI(); updateStatusBadge();
                 if(!isARTransparent) draw2DTexture();
                 updateAdviceBox(state.currentDegree);
             });
@@ -602,30 +594,26 @@
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         
-        // Fix for blurriness on mobile: force exact pixel ratio
-        renderer.setPixelRatio(window.devicePixelRatio); 
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Lock ratio for sharp edges without overloading
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('canvas3dContainer').appendChild(renderer.domElement);
 
         const canvas2d = document.createElement('canvas');
         const ctx = canvas2d.getContext('2d');
-        const texSize = 3072; // High resolution for sharp text
+        const texSize = 4096; // 4K Texture for maximum sharpness on mobile
         canvas2d.width = texSize; canvas2d.height = texSize;
         const texture = new THREE.CanvasTexture(canvas2d);
         texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
         texture.minFilter = THREE.LinearMipmapLinearFilter;
         texture.magFilter = THREE.LinearFilter;
 
-        // Use RingGeometry so AR mode is hollow in the middle
-        const outerRadius = 5;
-        const innerRadius = 0.05; 
-        const geometry = new THREE.RingGeometry(innerRadius, outerRadius, 64);
+        const outerRadius = 5; const innerRadius = 0.05; 
+        const geometry = new THREE.RingGeometry(innerRadius, outerRadius, 128); // higher poly for smooth circle
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide });
         const luopanMesh = new THREE.Mesh(geometry, material);
         luopanMesh.rotation.x = -Math.PI / 2;
         scene.add(luopanMesh);
 
-        // Center Crosshair (Red)
         const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 2, transparent: true, opacity: 0.6 });
         const lineGeo = new THREE.BufferGeometry().setFromPoints([
             new THREE.Vector3(0, -5, 0.05), new THREE.Vector3(0, 5, 0.05),
@@ -635,11 +623,10 @@
         crosshair.rotation.x = -Math.PI / 2;
         scene.add(crosshair);
         
-        const centerRingGeo = new THREE.RingGeometry(0.3, 0.35, 32);
+        const centerRingGeo = new THREE.RingGeometry(0.3, 0.35, 64);
         const centerRingMat = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
         const centerRing = new THREE.Mesh(centerRingGeo, centerRingMat);
-        centerRing.rotation.x = -Math.PI / 2;
-        centerRing.position.y = 0.05;
+        centerRing.rotation.x = -Math.PI / 2; centerRing.position.y = 0.05;
         scene.add(centerRing);
 
         let userImageMesh = null;
@@ -652,28 +639,25 @@
             camera.aspect = aspect;
             const fovRad = (camera.fov / 2) * (Math.PI / 180);
             
-            // Dynamic safe radius to prevent cutoff on tall screens (S23 Ultra fix)
-            const safeRadius = aspect < 0.5 ? 8.2 : 6.2; 
+            // Adjust Safe Radius for S23 Ultra (Tall Screen)
+            let safeRadius = 5.2;
+            if (aspect < 0.45) safeRadius = 6.8; 
+            else if (aspect < 0.6) safeRadius = 5.8;
             
-            camera.position.set(0, aspect < 1 ? (safeRadius / aspect) / Math.tan(fovRad) : safeRadius / Math.tan(fovRad), 0);
+            camera.position.set(0, (safeRadius / aspect) / Math.tan(fovRad), 0);
             camera.lookAt(0, 0, 0);
             camera.updateProjectionMatrix();
             renderer.setSize(width, height);
         }
-
         window.addEventListener('resize', onWindowResize);
         onWindowResize();
 
         function draw2DTexture() {
-            const size = texSize;
-            const cx = size / 2;
-            const cy = size / 2;
+            const size = texSize; const cx = size / 2; const cy = size / 2;
             ctx.clearRect(0, 0, size, size);
 
-            const rTicks = size * 0.48;
-            const rBrn = size * 0.38;
-            const rDir = size * 0.28;
-            const rStar = size * 0.16;
+            const rTicks = size * 0.48; const rBrn = size * 0.38; 
+            const rDir = size * 0.28; const rStar = size * 0.16; 
             const rTai = size * 0.08;
 
             ctx.save();
@@ -690,14 +674,9 @@
 
             const drawTxt = (txt, radius, deg, color, font, outline = 'transparent', lw = 2) => {
                 ctx.save();
-                ctx.rotate((deg - 90) * Math.PI / 180);
-                ctx.translate(radius, 0);
-                ctx.rotate(Math.PI / 2); 
-                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                ctx.font = font;
-                if(outline !== 'transparent') {
-                    ctx.strokeStyle = outline; ctx.lineWidth = lw; ctx.lineJoin = 'round'; ctx.strokeText(txt, 0, 0);
-                }
+                ctx.rotate((deg - 90) * Math.PI / 180); ctx.translate(radius, 0); ctx.rotate(Math.PI / 2); 
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = font;
+                if(outline !== 'transparent') { ctx.strokeStyle = outline; ctx.lineWidth = lw; ctx.lineJoin = 'round'; ctx.strokeText(txt, 0, 0); }
                 ctx.fillStyle = color; ctx.fillText(txt, 0, 0);
                 ctx.restore();
             };
@@ -706,91 +685,101 @@
             const innerFontSize = baseFontSize * 0.5;
 
             if (isARTransparent) {
-                // AR Mode: Completely transparent, only red outer text
-                mountains24.forEach(m => {
-                    const txt = m.name.split(' ');
-                    drawTxt(txt[0], rBrn + (rTicks - rBrn) * 0.7, m.deg, '#ff0000', `900 ${baseFontSize * 1.1}px Arial`, '#ffffff', 8);
-                    drawTxt(txt[1], rBrn + (rTicks - rBrn) * 0.35, m.deg, '#ff0000', `900 ${baseFontSize * 1.4}px Prompt`, '#ffffff', 10);
-                });
+                // AR Mode: Hollow center, text only
+                if(state.is64GuaMode) {
+                     for(let i = 0; i < 64; i++) {
+                        let hexagramUnicode = String.fromCharCode(0x4DC0 + i);
+                        drawTxt(hexagramUnicode, rBrn + (rTicks - rBrn) * 0.5, i*(360/64) + (360/128), '#ff0000', `900 ${baseFontSize * 1.5}px Arial`, '#ffffff', 8);
+                     }
+                } else {
+                     mountains24.forEach(m => {
+                        const txt = m.name.split(' ');
+                        drawTxt(txt[0], rBrn + (rTicks - rBrn) * 0.7, m.deg, '#ff0000', `900 ${baseFontSize * 1.1}px Arial`, '#ffffff', 8);
+                        drawTxt(txt[1], rBrn + (rTicks - rBrn) * 0.35, m.deg, '#ff0000', `900 ${baseFontSize * 1.4}px Prompt`, '#ffffff', 10);
+                    });
+                }
+
+            } else if (state.is64GuaMode) {
+                // --- 64 Gua Plate Design (Clean & Dark) ---
+                ctx.beginPath(); ctx.arc(0,0, rTicks, 0, 2*Math.PI); ctx.fillStyle = '#0a0f1d'; ctx.fill();
+                const ringColor = 'rgba(212,175,55,0.4)';
+                
+                // Outer 64 Rings
+                for(let i = 0; i < 64; i++) {
+                    drawSeg(rDir, rTicks, i*(360/64), (i+1)*(360/64), 'transparent', ringColor, 1.5);
+                    let hexagramUnicode = String.fromCharCode(0x4DC0 + i);
+                    drawTxt(hexagramUnicode, rDir + (rTicks-rDir)*0.6, i*(360/64) + (360/128), '#fcd34d', `900 ${baseFontSize*1.5}px Arial`, 'transparent');
+                }
+                // Inner 8 Rings
+                const trigrams = ['☰', '☴', '☵', '☶', '☷', '☳', '☲', '☱'];
+                for(let i = 0; i < 8; i++) {
+                    drawSeg(rStar, rDir, i*45-22.5, i*45+22.5, 'transparent', ringColor, 2);
+                    drawTxt(trigrams[i], rStar + (rDir-rStar)*0.5, i*45, '#d4af37', `900 ${baseFontSize*2}px Arial`, 'transparent');
+                }
+                drawSeg(rTai, rStar, 0, 360, 'transparent', ringColor, 2);
+
+                // Add huge text in the middle indicating 64 Gua mode (just outside Taiji)
+                drawTxt("ผัง 64 ข่วย", rTai * 1.5, 0, '#ffffff', `600 ${baseFontSize*0.6}px Prompt`, 'rgba(0,0,0,0.8)', 6);
 
             } else {
-                // Normal Mode: Clean UI with Borders and Highlights
-
-                // Base Background (Dark Slate)
-                ctx.beginPath();
-                ctx.arc(0,0, rTicks, 0, 2*Math.PI);
-                ctx.fillStyle = '#0a0f1d';
-                ctx.fill();
-
-                // Draw Grid (Gold)
+                // --- Normal Mode (Clean 24 Mountains UI) ---
+                ctx.beginPath(); ctx.arc(0,0, rTicks, 0, 2*Math.PI); ctx.fillStyle = '#0a0f1d'; ctx.fill();
                 const ringColor = 'rgba(212,175,55,0.4)';
+                
                 for(let i = 0; i < 24; i++) drawSeg(rBrn, rTicks, i*15-7.5, i*15+7.5, 'transparent', ringColor, 2);
                 for(let i = 0; i < 12; i++) drawSeg(rDir, rBrn, i*30-15, i*30+15, 'transparent', ringColor, 2);
                 for(let i = 0; i < 8; i++) drawSeg(rStar, rDir, i*45-22.5, i*45+22.5, 'transparent', ringColor, 2);
                 drawSeg(rTai, rStar, 0, 360, 'transparent', ringColor, 2); 
                 
                 const vm = state.viewMode;
-
-                // --- Base Data Structures for Afflictions ---
-                const activeSuiPos = [];
-                let activeSanShas = [];
+                const activeSuiPos = []; let activeSanShas = [];
                 if (vm === 'TIME') {
                     Object.keys(state.toggles).filter(k => state.toggles[k]).forEach(p => {
                         const aff = state.calc.afflictions[p];
-                        activeSuiPos.push({ branch: aff.clash, p: p });
-                        activeSanShas.push(aff);
+                        activeSuiPos.push({ branch: aff.clash, p: p }); activeSanShas.push(aff);
                     });
                 }
 
-                // --- Render 24 Mountains ---
+                // Render 24 Mountains
                 mountains24.forEach((m, i) => {
                     const txt = m.name.split(' ');
-                    drawTxt(txt[0], rBrn + (rTicks - rBrn) * 0.70, m.deg, '#fcd34d', `bold ${baseFontSize * 0.65}px Arial`, 'transparent');
+                    drawTxt(txt[0], rBrn + (rTicks - rBrn) * 0.70, m.deg, '#cbd5e1', `bold ${baseFontSize * 0.65}px Arial`, 'transparent');
                     drawTxt(txt[1], rBrn + (rTicks - rBrn) * 0.35, m.deg, '#ffffff', `600 ${baseFontSize * 0.9}px Prompt`, 'transparent');
                 });
 
-                // --- Render 12 Branches (Inner Ring) ---
+                // Render 12 Branches (Sui Po Flashing here only)
                 for (let i = 0; i < 12; i++) {
                     const clashData = activeSuiPos.filter(a => a.branch === i);
-                    // Sui Po Highlight (Flashing Red Box just for this cell)
                     if (clashData.length > 0 && vm === 'TIME') {
-                        const pulse = 0.5 + Math.sin(Date.now() / 200) * 0.4;
+                        const pulse = 0.5 + Math.sin(Date.now() / 150) * 0.4;
                         const branchBgColor = `rgba(239, 68, 68, ${pulse})`; 
-                        drawSeg(rDir, rBrn, i*30-15, i*30+15, branchBgColor, '#ef4444', 4);
+                        drawSeg(rDir, rBrn, i*30-15, i*30+15, branchBgColor, '#ef4444', 4); // Red Flash
                     }
-                    
-                    drawTxt(branches[i].branch, rDir + (rBrn - rDir) * 0.70, i * 30, '#ffffff', `bold ${innerFontSize * 1.3}px Arial`, 'rgba(0,0,0,0.8)', 4);
-                    drawTxt(branches[i].name.split(' ')[0], rDir + (rBrn - rDir) * 0.35, i * 30, '#ffffff', `600 ${innerFontSize * 2.3}px Prompt`, 'rgba(0,0,0,0.8)', 4);
+                    drawTxt(branches[i].branch, rDir + (rBrn - rDir) * 0.70, i * 30, '#ffffff', `bold ${innerFontSize * 1.3}px Arial`, 'transparent');
+                    drawTxt(branches[i].name.split(' ')[0], rDir + (rBrn - rDir) * 0.35, i * 30, '#ffffff', `600 ${innerFontSize * 2.3}px Prompt`, 'transparent');
                 }
 
-                // --- Render 8 Directions (KUA Mode logic) ---
+                // Render 8 Directions (KUA Borders)
                 Object.keys(dirs8).forEach(k => {
                     const d = dirs8[k];
                     let mid = (d.start + d.end) / 2; if (d.start > d.end) mid = (d.start + d.end + 360) / 2;
-                    
-                    let engColor = '#d4af37';
-                    let thColor = '#cbd5e1';
+                    let engColor = '#d4af37'; let thColor = '#94a3b8';
                     
                     if (vm === 'KUA') {
                         if (state.calc.auspiciousDirs.includes(k)) {
                             engColor = '#10b981'; thColor = '#10b981'; 
-                            // Add soft background and border
                             drawSeg(rStar, rDir, d.start, d.end, 'rgba(16, 185, 129, 0.15)', '#10b981', 3);
                         } else if (state.calc.inauspiciousDirs.includes(k)) {
                             engColor = '#ef4444'; thColor = '#ef4444'; 
-                            // Add soft background and border
                             drawSeg(rStar, rDir, d.start, d.end, 'rgba(239, 68, 68, 0.15)', '#ef4444', 3);
                         }
                     }
-
-                    drawTxt(k, rStar + (rDir - rStar) * 0.72, mid, engColor, `900 ${innerFontSize * 1.75}px Arial`, 'rgba(0,0,0,0.9)', 4);
-                    
-                    const isLong = d.name.length > 7;
-                    const thSize = isLong ? innerFontSize * 1.15 : innerFontSize * 1.6;
-                    drawTxt(d.name, rStar + (rDir - rStar) * 0.28, mid, thColor, `500 ${thSize}px Prompt`, 'rgba(0,0,0,0.9)', 4);
+                    drawTxt(k, rStar + (rDir - rStar) * 0.72, mid, engColor, `900 ${innerFontSize * 1.75}px Arial`, 'transparent');
+                    const thSize = d.name.length > 7 ? innerFontSize * 1.15 : innerFontSize * 1.6;
+                    drawTxt(d.name, rStar + (rDir - rStar) * 0.28, mid, thColor, `500 ${thSize}px Prompt`, 'transparent');
                 });
 
-                // --- Render Flying Stars ---
+                // Render Flying Stars (Circles in center)
                 if (vm === 'STARS') {
                     Object.keys(dirs8).forEach(k => {
                         const d = dirs8[k];
@@ -802,33 +791,22 @@
                         if ([2, 7, 3].includes(starNum)) { sCol = '#f87171'; bgCol = 'rgba(248, 113, 113, 0.15)'; } 
                         if (starNum === 5) { sCol = '#facc15'; bgCol = 'rgba(250, 204, 21, 0.15)'; } 
                         
-                        // Solid Fill for stars cell
                         drawSeg(rTai, rStar, d.start, d.end, bgCol, 'transparent');
-                        
                         const starRad = rTai + (rStar - rTai) * 0.5;
                         ctx.save();
-                        ctx.rotate((mid - 90) * Math.PI / 180);
-                        ctx.translate(starRad, 0);
-                        ctx.rotate(Math.PI / 2);
+                        ctx.rotate((mid - 90) * Math.PI / 180); ctx.translate(starRad, 0); ctx.rotate(Math.PI / 2);
                         
-                        // Circle Border around Star Number
-                        ctx.beginPath();
-                        ctx.arc(0, 0, innerFontSize * 1.8, 0, 2*Math.PI);
-                        ctx.strokeStyle = sCol;
-                        ctx.lineWidth = 4;
-                        ctx.fillStyle = '#0f172a';
-                        ctx.fill();
-                        ctx.stroke();
+                        ctx.beginPath(); ctx.arc(0, 0, innerFontSize * 1.8, 0, 2*Math.PI);
+                        ctx.strokeStyle = sCol; ctx.lineWidth = 3; ctx.fillStyle = '#0f172a';
+                        ctx.fill(); ctx.stroke();
                         
-                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                        ctx.fillStyle = sCol;
-                        ctx.font = `900 ${innerFontSize * 2.2}px Arial`;
-                        ctx.fillText(starNum, 0, 0);
+                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = sCol;
+                        ctx.font = `900 ${innerFontSize * 2.2}px Arial`; ctx.fillText(starNum, 0, 0);
                         ctx.restore();
                     });
                 }
 
-                // --- Render San Sha (Orange Outer Arc) ---
+                // Render San Sha (Orange Outer Arc Edge)
                 if (vm === 'TIME') {
                     activeSanShas.forEach(aff => {
                         ctx.beginPath();
@@ -836,64 +814,58 @@
                         let ssERad = (aff.ssEnd - 90) * Math.PI / 180;
                         if (ssERad < ssSRad) ssERad += 2 * Math.PI;
                         ctx.arc(0, 0, rTicks - 8, ssSRad, ssERad);
-                        ctx.strokeStyle = '#f97316'; // Orange
-                        ctx.lineWidth = 16;
-                        ctx.stroke();
+                        ctx.strokeStyle = '#f97316'; ctx.lineWidth = 16; ctx.stroke();
                     });
                 }
-
-                // --- Center Taiji ---
-                ctx.beginPath(); ctx.arc(0, 0, rTai, 0, 2*Math.PI); ctx.fillStyle = '#0f172a'; ctx.fill();
-                const tj = rTai * 0.8;
-                ctx.beginPath(); ctx.arc(0, 0, tj, Math.PI/2, Math.PI*1.5); ctx.fillStyle = '#ffffff'; ctx.fill();
-                ctx.beginPath(); ctx.arc(0, 0, tj, Math.PI*1.5, Math.PI/2); ctx.fillStyle = '#000000'; ctx.fill();
-                ctx.beginPath(); ctx.arc(0, -tj/2, tj/2, 0, 2*Math.PI); ctx.fillStyle = '#ffffff'; ctx.fill();
-                ctx.beginPath(); ctx.arc(0, tj/2, tj/2, 0, 2*Math.PI); ctx.fillStyle = '#000000'; ctx.fill();
-                ctx.beginPath(); ctx.arc(0, -tj/2, tj/6, 0, 2*Math.PI); ctx.fillStyle = '#000000'; ctx.fill();
-                ctx.beginPath(); ctx.arc(0, tj/2, tj/6, 0, 2*Math.PI); ctx.fillStyle = '#ffffff'; ctx.fill();
             }
+            
+            // --- Center Taiji (Always Present) ---
+            ctx.beginPath(); ctx.arc(0, 0, rTai, 0, 2*Math.PI); ctx.fillStyle = '#0f172a'; ctx.fill();
+            const tj = rTai * 0.8;
+            ctx.beginPath(); ctx.arc(0, 0, tj, Math.PI/2, Math.PI*1.5); ctx.fillStyle = '#ffffff'; ctx.fill();
+            ctx.beginPath(); ctx.arc(0, 0, tj, Math.PI*1.5, Math.PI/2); ctx.fillStyle = '#000000'; ctx.fill();
+            ctx.beginPath(); ctx.arc(0, -tj/2, tj/2, 0, 2*Math.PI); ctx.fillStyle = '#ffffff'; ctx.fill();
+            ctx.beginPath(); ctx.arc(0, tj/2, tj/2, 0, 2*Math.PI); ctx.fillStyle = '#000000'; ctx.fill();
+            ctx.beginPath(); ctx.arc(0, -tj/2, tj/6, 0, 2*Math.PI); ctx.fillStyle = '#000000'; ctx.fill();
+            ctx.beginPath(); ctx.arc(0, tj/2, tj/6, 0, 2*Math.PI); ctx.fillStyle = '#ffffff'; ctx.fill();
 
             ctx.restore();
             texture.needsUpdate = true;
         }
 
-        // Determine Direction Logic
         function getDirectionData(deg) {
             for (let k in dirs8) {
                 let d = dirs8[k];
-                if (d.start > d.end) {
-                    if (deg >= d.start || deg <= d.end) return { code: k, name: d.name };
-                } else {
-                    if (deg >= d.start && deg <= d.end) return { code: k, name: d.name };
-                }
+                if (d.start > d.end) { if (deg >= d.start || deg <= d.end) return { code: k, name: d.name }; } 
+                else { if (deg >= d.start && deg <= d.end) return { code: k, name: d.name }; }
             }
             return { code: 'N', name: 'เหนือ' };
         }
 
         function updateAdviceBox(deg) {
-            const dirData = getDirectionData(deg);
-            const dirCode = dirData.code;
-            
+            const dirData = getDirectionData(deg); const dirCode = dirData.code;
             els.dirLabel.innerText = `${dirData.name} (${dirCode})`;
             els.degreeValue.innerText = deg.toFixed(1) + '°';
 
             let title = "", remedy = "", hasBad = false;
 
-            if (state.viewMode === 'STARS') {
+            if (state.is64GuaMode) {
+                title = "ผัง 64 ข่วยวงนอก / 8 ไตรลักษณ์วงใน"; remedy = "";
+                els.dirAdvice.classList.replace('border-red-500', 'border-slate-300');
+                els.adviceTitle.className = 'font-bold text-[11px] tracking-wide leading-tight mb-1 text-indigo-600';
+            } 
+            else if (state.viewMode === 'STARS') {
                 const starNum = state.calc.stars.year[dirCode];
                 if (starNum) {
-                    title = starsInfo[starNum].desc;
-                    remedy = starsInfo[starNum].remedy;
+                    title = starsInfo[starNum].desc; remedy = starsInfo[starNum].remedy;
                     if(starsInfo[starNum].type === 'fatal') {
                         els.dirAdvice.classList.replace('border-slate-300', 'border-red-500');
-                        els.adviceTitle.className = 'font-bold text-[11px] tracking-wide leading-tight mb-1 text-red-600';
-                        hasBad = true;
+                        els.adviceTitle.className = 'font-bold text-[11px] tracking-wide leading-tight mb-1 text-red-600'; hasBad = true;
                     } else if (starsInfo[starNum].type === 'bad') {
                          els.dirAdvice.classList.replace('border-slate-300', 'border-orange-500');
                          els.adviceTitle.className = 'font-bold text-[11px] tracking-wide leading-tight mb-1 text-orange-600';
                     } else {
-                        els.dirAdvice.classList.replace('border-red-500', 'border-slate-300');
-                        els.dirAdvice.classList.replace('border-orange-500', 'border-slate-300');
+                        els.dirAdvice.classList.replace('border-red-500', 'border-slate-300'); els.dirAdvice.classList.replace('border-orange-500', 'border-slate-300');
                         els.adviceTitle.className = 'font-bold text-[11px] tracking-wide leading-tight mb-1 text-emerald-600';
                     }
                 }
@@ -904,14 +876,12 @@
                 } else {
                     title = "ทิศร้ายประจำตัว"; remedy = "หลีกเลี่ยงการหันหัวเตียง หรือโต๊ะทำงาน";
                     els.dirAdvice.classList.replace('border-slate-300', 'border-red-500');
-                    els.adviceTitle.className = 'font-bold text-[11px] tracking-wide leading-tight mb-1 text-red-600';
-                    hasBad = true;
+                    els.adviceTitle.className = 'font-bold text-[11px] tracking-wide leading-tight mb-1 text-red-600'; hasBad = true;
                 }
                 if(!hasBad) els.dirAdvice.classList.replace('border-red-500', 'border-slate-300');
                 
             } else if (state.viewMode === 'TIME') {
-                let badTitle = [];
-                let currentBranch = Math.floor((deg + 15) % 360 / 30);
+                let badTitle = []; let currentBranch = Math.floor((deg + 15) % 360 / 30);
                 
                 Object.keys(state.toggles).filter(k=>state.toggles[k]).forEach(p => {
                      const aff = state.calc.afflictions[p];
@@ -919,52 +889,36 @@
                      if(aff.clash === currentBranch) badTitle.push(`ทิศชง(${thName})`);
                      
                      let inSS = false;
-                     if(aff.ssStart > aff.ssEnd) {
-                         if(deg >= aff.ssStart || deg <= aff.ssEnd) inSS = true;
-                     } else {
-                         if(deg >= aff.ssStart && deg <= aff.ssEnd) inSS = true;
-                     }
+                     if(aff.ssStart > aff.ssEnd) { if(deg >= aff.ssStart || deg <= aff.ssEnd) inSS = true; } 
+                     else { if(deg >= aff.ssStart && deg <= aff.ssEnd) inSS = true; }
                      if(inSS) badTitle.push(`ทิศอสูร(${thName})`);
                 });
 
                 if(badTitle.length > 0) {
-                     title = "⚠️ " + badTitle.join(', ');
-                     remedy = "ห้ามเคาะ เจาะ ทุบ ตอก ซ่อมแซม ในทิศนี้เด็ดขาด!";
+                     title = "⚠️ " + badTitle.join(', '); remedy = "ห้ามเคาะ เจาะ ทุบ ตอก ซ่อมแซม ในทิศนี้เด็ดขาด!";
                      els.dirAdvice.classList.replace('border-slate-300', 'border-red-500');
-                     els.adviceTitle.className = 'font-bold text-[11px] tracking-wide leading-tight mb-1 text-red-600';
-                     hasBad = true;
+                     els.adviceTitle.className = 'font-bold text-[11px] tracking-wide leading-tight mb-1 text-red-600'; hasBad = true;
                 } else {
-                     title = "ทิศปกติ (กาลเวลาจร)";
-                     remedy = "ไม่มีดาวร้ายจรปะทะ สามารถใช้งานได้ปกติ";
+                     title = "ทิศปกติ (กาลเวลาจร)"; remedy = "ไม่มีดาวร้ายจรปะทะ สามารถใช้งานได้ปกติ";
                      els.dirAdvice.classList.replace('border-red-500', 'border-slate-300');
                      els.adviceTitle.className = 'font-bold text-[11px] tracking-wide leading-tight mb-1 text-slate-700';
                 }
             }
 
             if(title) {
-                els.adviceTitle.innerText = title;
-                els.adviceRemedy.innerText = remedy;
+                els.adviceTitle.innerText = title; els.adviceRemedy.innerText = remedy;
                 els.dirAdvice.classList.remove('hidden');
-                setTimeout(() => {
-                    els.dirAdvice.classList.remove('opacity-0', 'scale-95');
-                    els.dirAdvice.classList.add('opacity-100', 'scale-100');
-                }, 50);
+                setTimeout(() => { els.dirAdvice.classList.remove('opacity-0', 'scale-95'); els.dirAdvice.classList.add('opacity-100', 'scale-100'); }, 50);
             } else {
-                els.dirAdvice.classList.add('opacity-0', 'scale-95');
-                setTimeout(() => els.dirAdvice.classList.add('hidden'), 300);
+                els.dirAdvice.classList.add('opacity-0', 'scale-95'); setTimeout(() => els.dirAdvice.classList.add('hidden'), 300);
             }
         }
 
-        // --- Compass Logic (Shortest Path Lerp) ---
-        let targetDegree = 0;
-        let displayDegree = 0;
-        
+        // Compass Logic
+        let targetDegree = 0; let displayDegree = 0;
         function lerpAngle(start, end, amount) {
             let difference = Math.abs(end - start);
-            if (difference > 180) {
-                if (end > start) start += 360;
-                else end += 360;
-            }
+            if (difference > 180) { if (end > start) start += 360; else end += 360; }
             let value = (start + ((end - start) * amount));
             return (value >= 0 && value < 360) ? value : value % 360;
         }
@@ -972,9 +926,7 @@
         function handleOrientation(event) {
             if (!state.isCompassActive) return;
             let compass = event.webkitCompassHeading || Math.abs(event.alpha - 360);
-            if (compass !== null) {
-                targetDegree = compass;
-            }
+            if (compass !== null) targetDegree = compass;
         }
 
         els.compassBtn.addEventListener('click', async () => {
@@ -982,103 +934,72 @@
                 if (typeof DeviceOrientationEvent.requestPermission === 'function') {
                     try {
                         const permission = await DeviceOrientationEvent.requestPermission();
-                        if (permission === 'granted') {
-                            window.addEventListener('deviceorientation', handleOrientation);
-                            startCompass();
-                        } else {
-                            alert("ต้องอนุญาตให้เข้าถึงเข็มทิศก่อนครับ");
-                        }
+                        if (permission === 'granted') { window.addEventListener('deviceorientation', handleOrientation); startCompass(); } 
+                        else { alert("ต้องอนุญาตให้เข้าถึงเข็มทิศก่อนครับ"); }
                     } catch (e) { alert(e); }
-                } else {
-                    window.addEventListener('deviceorientationabsolute', handleOrientation);
-                    startCompass();
-                }
-            } else {
-                stopCompass();
-            }
+                } else { window.addEventListener('deviceorientationabsolute', handleOrientation); startCompass(); }
+            } else { stopCompass(); }
         });
 
         function startCompass() {
             state.isCompassActive = true;
-            els.compassBtn.classList.replace('bg-indigo-600/90', 'bg-red-600/90');
+            els.compassBtn.classList.replace('bg-indigo-600/95', 'bg-red-600/95');
             els.compassBtn.innerHTML = '<svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg>';
             els.manualRotationControl.classList.add('hidden'); 
         }
 
         function stopCompass() {
             state.isCompassActive = false;
-            window.removeEventListener('deviceorientation', handleOrientation);
-            window.removeEventListener('deviceorientationabsolute', handleOrientation);
-            els.compassBtn.classList.replace('bg-red-600/90', 'bg-indigo-600/90');
+            window.removeEventListener('deviceorientation', handleOrientation); window.removeEventListener('deviceorientationabsolute', handleOrientation);
+            els.compassBtn.classList.replace('bg-red-600/95', 'bg-indigo-600/95');
             els.compassBtn.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>';
-            els.manualRotationControl.classList.remove('hidden'); 
-            els.manualDegree.value = displayDegree;
+            els.manualRotationControl.classList.remove('hidden'); els.manualDegree.value = displayDegree;
         }
 
         els.manualDegree.addEventListener('input', (e) => {
-            targetDegree = parseFloat(e.target.value);
-            displayDegree = targetDegree; 
+            targetDegree = parseFloat(e.target.value); displayDegree = targetDegree; 
             if(luopanMesh) luopanMesh.rotation.z = -displayDegree * (Math.PI / 180);
-            updateAdviceBox(displayDegree);
-            state.currentDegree = displayDegree;
+            updateAdviceBox(displayDegree); state.currentDegree = displayDegree;
         });
 
-        // --- AR Camera Logic ---
+        // AR Camera Logic
         const video = document.getElementById('videoBackground');
-        
         els.arBtn.addEventListener('click', async () => {
             if (!isARTransparent) {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                    video.srcObject = stream;
-                    video.style.display = 'block';
-                    isARTransparent = true;
-                    els.arBtn.classList.replace('bg-slate-800/90', 'bg-emerald-600/90');
-                    els.arBtn.classList.replace('text-emerald-400', 'text-white');
+                    video.srcObject = stream; video.style.display = 'block'; isARTransparent = true;
+                    els.arBtn.classList.replace('bg-slate-800/95', 'bg-emerald-600/95'); els.arBtn.classList.replace('text-emerald-400', 'text-white');
                     document.body.style.backgroundColor = 'transparent';
-                    
-                    els.importImgBtn.querySelector('svg').innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>`;
-                    
+                    els.importImgBtn.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>`; // Camera icon
                     updateStatusBadge();
                 } catch(err) { alert("ไม่สามารถเปิดกล้องได้: " + err.message); }
             } else {
-                const stream = video.srcObject;
-                if (stream) stream.getTracks().forEach(track => track.stop());
-                video.style.display = 'none';
-                isARTransparent = false;
-                els.arBtn.classList.replace('bg-emerald-600/90', 'bg-slate-800/90');
-                els.arBtn.classList.replace('text-white', 'text-emerald-400');
+                const stream = video.srcObject; if (stream) stream.getTracks().forEach(track => track.stop());
+                video.style.display = 'none'; isARTransparent = false;
+                els.arBtn.classList.replace('bg-emerald-600/95', 'bg-slate-800/95'); els.arBtn.classList.replace('text-white', 'text-emerald-400');
                 document.body.style.backgroundColor = '#020617';
-                
-                els.importImgBtn.querySelector('svg').innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>`;
-                
+                els.importImgBtn.innerHTML = `<input type="file" id="imageInput" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>`; // Folder icon
                 updateStatusBadge();
             }
             draw2DTexture();
         });
 
-        // --- Image Upload & Transformation Logic ---
+        // Image Handling
         function applyUserImage(src) {
-            const textureLoader = new THREE.TextureLoader();
-            textureLoader.load(src, function(tex) {
+            new THREE.TextureLoader().load(src, function(tex) {
                 if(userImageMesh) scene.remove(userImageMesh);
-                
                 const aspect = tex.image.width / tex.image.height;
-                const geo = new THREE.PlaneGeometry(20, 20 / aspect);
-                const mat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide });
-                userImageMesh = new THREE.Mesh(geo, mat);
-                
-                userImageMesh.position.y = -1; 
-                userImageMesh.rotation.x = -Math.PI / 2; 
+                userImageMesh = new THREE.Mesh(new THREE.PlaneGeometry(20, 20 / aspect), new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide }));
+                userImageMesh.position.y = -1; userImageMesh.rotation.x = -Math.PI / 2; 
                 scene.add(userImageMesh);
-                
-                els.editImgBtn.classList.remove('hidden');
-                resetImgTransforms();
+                els.editImgBtn.classList.remove('hidden'); resetImgTransforms();
             });
         }
-
-        els.imageInput.addEventListener('change', (e) => {
-            if(e.target.files && e.target.files[0]) {
+        
+        // Re-attach event listener for the dynamic input
+        document.body.addEventListener('change', (e) => {
+            if(e.target && e.target.id === 'imageInput' && e.target.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (ev) => applyUserImage(ev.target.result);
                 reader.readAsDataURL(e.target.files[0]);
@@ -1088,49 +1009,32 @@
         els.importImgBtn.addEventListener('click', (e) => {
             if(isARTransparent && video.readyState === video.HAVE_ENOUGH_DATA) {
                 e.preventDefault(); 
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = video.videoWidth;
-                tempCanvas.height = video.videoHeight;
+                const tempCanvas = document.createElement('canvas'); tempCanvas.width = video.videoWidth; tempCanvas.height = video.videoHeight;
                 tempCanvas.getContext('2d').drawImage(video, 0, 0);
                 applyUserImage(tempCanvas.toDataURL('image/jpeg'));
                 els.arBtn.click();
             }
         });
 
-        els.editImgBtn.addEventListener('click', () => {
-            els.imageEditPanel.classList.remove('hidden');
-            if(luopanMesh) luopanMesh.material.opacity = 0.3;
-        });
-
-        els.closeImageEditBtn.addEventListener('click', () => {
-            els.imageEditPanel.classList.add('hidden');
-            if(luopanMesh) luopanMesh.material.opacity = 1.0;
-        });
+        els.editImgBtn.addEventListener('click', () => { els.imageEditPanel.classList.remove('hidden'); if(luopanMesh) luopanMesh.material.opacity = 0.3; });
+        els.closeImageEditBtn.addEventListener('click', () => { els.imageEditPanel.classList.add('hidden'); if(luopanMesh) luopanMesh.material.opacity = 1.0; });
 
         function updateImageTransform() {
             if(!userImageMesh) return;
-            const sc = parseFloat(els.imgScale.value);
-            const rZ = parseFloat(els.imgRotZ.value);
-            const rX = parseFloat(els.imgRotX.value); 
-            const rY = parseFloat(els.imgRotY.value); 
-            const pX = parseFloat(els.imgPosX.value);
-            const pY = parseFloat(els.imgPosY.value);
+            const sc = parseFloat(els.imgScale.value); const rZ = parseFloat(els.imgRotZ.value);
+            const rX = parseFloat(els.imgRotX.value); const rY = parseFloat(els.imgRotY.value); 
+            const pX = parseFloat(els.imgPosX.value); const pY = parseFloat(els.imgPosY.value);
 
             userImageMesh.scale.set(sc, sc, sc);
             userImageMesh.rotation.set(-Math.PI/2 + THREE.MathUtils.degToRad(rX), THREE.MathUtils.degToRad(rY), THREE.MathUtils.degToRad(rZ), 'ZXY');
             userImageMesh.position.set(pX, -1, -pY); 
 
-            els.valImgScale.innerText = sc.toFixed(2);
-            els.valImgRotZ.innerText = rZ.toFixed(1) + '°';
-            els.valImgRotX.innerText = rX.toFixed(1) + '°';
-            els.valImgRotY.innerText = rY.toFixed(1) + '°';
-            els.valImgPosX.innerText = pX.toFixed(1);
-            els.valImgPosY.innerText = pY.toFixed(1);
+            els.valImgScale.innerText = sc.toFixed(2); els.valImgRotZ.innerText = rZ.toFixed(1) + '°';
+            els.valImgRotX.innerText = rX.toFixed(1) + '°'; els.valImgRotY.innerText = rY.toFixed(1) + '°';
+            els.valImgPosX.innerText = pX.toFixed(1); els.valImgPosY.innerText = pY.toFixed(1);
         }
 
-        ['imgScale', 'imgRotZ', 'imgRotX', 'imgRotY', 'imgPosX', 'imgPosY'].forEach(id => {
-            els[id].addEventListener('input', updateImageTransform);
-        });
+        ['imgScale', 'imgRotZ', 'imgRotX', 'imgRotY', 'imgPosX', 'imgPosY'].forEach(id => els[id].addEventListener('input', updateImageTransform));
 
         function resetImgTransforms() {
             els.imgScale.value = 1; els.imgRotZ.value = 0; els.imgRotX.value = 0;
@@ -1139,19 +1043,15 @@
         }
         els.resetImgBtn.addEventListener('click', resetImgTransforms);
 
-        // --- Render Loop ---
         function animate() {
             requestAnimationFrame(animate);
-            if(!isARTransparent && state.viewMode === 'TIME') draw2DTexture(); 
+            // Refresh Texture for Sui Po Flashing if TIME mode or 64 Gua is active
+            if(!isARTransparent && (state.viewMode === 'TIME' || state.is64GuaMode)) draw2DTexture(); 
 
             if (luopanMesh && state.isCompassActive) {
                 displayDegree = lerpAngle(displayDegree, targetDegree, 0.15);
                 luopanMesh.rotation.z = -displayDegree * (Math.PI / 180);
-                
-                if(Math.abs(state.currentDegree - displayDegree) > 0.5) {
-                    updateAdviceBox(displayDegree);
-                    state.currentDegree = displayDegree;
-                }
+                if(Math.abs(state.currentDegree - displayDegree) > 0.5) { updateAdviceBox(displayDegree); state.currentDegree = displayDegree; }
             }
             renderer.render(scene, camera);
         }
