@@ -34,15 +34,15 @@
             object-fit: cover; z-index: 0; display: none;
         }
 
-        /* Improved Top Margin for Degree Box to touch the rim */
+        /* Improved Top Margin for Degree Box to touch the rim (Adjusted lower) */
         #degreeDisplay {
-            top: calc(50% - min(47vw, 47vh));
+            top: calc(50% - min(39vw, 39vh));
             transform: translate(-50%, -100%);
         }
-        /* Mobile specific adjustment for safe area */
+        /* Mobile specific adjustment for safe area (Adjusted lower) */
         @media (max-aspect-ratio: 3/4) {
              #degreeDisplay {
-                top: calc(50% - min(48vw, 48vh)); 
+                top: calc(50% - min(43vw, 43vh)); 
             }
         }
     </style>
@@ -58,7 +58,7 @@
     <!-- UI Layer -->
     <div id="uiLayer">
         
-        <!-- Top Left Controls (Moved down to top-20 to avoid address bar) -->
+        <!-- Top Left Controls -->
         <div id="topLeftControls" class="absolute top-20 left-4 z-30 flex flex-col gap-3 pointer-events-none transition-opacity duration-300">
             <button id="menuBtn" class="pointer-events-auto bg-slate-900/90 border border-slate-700 text-yellow-500 p-3 rounded-xl shadow-lg hover:bg-slate-800 transition-all flex items-center justify-center w-12 h-12">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -68,7 +68,7 @@
             </button>
         </div>
 
-        <!-- Top Right Controls (Moved down to top-20) -->
+        <!-- Top Right Controls -->
         <div class="absolute top-20 right-4 z-30 flex flex-col gap-3 pointer-events-auto">
             <!-- Live Compass Button -->
             <button id="compassBtn" class="bg-indigo-600/90 text-white p-3 rounded-full shadow-lg border border-indigo-400 hover:bg-indigo-500 transition-all flex items-center justify-center w-12 h-12">
@@ -113,16 +113,6 @@
             <!-- Tab Content: Config -->
             <div id="tab-config" class="p-4 space-y-6 flex-1">
                 
-                <!-- View Modes (Exclusive selection) -->
-                <div class="space-y-2">
-                    <label class="block text-[11px] font-medium text-slate-300">โหมดแสดงผลหน้าปัด (View Mode)</label>
-                    <div class="flex flex-col gap-1.5">
-                        <button class="layer-btn active px-3 py-2.5 bg-slate-800 border border-yellow-600 text-yellow-400 rounded-lg text-[12px] text-left transition-all flex items-center gap-2" data-layer="TIME"><span class="text-red-400">🕒</span> เฉพาะทิศร้ายกาลเวลา (Afflictions)</button>
-                        <button class="layer-btn px-3 py-2.5 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[12px] text-left transition-all flex items-center gap-2" data-layer="KUA"><span class="text-emerald-400">👤</span> เฉพาะทิศมงคลบุคคล (8 Mansions)</button>
-                        <button class="layer-btn px-3 py-2.5 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[12px] text-left transition-all flex items-center gap-2" data-layer="STARS"><span class="text-blue-400">⭐</span> เฉพาะดาวเหิน (Flying Stars)</button>
-                    </div>
-                </div>
-
                 <!-- Time Config -->
                 <div class="bg-slate-800/40 rounded-xl p-3 border border-slate-700/50 relative">
                     <div class="flex justify-between items-center mb-3">
@@ -133,7 +123,7 @@
                     </div>
                     <input type="datetime-local" id="targetDate" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:border-yellow-500 focus:outline-none mb-3">
                     
-                    <div class="text-[10px] text-slate-400 mb-1.5 font-medium">เปิดเช็คทิศชง/อสูร (Affliction Layers):</div>
+                    <div class="text-[10px] text-slate-400 mb-1.5 font-medium">เปิดเช็คข้อมูล (ชั้นกาลเวลาจร):</div>
                     <div class="grid grid-cols-2 gap-2 text-[11px]">
                         <label class="flex items-center gap-2 bg-slate-900/60 px-2 py-1.5 rounded border border-slate-700"><input type="checkbox" id="togYear" checked class="rounded border-slate-600 bg-slate-800"> <span>ปี (Year)</span></label>
                         <label class="flex items-center gap-2 bg-slate-900/60 px-2 py-1.5 rounded border border-slate-700"><input type="checkbox" id="togMonth" checked class="rounded border-slate-600 bg-slate-800"> <span>เดือน (Month)</span></label>
@@ -165,6 +155,16 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- View Modes (Exclusive selection) -->
+                <div class="space-y-2 pb-4">
+                    <label class="block text-[11px] font-medium text-slate-300 border-b border-slate-700 pb-1">โหมดแสดงผลหน้าปัด (View Mode)</label>
+                    <div class="flex flex-col gap-1.5 pt-1">
+                        <button class="layer-btn active px-3 py-2.5 bg-slate-800 border border-yellow-600 text-yellow-400 rounded-lg text-[12px] text-left transition-all flex items-center gap-2" data-layer="TIME"><span class="text-red-400">🕒</span> แสดงทิศร้ายกาลเวลา (Afflictions)</button>
+                        <button class="layer-btn px-3 py-2.5 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[12px] text-left transition-all flex items-center gap-2" data-layer="KUA"><span class="text-emerald-400">👤</span> เฉพาะทิศมงคลบุคคล (8 Mansions)</button>
+                        <button class="layer-btn px-3 py-2.5 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[12px] text-left transition-all flex items-center gap-2" data-layer="STARS"><span class="text-blue-400">⭐</span> เฉพาะดาวเหิน (Flying Stars)</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Tab Content: Analysis -->
@@ -192,30 +192,30 @@
             
             <!-- Author signature -->
             <div class="text-center pb-4 text-[9px] text-slate-600 mt-auto">
-                Luopan 3D Pro - Engine v3.1
+                Luopan 3D Pro - Engine v3.3
             </div>
         </div>
 
-        <!-- Live Degree Display Box (Positioned to exactly touch the rim) -->
+        <!-- Live Degree Display Box -->
         <div id="degreeDisplay" class="absolute z-20 flex flex-col items-center pointer-events-none transition-opacity duration-300 w-full left-1/2">
             
-            <!-- Advice Box (Above the degree box, grows upwards) -->
-            <div id="dirAdvice" class="mb-1.5 bg-white/95 backdrop-blur-sm border-2 border-slate-300 rounded-xl px-4 py-3 shadow-[0_10px_25px_rgba(0,0,0,0.5)] text-center w-max max-w-[85vw] transition-all duration-300 pointer-events-auto opacity-0 scale-95 origin-bottom hidden flex flex-col items-center justify-end">
-                <div id="adviceTitle" class="text-black font-bold text-[12px] tracking-wide leading-tight mb-1"></div>
+            <!-- Advice Box (Above the degree box) -->
+            <div id="dirAdvice" class="mb-1.5 bg-white/95 backdrop-blur-sm border-2 border-slate-300 rounded-xl px-4 py-2 shadow-[0_10px_25px_rgba(0,0,0,0.5)] text-center w-max max-w-[85vw] transition-all duration-300 pointer-events-auto opacity-0 scale-95 origin-bottom hidden flex flex-col items-center justify-end">
+                <div id="adviceTitle" class="text-black font-bold text-[11px] tracking-wide leading-tight mb-1"></div>
                 <div id="adviceRemedy" class="text-slate-700 text-[10px] leading-tight font-medium"></div>
             </div>
 
             <!-- Main Black Degree Box -->
-            <div class="bg-slate-900/95 backdrop-blur-md border border-yellow-500/80 rounded-xl px-3 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.8)] text-center relative pointer-events-auto scale-90">
+            <div class="bg-slate-900/95 backdrop-blur-md border border-yellow-500/80 rounded-xl px-4 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.8)] text-center relative pointer-events-auto scale-90">
                 <div class="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-slate-900 border-b border-r border-yellow-500/80 rotate-45"></div>
-                <span id="degreeValue" class="text-yellow-400 font-bold text-xl font-mono relative z-10 drop-shadow-md tracking-wider">0.0°</span>
-                <div id="dirLabel" class="text-slate-300 text-[9px] font-semibold mt-0.5 relative z-10 uppercase tracking-wider">เหนือ (N)</div>
+                <span id="degreeValue" class="text-yellow-400 font-bold text-lg font-mono relative z-10 drop-shadow-md tracking-wider">0.0°</span>
+                <div id="dirLabel" class="text-slate-300 text-[9px] font-semibold mt-0 relative z-10 uppercase tracking-wider">เหนือ (N)</div>
             </div>
         </div>
 
-        <!-- Status Badge & Legend (Moved to Bottom) -->
+        <!-- Status Badge & Legend (Bottom) -->
         <div class="absolute bottom-[4.5rem] w-full flex justify-center pointer-events-none z-10">
-            <div id="statusBadge" class="bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-2xl px-5 py-3 text-[11px] text-center shadow-[0_10px_30px_rgba(0,0,0,0.8)] font-medium tracking-wide w-[85%] max-w-sm">
+            <div id="statusBadge" class="bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-2xl px-5 py-3 text-[11px] text-center shadow-[0_10px_30px_rgba(0,0,0,0.8)] font-medium tracking-wide w-[90%] max-w-sm">
                 <!-- Status content injected by JS -->
             </div>
         </div>
@@ -399,21 +399,21 @@
             activeText = activeDetails.length > 0 ? `(เช็ค: ${activeDetails.join(', ')})` : '(ปิดการเช็คกาลเวลา)';
 
             if (state.viewMode === 'KUA') {
-                modeName = `<span class="text-yellow-400">โหมด: แสดงเฉพาะทิศมงคลบุคคล</span>`;
+                modeName = `<span class="text-yellow-400">โหมด:<br>แสดงเฉพาะทิศมงคลบุคคล</span>`;
                 legendHtml = `<div class="flex justify-center gap-5 mt-2 pt-1.5 border-t border-slate-700/80">
                     <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 border border-slate-900"></span>ทิศมงคล</span>
                     <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 border border-slate-900"></span>ทิศร้าย</span>
                 </div>`;
             }
             else if (state.viewMode === 'TIME') {
-                modeName = `<span class="text-yellow-400">โหมด: แสดงทิศร้ายกาลเวลา</span><br><span class="text-[10px] text-slate-300 font-normal mt-0.5 block">${activeText}</span>`;
-                legendHtml = `<div class="flex justify-center gap-6 mt-2 pt-1.5 border-t border-slate-700/80">
+                modeName = `<span class="text-yellow-400">โหมด:<br>แสดงทิศร้ายกาลเวลา</span><br><span class="text-[10px] text-slate-300 font-normal mt-0.5 block">${activeText}</span>`;
+                legendHtml = `<div class="flex justify-center gap-4 mt-2 pt-1.5 border-t border-slate-700/80">
                     <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-red-600 rounded-sm"></span>ทิศแตก (ชง)</span>
                     <span class="flex items-center gap-1.5"><span class="w-4 h-1.5 bg-orange-500 rounded-full"></span>ทิศอสูร (เส้นขอบ)</span>
                 </div>`;
             }
             else if (state.viewMode === 'STARS') {
-                modeName = `<span class="text-yellow-400">โหมด: ดาวเหินประจำปี</span><br><span class="text-[10px] text-slate-300 font-normal mt-0.5 block">(อิงจาก: ${state.date.getFullYear()})</span>`;
+                modeName = `<span class="text-yellow-400">โหมด:<br>ดาวเหินประจำปี</span><br><span class="text-[10px] text-slate-300 font-normal mt-0.5 block">(อิงจากปี: ${state.date.getFullYear()})</span>`;
                 legendHtml = `<div class="flex justify-center gap-4 mt-2 pt-1.5 border-t border-slate-700/80 text-[10px]">
                     <span class="flex items-center gap-1 text-emerald-400">⭐มงคล</span>
                     <span class="flex items-center gap-1 text-red-400">⭐ร้าย</span>
@@ -653,7 +653,7 @@
             const fovRad = (camera.fov / 2) * (Math.PI / 180);
             
             // Dynamic safe radius to prevent cutoff on tall screens (S23 Ultra fix)
-            const safeRadius = aspect < 0.5 ? 7.8 : 6.2; 
+            const safeRadius = aspect < 0.5 ? 8.2 : 6.2; 
             
             camera.position.set(0, aspect < 1 ? (safeRadius / aspect) / Math.tan(fovRad) : safeRadius / Math.tan(fovRad), 0);
             camera.lookAt(0, 0, 0);
@@ -886,25 +886,25 @@
                     remedy = starsInfo[starNum].remedy;
                     if(starsInfo[starNum].type === 'fatal') {
                         els.dirAdvice.classList.replace('border-slate-300', 'border-red-500');
-                        els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-red-600';
+                        els.adviceTitle.className = 'font-bold text-[11px] tracking-wide leading-tight mb-1 text-red-600';
                         hasBad = true;
                     } else if (starsInfo[starNum].type === 'bad') {
                          els.dirAdvice.classList.replace('border-slate-300', 'border-orange-500');
-                         els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-orange-600';
+                         els.adviceTitle.className = 'font-bold text-[11px] tracking-wide leading-tight mb-1 text-orange-600';
                     } else {
                         els.dirAdvice.classList.replace('border-red-500', 'border-slate-300');
                         els.dirAdvice.classList.replace('border-orange-500', 'border-slate-300');
-                        els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-emerald-600';
+                        els.adviceTitle.className = 'font-bold text-[11px] tracking-wide leading-tight mb-1 text-emerald-600';
                     }
                 }
             } else if (state.viewMode === 'KUA') {
                 if (state.calc.auspiciousDirs.includes(dirCode)) {
                     title = "ทิศมงคลประจำตัว"; remedy = "ส่งเสริมโชคลาภ สุขภาพ ความสัมพันธ์";
-                    els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-emerald-600';
+                    els.adviceTitle.className = 'font-bold text-[11px] tracking-wide leading-tight mb-1 text-emerald-600';
                 } else {
                     title = "ทิศร้ายประจำตัว"; remedy = "หลีกเลี่ยงการหันหัวเตียง หรือโต๊ะทำงาน";
                     els.dirAdvice.classList.replace('border-slate-300', 'border-red-500');
-                    els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-red-600';
+                    els.adviceTitle.className = 'font-bold text-[11px] tracking-wide leading-tight mb-1 text-red-600';
                     hasBad = true;
                 }
                 if(!hasBad) els.dirAdvice.classList.replace('border-red-500', 'border-slate-300');
@@ -931,13 +931,13 @@
                      title = "⚠️ " + badTitle.join(', ');
                      remedy = "ห้ามเคาะ เจาะ ทุบ ตอก ซ่อมแซม ในทิศนี้เด็ดขาด!";
                      els.dirAdvice.classList.replace('border-slate-300', 'border-red-500');
-                     els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-red-600';
+                     els.adviceTitle.className = 'font-bold text-[11px] tracking-wide leading-tight mb-1 text-red-600';
                      hasBad = true;
                 } else {
                      title = "ทิศปกติ (กาลเวลาจร)";
                      remedy = "ไม่มีดาวร้ายจรปะทะ สามารถใช้งานได้ปกติ";
                      els.dirAdvice.classList.replace('border-red-500', 'border-slate-300');
-                     els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-slate-700';
+                     els.adviceTitle.className = 'font-bold text-[11px] tracking-wide leading-tight mb-1 text-slate-700';
                 }
             }
 
