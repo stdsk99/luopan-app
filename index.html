@@ -46,17 +46,17 @@
     <!-- UI Layer -->
     <div id="uiLayer">
         
-        <!-- Top Left Controls (Moved down and added quick layer toggle) -->
+        <!-- Top Left Controls -->
         <div id="topLeftControls" class="absolute top-20 left-4 z-30 flex flex-col gap-3 pointer-events-none">
             <button id="menuBtn" class="pointer-events-auto bg-slate-900/90 border border-slate-700 text-yellow-500 p-3 rounded-xl shadow-lg hover:bg-slate-800 transition-all flex items-center justify-center w-12 h-12">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
-            <button id="quickLayerBtn" class="pointer-events-auto bg-slate-900/90 border border-slate-700 text-purple-400 p-3 rounded-xl shadow-lg hover:bg-slate-800 transition-all flex items-center justify-center w-12 h-12" title="สลับหน้าปัดด่วน">
+            <button id="quickLayerBtn" class="pointer-events-auto bg-slate-900/90 border border-slate-700 text-yellow-400 p-3 rounded-xl shadow-lg hover:bg-slate-800 transition-all flex items-center justify-center w-12 h-12" title="สลับหน้าปัดด่วน">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
             </button>
         </div>
 
-        <!-- Top Right Controls (Moved down) -->
+        <!-- Top Right Controls -->
         <div class="absolute top-20 right-4 z-30 flex flex-col gap-3 pointer-events-auto">
             <!-- Live Compass Button -->
             <button id="compassBtn" class="bg-indigo-600/90 text-white p-3 rounded-full shadow-lg border border-indigo-400 hover:bg-indigo-500 transition-all flex items-center justify-center w-12 h-12">
@@ -73,7 +73,7 @@
             </button>
             <!-- Edit Image Button (Hidden initially) -->
             <button id="editImgBtn" class="hidden bg-yellow-600/90 text-white p-3 rounded-full shadow-lg border border-yellow-400 hover:bg-yellow-500 transition-all flex items-center justify-center w-12 h-12">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
             </button>
         </div>
 
@@ -101,7 +101,7 @@
             <!-- Tab Content: Config -->
             <div id="tab-config" class="p-4 space-y-6 flex-1">
                 
-                <!-- View Modes (Forced Individual Modes) -->
+                <!-- View Modes -->
                 <div class="space-y-2">
                     <label class="block text-[11px] font-medium text-slate-300">โหมดแสดงผลหน้าปัด (View Mode)</label>
                     <div class="flex flex-col gap-1.5">
@@ -155,7 +155,7 @@
                 </div>
             </div>
 
-            <!-- Tab Content: Analysis (Separated BaZi) -->
+            <!-- Tab Content: Analysis -->
             <div id="tab-analysis" class="p-4 hidden space-y-4 flex-1">
                 
                 <!-- Time BaZi -->
@@ -180,56 +180,56 @@
             
             <!-- Author signature -->
             <div class="text-center pb-4 text-[9px] text-slate-600 mt-auto">
-                Luopan 3D Pro - Engine v2.0
+                Luopan 3D Pro - Engine v3.0
             </div>
         </div>
 
-        <!-- Live Degree Display Box (Positioned properly to not overflow) -->
+        <!-- Live Degree Display Box -->
         <div id="degreeDisplay" class="absolute z-20 flex flex-col items-center pointer-events-none transition-opacity duration-300 w-full" style="top: calc(50% - min(47vw, 47vh)); left: 50%; transform: translate(-50%, -100%);">
             
             <!-- Advice Box (Above the degree box) -->
-            <div id="dirAdvice" class="mb-1.5 bg-white/95 backdrop-blur-sm border-2 border-slate-300 rounded-lg px-3 py-2 shadow-[0_10px_25px_rgba(0,0,0,0.5)] text-center w-max max-w-[85vw] transition-all duration-300 pointer-events-auto opacity-0 scale-95 origin-bottom hidden">
-                <div id="adviceTitle" class="text-black font-bold text-[11px] tracking-wide leading-tight"></div>
-                <div id="adviceRemedy" class="text-slate-700 text-[10px] mt-1 leading-tight"></div>
+            <div id="dirAdvice" class="mb-2 bg-white/95 backdrop-blur-sm border-2 border-slate-300 rounded-xl px-4 py-3 shadow-[0_10px_25px_rgba(0,0,0,0.5)] text-center w-max max-w-[85vw] transition-all duration-300 pointer-events-auto opacity-0 scale-95 origin-bottom hidden">
+                <div id="adviceTitle" class="text-black font-bold text-[13px] tracking-wide leading-tight mb-1"></div>
+                <div id="adviceRemedy" class="text-slate-700 text-[11px] leading-tight font-medium"></div>
             </div>
 
             <!-- Main Black Degree Box (Scaled down 20%) -->
-            <div class="bg-slate-900/95 backdrop-blur-md border border-yellow-500/80 rounded-xl px-3 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.8)] text-center relative pointer-events-auto">
+            <div class="bg-slate-900/95 backdrop-blur-md border border-yellow-500/80 rounded-xl px-3 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.8)] text-center relative pointer-events-auto scale-90">
                 <div class="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-slate-900 border-b border-r border-yellow-500/80 rotate-45"></div>
-                <span id="degreeValue" class="text-yellow-400 font-bold text-xl font-mono relative z-10 drop-shadow-md">0.0°</span>
+                <span id="degreeValue" class="text-yellow-400 font-bold text-xl font-mono relative z-10 drop-shadow-md tracking-wider">0.0°</span>
                 <div id="dirLabel" class="text-slate-300 text-[9px] font-semibold mt-0.5 relative z-10 uppercase tracking-wider">เหนือ (N)</div>
             </div>
         </div>
 
-        <!-- Status Badge & Legend (Bottom) -->
-        <div class="absolute bottom-16 w-full flex justify-center pointer-events-none z-10">
-            <div id="statusBadge" class="bg-slate-900/80 backdrop-blur-md border border-slate-700 rounded-xl px-4 py-2 text-[11px] text-center shadow-lg font-medium tracking-wide">
+        <!-- Status Badge & Legend (Moved to Bottom) -->
+        <div class="absolute bottom-[4.5rem] w-full flex justify-center pointer-events-none z-10">
+            <div id="statusBadge" class="bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-2xl px-5 py-3 text-[11px] text-center shadow-[0_10px_30px_rgba(0,0,0,0.8)] font-medium tracking-wide">
                 <!-- Status content injected by JS -->
             </div>
         </div>
 
-        <!-- Manual Rotation Slider (Hidden when Live Compass is ON) -->
-        <div id="manualRotationControl" class="absolute bottom-4 w-full px-8 flex flex-col items-center pointer-events-none z-20">
-            <label class="text-[10px] text-yellow-400 mb-1 font-medium bg-slate-900/80 px-2 py-0.5 rounded pointer-events-auto">👆 เลื่อนปรับองศาจานหล่อแกด้วยตนเอง</label>
-            <input type="range" id="manualDegree" min="0" max="360" step="0.1" value="0" class="w-full max-w-md pointer-events-auto bg-slate-700 rounded-lg h-2 appearance-none">
+        <!-- Manual Rotation Slider -->
+        <div id="manualRotationControl" class="absolute bottom-5 w-full px-8 flex flex-col items-center pointer-events-none z-20">
+            <label class="text-[10px] text-yellow-400 mb-1.5 font-medium bg-slate-900/90 px-3 py-1 rounded-full border border-yellow-600/30 shadow-lg pointer-events-auto flex items-center gap-1.5"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg> เลื่อนปรับองศาจานหล่อแกด้วยตนเอง</label>
+            <input type="range" id="manualDegree" min="0" max="360" step="0.1" value="0" class="w-full max-w-md pointer-events-auto bg-slate-700 rounded-lg h-2.5 appearance-none shadow-inner border border-slate-600">
         </div>
 
-        <!-- Image Edit Controls Panel (Hidden by default) -->
-        <div id="imageEditPanel" class="hidden absolute bottom-0 left-0 w-full bg-slate-900/95 backdrop-blur-md p-4 rounded-t-2xl z-50 text-slate-200 text-[10px] shadow-[0_-10px_40px_rgba(0,0,0,0.8)] border-t border-slate-700 pointer-events-auto">
-            <div class="flex justify-between items-center mb-3 border-b border-slate-700 pb-2">
-               <span class="font-bold text-yellow-400 text-xs flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg> เครื่องมือปรับแต่งรูปแปลนบ้าน</span>
-               <button id="closeImageEditBtn" class="text-red-400 font-bold bg-red-900/30 px-3 py-1 rounded hover:bg-red-900/50">ปิด (Done)</button>
+        <!-- Image Edit Controls Panel -->
+        <div id="imageEditPanel" class="hidden absolute bottom-0 left-0 w-full bg-slate-900/95 backdrop-blur-md p-5 rounded-t-3xl z-50 text-slate-200 text-[11px] shadow-[0_-15px_50px_rgba(0,0,0,0.9)] border-t border-slate-700 pointer-events-auto transition-transform">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
+               <span class="font-bold text-yellow-400 text-sm flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg> เครื่องมือปรับแก้ภาพแปลนบ้าน (Perspective)</span>
+               <button id="closeImageEditBtn" class="text-white font-bold bg-indigo-600 px-4 py-1.5 rounded-lg hover:bg-indigo-500 shadow-lg">เสร็จสิ้น</button>
             </div>
-            <div class="grid grid-cols-2 gap-x-4 gap-y-3">
-                <div><label class="flex justify-between"><span>ขนาด (Zoom)</span><span id="valImgScale">1.0</span></label><input type="range" id="imgScale" min="0.1" max="5" step="0.05" value="1" class="w-full"></div>
-                <div><label class="flex justify-between"><span>หมุน (Rotate)</span><span id="valImgRotZ">0°</span></label><input type="range" id="imgRotZ" min="-180" max="180" step="0.5" value="0" class="w-full"></div>
-                <div><label class="flex justify-between text-indigo-300"><span>เบี้ยวซ้าย-ขวา (Tilt X)</span><span id="valImgRotY">0°</span></label><input type="range" id="imgRotY" min="-60" max="60" step="0.5" value="0" class="w-full"></div>
-                <div><label class="flex justify-between text-indigo-300"><span>เบี้ยวบน-ล่าง (Tilt Y)</span><span id="valImgRotX">0°</span></label><input type="range" id="imgRotX" min="-60" max="60" step="0.5" value="0" class="w-full"></div>
-                <div><label class="flex justify-between text-emerald-300"><span>เลื่อนซ้าย-ขวา (Pan X)</span><span id="valImgPosX">0</span></label><input type="range" id="imgPosX" min="-15" max="15" step="0.1" value="0" class="w-full"></div>
-                <div><label class="flex justify-between text-emerald-300"><span>เลื่อนขึ้น-ลง (Pan Y)</span><span id="valImgPosY">0</span></label><input type="range" id="imgPosY" min="-15" max="15" step="0.1" value="0" class="w-full"></div>
+            <div class="grid grid-cols-2 gap-x-6 gap-y-4">
+                <div><label class="flex justify-between text-yellow-300 font-medium mb-1"><span>ขนาด (Zoom)</span><span id="valImgScale">1.0</span></label><input type="range" id="imgScale" min="0.1" max="5" step="0.05" value="1" class="w-full h-2"></div>
+                <div><label class="flex justify-between text-yellow-300 font-medium mb-1"><span>หมุน (Rotate)</span><span id="valImgRotZ">0°</span></label><input type="range" id="imgRotZ" min="-180" max="180" step="0.5" value="0" class="w-full h-2"></div>
+                <div><label class="flex justify-between text-indigo-300 font-medium mb-1"><span>เบี้ยวซ้าย-ขวา (Tilt X)</span><span id="valImgRotY">0°</span></label><input type="range" id="imgRotY" min="-60" max="60" step="0.5" value="0" class="w-full h-2"></div>
+                <div><label class="flex justify-between text-indigo-300 font-medium mb-1"><span>เบี้ยวบน-ล่าง (Tilt Y)</span><span id="valImgRotX">0°</span></label><input type="range" id="imgRotX" min="-60" max="60" step="0.5" value="0" class="w-full h-2"></div>
+                <div><label class="flex justify-between text-emerald-300 font-medium mb-1"><span>เลื่อนซ้าย-ขวา (Pan X)</span><span id="valImgPosX">0</span></label><input type="range" id="imgPosX" min="-15" max="15" step="0.1" value="0" class="w-full h-2"></div>
+                <div><label class="flex justify-between text-emerald-300 font-medium mb-1"><span>เลื่อนขึ้น-ลง (Pan Y)</span><span id="valImgPosY">0</span></label><input type="range" id="imgPosY" min="-15" max="15" step="0.1" value="0" class="w-full h-2"></div>
             </div>
-            <div class="mt-3 flex justify-end">
-                <button id="resetImgBtn" class="text-[9px] text-slate-400 underline">รีเซ็ตค่าเริ่มต้น (Reset)</button>
+            <div class="mt-4 flex justify-end">
+                <button id="resetImgBtn" class="text-[10px] text-slate-400 hover:text-white underline">รีเซ็ตค่าเริ่มต้น (Reset)</button>
             </div>
         </div>
 
@@ -275,15 +275,15 @@
         };
 
         const starsInfo = {
-            1: { type: 'good', desc: 'ดาว 1 โชคเสริม ธุรกิจ การเดินทาง ปรับตัว', remedy: 'ตั้งน้ำพุ น้ำตก นาฬิกาลูกตุ้มโลหะ' },
-            2: { type: 'bad', desc: 'ดาว 2 เจ็บป่วย เรื้อรัง ซึมเศร้า แท้งบุตร', remedy: 'แขวนน้ำเต้าทองเหลือง เหรียญจีน 6 จักรพรรดิ' },
-            3: { type: 'bad', desc: 'ดาว 3 ทะเลาะ คดีความ อารมณ์ร้อน โดนขโมย', remedy: 'เปิดไฟสว่าง วางพรมแดง โคมไฟสีแดง' },
-            4: { type: 'neutral', desc: 'ดาว 4 การศึกษา เสน่ห์ ความรัก (ดีถ้าวางถูก)', remedy: 'ต้นไม้ไผ่กวนอิม 4 ต้น พู่กันจีน' },
-            5: { type: 'fatal', desc: 'ดาว 5 วิบัติ หายนะ อุบัติเหตุ ล้มละลาย', remedy: 'ระฆังลมโลหะ 6 หลอด เสียงเปียโน ห้ามเจาะทุบ' },
-            6: { type: 'neutral', desc: 'ดาว 6 อำนาจ บารมี เลื่อนขั้น (แต่อาจเหงา)', remedy: 'ก้อนทอง ดินเผา เซรามิก ลูกแก้วคริสตัล' },
-            7: { type: 'bad', desc: 'ดาว 7 โจรภัย แข่งขัน สูญเสีย เลือดตกยางออก', remedy: 'อ่างน้ำนิ่งสีฟ้า/ดำ แร่พลอยสีน้ำเงิน' },
-            8: { type: 'good', desc: 'ดาว 8 โชคลาภปัจจุบัน มั่นคง การเงิน', remedy: 'พัดลม นาฬิกาเดิน น้ำพุ สิ่งเคลื่อนไหว' },
-            9: { type: 'good', desc: 'ดาว 9 โชคลาภอนาคต ชื่อเสียง ยินดี งานแต่ง', remedy: 'ต้นไม้สวยงาม โคมไฟสว่าง สิ่งของสีแดง/ม่วง' }
+            1: { type: 'good', desc: 'ดาว 1 โชคเสริม ธุรกิจ การเดินทาง ปรับตัว', remedy: 'วางอุปกรณ์ เช่น น้ำพุ, น้ำตก, ตู้ปลา, พัดลม, นาฬิกาลูกตุ้มโลหะ' },
+            2: { type: 'bad', desc: 'ดาว 2 เจ็บป่วย เรื้อรัง ซึมเศร้า แท้งบุตร', remedy: 'แขวนน้ำเต้าทองเหลือง หรือ เหรียญจีน 6 จักรพรรดิ เพื่อสลายพลังร้าย' },
+            3: { type: 'bad', desc: 'ดาว 3 ทะเลาะ คดีความ อารมณ์ร้อน โดนขโมย', remedy: 'สลายพลังด้วย สีแดง เช่น พรม โคมไฟสว่าง ของตกแต่งสีแดง' },
+            4: { type: 'neutral', desc: 'ดาว 4 การศึกษา เสน่ห์ ความรัก', remedy: 'กระตุ้นด้วย ต้นไม้ไผ่กวนอิม 4 ต้น หรือ พู่กันจีน' },
+            5: { type: 'fatal', desc: 'ดาว 5 วิบัติ หายนะ อุบัติเหตุ ล้มละลาย', remedy: 'ห้ามเคาะเจาะทุบ! แขวนระฆังลมโลหะ 6 หลอด หรือเสียงเปียโน' },
+            6: { type: 'neutral', desc: 'ดาว 6 อำนาจ บารมี เลื่อนขั้น', remedy: 'กระตุ้นด้วย ก้อนทอง ดินเผา เซรามิก หรือลูกแก้วคริสตัล' },
+            7: { type: 'bad', desc: 'ดาว 7 โจรภัย แข่งขัน สูญเสีย เลือดตกยางออก', remedy: 'วางอ่างน้ำนิ่งสีฟ้า/ดำ แร่พลอยสีน้ำเงิน เพื่อถ่ายเทพลังร้าย' },
+            8: { type: 'good', desc: 'ดาว 8 โชคลาภปัจจุบัน มั่นคง การเงิน', remedy: 'กระตุ้นด้วย สิ่งเคลื่อนไหว เช่น พัดลม นาฬิกาเดิน น้ำพุ' },
+            9: { type: 'good', desc: 'ดาว 9 โชคลาภอนาคต ชื่อเสียง ยินดี งานแต่ง', remedy: 'กระตุ้นด้วย ต้นไม้สวยงาม โคมไฟสว่าง สิ่งของสีแดง/ม่วง' }
         };
 
         // --- State Management ---
@@ -291,10 +291,9 @@
             date: new Date(),
             birthDate: new Date(1981, 5, 25, 10, 16),
             gender: 'F',
-            viewMode: 'TIME',
+            viewMode: 'TIME', // Default to Time mode
             toggles: { year: true, month: true, day: true, hour: true },
             calc: { timeBazi: {}, personBazi: {}, afflictions: {}, stars: {}, kua: 8, auspiciousDirs: [], inauspiciousDirs: [] },
-            sidebarOpen: false,
             isCompassActive: false,
             currentDegree: 0
         };
@@ -346,7 +345,6 @@
             imgRotX: document.getElementById('imgRotX'),
             imgPosX: document.getElementById('imgPosX'),
             imgPosY: document.getElementById('imgPosY'),
-            // Value displays
             valImgScale: document.getElementById('valImgScale'),
             valImgRotZ: document.getElementById('valImgRotZ'),
             valImgRotY: document.getElementById('valImgRotY'),
@@ -370,7 +368,7 @@
             let modeName = "";
             let legendHtml = "";
             
-            // Hide Status Badge if AR is on (to keep screen clean)
+            // Hide Status Badge if AR is on
             if (isARTransparent) {
                 els.statusBadge.parentElement.style.display = 'none';
                 return;
@@ -380,30 +378,31 @@
 
             if (state.viewMode === 'KUA') {
                 modeName = "แสดงทิศมงคลบุคคล (8 Mansions)";
-                legendHtml = `<div class="flex justify-center gap-4 mt-1.5 pt-1 border-t border-slate-700/80">
-                    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full border border-emerald-500"></span>ทิศมงคล (ขอบเขียว)</span>
-                    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full border border-red-500"></span>ทิศร้าย (ขอบแดง)</span>
+                legendHtml = `<div class="flex justify-center gap-5 mt-2 pt-1.5 border-t border-slate-700/80">
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 border border-slate-900"></span>ทิศมงคล</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 border border-slate-900"></span>ทิศร้าย</span>
                 </div>`;
             }
             if (state.viewMode === 'TIME') {
                 let activeDetails = [];
                 if (state.calc && state.calc.timeBazi) {
-                    if (state.toggles.year && state.calc.timeBazi.year !== undefined) activeDetails.push(`ปี${branches[state.calc.timeBazi.year].name.split(' ')[0]}`);
-                    if (state.toggles.month && state.calc.timeBazi.month !== undefined) activeDetails.push(`เดือน${branches[state.calc.timeBazi.month].name.split(' ')[0]}`);
-                    if (state.toggles.day && state.calc.timeBazi.day !== undefined) activeDetails.push(`วัน${branches[state.calc.timeBazi.day].name.split(' ')[0]}`);
-                    if (state.toggles.hour && state.calc.timeBazi.hour !== undefined) activeDetails.push(`ยาม${branches[state.calc.timeBazi.hour].name.split(' ')[0]}`);
+                    // ใช้ .p เพื่อดึงชื่อนักษัตรไทย
+                    if (state.toggles.year && state.calc.timeBazi.year !== undefined) activeDetails.push(`ปี${branches[state.calc.timeBazi.year].p}`);
+                    if (state.toggles.month && state.calc.timeBazi.month !== undefined) activeDetails.push(`เดือน${branches[state.calc.timeBazi.month].p}`);
+                    if (state.toggles.day && state.calc.timeBazi.day !== undefined) activeDetails.push(`วัน${branches[state.calc.timeBazi.day].p}`);
+                    if (state.toggles.hour && state.calc.timeBazi.hour !== undefined) activeDetails.push(`ยาม${branches[state.calc.timeBazi.hour].p}`);
                 }
                 let activeText = activeDetails.length > 0 ? `(เช็ค: ${activeDetails.join(', ')})` : '(ปิดการเช็ค)';
-                modeName = `<span class="text-yellow-400">แสดงทิศร้ายกาลเวลา</span><br><span class="text-[9px] text-slate-300 font-normal">${activeText}</span>`;
+                modeName = `<span class="text-yellow-400">แสดงทิศร้ายกาลเวลา</span><br><span class="text-[10px] text-slate-300 font-normal mt-0.5 block">${activeText}</span>`;
                 
-                legendHtml = `<div class="flex justify-center gap-4 mt-1.5 pt-1 border-t border-slate-700/80">
-                    <span class="flex items-center gap-1"><span class="w-2 h-2 bg-red-600 rounded-sm"></span>ทิศแตก (ชง)</span>
-                    <span class="flex items-center gap-1"><span class="w-3 h-1 bg-orange-500 rounded-full"></span>ทิศอสูร (เส้นขอบ)</span>
+                legendHtml = `<div class="flex justify-center gap-6 mt-2 pt-1.5 border-t border-slate-700/80">
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-red-600 rounded-sm"></span>ทิศแตก (ชง)</span>
+                    <span class="flex items-center gap-1.5"><span class="w-4 h-1.5 bg-orange-500 rounded-full"></span>ทิศอสูร (เส้นขอบ)</span>
                 </div>`;
             }
             if (state.viewMode === 'STARS') {
-                modeName = "แสดงดาวเหินประจำปี (Flying Stars)";
-                legendHtml = `<div class="flex justify-center gap-3 mt-1.5 pt-1 border-t border-slate-700/80 text-[9px]">
+                modeName = "ดาวเหินประจำปี (Flying Stars)";
+                legendHtml = `<div class="flex justify-center gap-4 mt-2 pt-1.5 border-t border-slate-700/80 text-[10px]">
                     <span class="flex items-center gap-1 text-emerald-400">⭐มงคล</span>
                     <span class="flex items-center gap-1 text-red-400">⭐ร้าย</span>
                     <span class="flex items-center gap-1 text-yellow-400">⭐วิบัติ</span>
@@ -411,7 +410,7 @@
                 </div>`;
             }
 
-            els.statusBadge.innerHTML = `<div class="flex flex-col text-yellow-500">โหมด: ${modeName}</div>${legendHtml}`;
+            els.statusBadge.innerHTML = `<div class="flex flex-col text-yellow-500 mb-1">โหมด: ${modeName}</div>${legendHtml}`;
         }
 
         // Logic functions
@@ -421,17 +420,10 @@
             const m = dt.getMonth() + 1;
             const d = dt.getDate();
             const hour = dt.getHours();
-            
-            // Simplified Month Branch (Approximation based on lunar/solar boundary)
             let mBranch = (m + 1) % 12; 
-            
-            // Simplified Day Branch (Rough julian approximation)
             const jd = Math.floor(dt.getTime() / 86400000) + 2440588;
             const dBranch = (jd + 1) % 12;
-            
-            // Hour Branch
             const hBranch = Math.floor((hour + 1) % 24 / 2);
-            
             return { year: yBranch, month: mBranch, day: dBranch, hour: hBranch };
         }
 
@@ -442,11 +434,10 @@
             
             // 1. Time BaZi
             state.calc.timeBazi = getPillars(state.date);
-            
             // 2. Person BaZi
             state.calc.personBazi = getPillars(state.birthDate);
 
-            // 3. Kua Number (Person)
+            // 3. Kua Number
             const by = state.birthDate.getFullYear();
             let sum = by.toString().split('').reduce((a, b) => a + parseInt(b), 0);
             while (sum > 9) sum = sum.toString().split('').reduce((a, b) => a + parseInt(b), 0);
@@ -456,16 +447,8 @@
             state.calc.kua = kua;
             els.kuaDisplay.innerText = kua;
 
-            // Kua Auspicious/Inauspicious Logic
-            const kuaGroups = {
-                east: [1, 3, 4, 9],
-                west: [2, 6, 7, 8]
-            };
-            const dirGroups = {
-                east: ['N', 'S', 'E', 'SE'],
-                west: ['W', 'NW', 'SW', 'NE']
-            };
-            
+            const kuaGroups = { east: [1, 3, 4, 9], west: [2, 6, 7, 8] };
+            const dirGroups = { east: ['N', 'S', 'E', 'SE'], west: ['W', 'NW', 'SW', 'NE'] };
             const group = kuaGroups.east.includes(kua) ? 'east' : 'west';
             state.calc.auspiciousDirs = dirGroups[group];
             state.calc.inauspiciousDirs = dirGroups[group === 'east' ? 'west' : 'east'];
@@ -473,12 +456,12 @@
             // 4. Afflictions (Time)
             const getAffliction = (branchIdx) => {
                 const clash = (branchIdx + 6) % 12;
-                const trines = [[8,0,4], [11,3,7], [2,6,10], [5,9,1]]; // Water, Wood, Fire, Metal
+                const trines = [[8,0,4], [11,3,7], [2,6,10], [5,9,1]];
                 let ssStart = 0, ssEnd = 0, ssName = '';
-                if(trines[0].includes(branchIdx)) { ssStart = 135; ssEnd = 225; ssName = 'ใต้'; } // Water -> Fire (South)
-                else if(trines[1].includes(branchIdx)) { ssStart = 225; ssEnd = 315; ssName = 'ตะวันตก'; } // Wood -> Metal (West)
-                else if(trines[2].includes(branchIdx)) { ssStart = 315; ssEnd = 45; ssName = 'เหนือ'; } // Fire -> Water (North)
-                else if(trines[3].includes(branchIdx)) { ssStart = 45; ssEnd = 135; ssName = 'ตะวันออก'; } // Metal -> Wood (East)
+                if(trines[0].includes(branchIdx)) { ssStart = 135; ssEnd = 225; ssName = 'ใต้'; } 
+                else if(trines[1].includes(branchIdx)) { ssStart = 225; ssEnd = 315; ssName = 'ตะวันตก'; } 
+                else if(trines[2].includes(branchIdx)) { ssStart = 315; ssEnd = 45; ssName = 'เหนือ'; } 
+                else if(trines[3].includes(branchIdx)) { ssStart = 45; ssEnd = 135; ssName = 'ตะวันออก'; } 
                 return { clash, ssStart, ssEnd, ssName };
             };
 
@@ -486,7 +469,7 @@
                 state.calc.afflictions[p] = getAffliction(state.calc.timeBazi[p]);
             });
 
-            // 5. Flying Stars (Time - Year only simplified)
+            // 5. Flying Stars
             const baseYear = 2024;
             const baseStar = 3; 
             const diff = state.date.getFullYear() - baseYear;
@@ -511,7 +494,6 @@
         function updateUI() {
             const formatPillar = (b) => `<div class="bg-slate-900 border border-slate-700 rounded px-2 py-1 flex justify-between items-center"><span class="text-slate-400 mr-2"></span><span class="font-medium text-white">${branches[b].name}</span></div>`;
             
-            // Time Panels
             els.timeBaziPanel.innerHTML = `
                 ${formatPillar(state.calc.timeBazi.year).replace('<span>', '<span class="text-slate-400 mr-2">ปี:</span>')}
                 ${formatPillar(state.calc.timeBazi.month).replace('<span>', '<span class="text-slate-400 mr-2">เดือน:</span>')}
@@ -519,7 +501,6 @@
                 ${formatPillar(state.calc.timeBazi.hour).replace('<span>', '<span class="text-slate-400 mr-2">ยาม:</span>')}
             `;
 
-            // Person Panels
             els.personBaziPanel.innerHTML = `
                 ${formatPillar(state.calc.personBazi.year).replace('<span>', '<span class="text-slate-400 mr-2">ปี:</span>')}
                 ${formatPillar(state.calc.personBazi.month).replace('<span>', '<span class="text-slate-400 mr-2">เดือน:</span>')}
@@ -531,7 +512,8 @@
             Object.keys(state.toggles).forEach(k => {
                 if (!state.toggles[k]) return;
                 const aff = state.calc.afflictions[k];
-                const bName = branches[state.calc.timeBazi[k]].name.split(' ')[0];
+                // แก้ไขดึงชื่อนักษัตรไทย (.p) มาแสดง
+                const bName = branches[state.calc.timeBazi[k]].p; 
                 const label = k==='year'?'ปี':k==='month'?'เดือน':k==='day'?'วัน':'ยาม';
                 sumHtml += `
                     <div class="border-b border-red-900/30 pb-1 mb-1">
@@ -544,7 +526,6 @@
             els.afflictionSummary.innerHTML = sumHtml || '<div class="text-emerald-400">ไม่มีทิศร้ายจร (หรือปิดการแสดงผลไว้)</div>';
         }
 
-        // UI Interactions
         els.layerBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 els.layerBtns.forEach(b => b.classList.remove('active'));
@@ -552,6 +533,7 @@
                 state.viewMode = e.target.getAttribute('data-layer');
                 updateStatusBadge();
                 if(!isARTransparent) draw2DTexture();
+                updateAdviceBox(state.currentDegree);
             });
         });
 
@@ -572,26 +554,23 @@
 
         els.menuBtn.addEventListener('click', () => {
             els.sidebar.classList.add('open');
-            els.menuBtn.style.display = 'none'; // Hide menu button
-            els.quickLayerBtn.style.display = 'none'; // Hide quick toggle button
+            els.menuBtn.style.display = 'none'; 
+            els.quickLayerBtn.style.display = 'none';
         });
 
         els.closeSidebarBtn.addEventListener('click', () => {
             els.sidebar.classList.remove('open');
             setTimeout(() => {
-                els.menuBtn.style.display = 'flex'; // Show menu button after transition
+                els.menuBtn.style.display = 'flex'; 
                 els.quickLayerBtn.style.display = 'flex';
-            }, 400); // Matches CSS transition duration
+            }, 400); 
         });
 
-        // Quick Layer Toggle Logic
         const modeOrder = ['TIME', 'KUA', 'STARS'];
         els.quickLayerBtn.addEventListener('click', () => {
             let currentIndex = modeOrder.indexOf(state.viewMode);
             let nextIndex = (currentIndex + 1) % modeOrder.length;
             let nextMode = modeOrder[nextIndex];
-            
-            // Trigger the click on the corresponding sidebar button to keep everything synced
             const targetBtn = Array.from(els.layerBtns).find(b => b.getAttribute('data-layer') === nextMode);
             if(targetBtn) targetBtn.click();
         });
@@ -602,6 +581,7 @@
                 updateUI();
                 updateStatusBadge();
                 if(!isARTransparent) draw2DTexture();
+                updateAdviceBox(state.currentDegree);
             });
         });
 
@@ -609,25 +589,29 @@
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // แก้ปัญหาภาพเบลอบนจอมือถือความละเอียดสูง
+        renderer.setPixelRatio(window.devicePixelRatio); // Lock resolution to native for sharp text
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('canvas3dContainer').appendChild(renderer.domElement);
 
         const canvas2d = document.createElement('canvas');
         const ctx = canvas2d.getContext('2d');
-        const texSize = 3072; // อัปเกรดความคมชัดของ Texture (4K Ready)
+        const texSize = 3072; // High resolution for sharp text
         canvas2d.width = texSize; canvas2d.height = texSize;
         const texture = new THREE.CanvasTexture(canvas2d);
         texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        texture.minFilter = THREE.LinearMipmapLinearFilter;
+        texture.magFilter = THREE.LinearFilter;
 
-        // Luopan Mesh (Plane instead of Cylinder for AR pass-through ease)
-        const geometry = new THREE.PlaneGeometry(10, 10);
-        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+        // Change geometry to Ring to allow transparent center
+        const outerRadius = 5;
+        const innerRadius = 0.5; // Small hole in center
+        const geometry = new THREE.RingGeometry(innerRadius, outerRadius, 64);
+        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide });
         const luopanMesh = new THREE.Mesh(geometry, material);
-        luopanMesh.rotation.x = -Math.PI / 2; // Flat on ground
+        luopanMesh.rotation.x = -Math.PI / 2;
         scene.add(luopanMesh);
 
-        // Grid/Crosshair Mesh
+        // Center Crosshair (Red)
         const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 2, transparent: true, opacity: 0.6 });
         const lineGeo = new THREE.BufferGeometry().setFromPoints([
             new THREE.Vector3(0, -5, 0.05), new THREE.Vector3(0, 5, 0.05),
@@ -636,8 +620,7 @@
         const crosshair = new THREE.LineSegments(lineGeo, lineMat);
         crosshair.rotation.x = -Math.PI / 2;
         scene.add(crosshair);
-
-        // Center ring for crosshair
+        
         const centerRingGeo = new THREE.RingGeometry(0.3, 0.35, 32);
         const centerRingMat = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
         const centerRing = new THREE.Mesh(centerRingGeo, centerRingMat);
@@ -645,7 +628,6 @@
         centerRing.position.y = 0.05;
         scene.add(centerRing);
 
-        // Image Mesh (For imported plans)
         let userImageMesh = null;
 
         function onWindowResize() {
@@ -655,7 +637,10 @@
             const aspect = width / height;
             camera.aspect = aspect;
             const fovRad = (camera.fov / 2) * (Math.PI / 180);
-            const safeRadius = 6.2; // Increased for narrow screens (S23 Ultra)
+            
+            // Fix for S23 Ultra and tall screens: Dynamic safe radius
+            const safeRadius = aspect < 0.5 ? 7.5 : 6.2; 
+            
             camera.position.set(0, aspect < 1 ? (safeRadius / aspect) / Math.tan(fovRad) : safeRadius / Math.tan(fovRad), 0);
             camera.lookAt(0, 0, 0);
             camera.updateProjectionMatrix();
@@ -663,9 +648,8 @@
         }
 
         window.addEventListener('resize', onWindowResize);
-        onWindowResize(); // Initial call
+        onWindowResize();
 
-        // Draw 2D Canvas Function
         function draw2DTexture() {
             const size = texSize;
             const cx = size / 2;
@@ -681,7 +665,6 @@
             ctx.save();
             ctx.translate(cx, cy);
             
-            // Helper function for arcs
             const drawSeg = (rIn, rOut, sDeg, eDeg, fill, stroke, lWidth = 2) => {
                 ctx.beginPath();
                 ctx.arc(0, 0, rOut, (sDeg - 90) * Math.PI / 180, (eDeg - 90) * Math.PI / 180);
@@ -695,7 +678,6 @@
                 ctx.save();
                 ctx.rotate((deg - 90) * Math.PI / 180);
                 ctx.translate(radius, 0);
-                // Rotate text to face upright relative to center
                 ctx.rotate(Math.PI / 2); 
                 ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 ctx.font = font;
@@ -706,56 +688,135 @@
                 ctx.restore();
             };
 
+            const baseFontSize = size * 0.035; 
+            const innerFontSize = baseFontSize * 0.5;
+
             if (isARTransparent) {
-                // AR Mode: Only outer rim and 24 mountains text in bright red
-                const ringColor = 'rgba(212,175,55,1)';
-                drawSeg(rBrn, rTicks, 0, 360, 'transparent', ringColor, 4);
-                
-                const baseFontSize = size * 0.035; 
+                // AR Mode: Completely transparent except red outer text
                 mountains24.forEach(m => {
                     const txt = m.name.split(' ');
-                    drawTxt(txt[0], rBrn + (rTicks - rBrn) * 0.7, m.deg, '#ef4444', `900 ${baseFontSize * 0.9}px Arial`, '#ffffff', 6);
-                    drawTxt(txt[1], rBrn + (rTicks - rBrn) * 0.35, m.deg, '#ef4444', `900 ${baseFontSize * 1.2}px Prompt`, '#ffffff', 8);
+                    drawTxt(txt[0], rBrn + (rTicks - rBrn) * 0.7, m.deg, '#ff0000', `900 ${baseFontSize * 1.1}px Arial`, '#ffffff', 8);
+                    drawTxt(txt[1], rBrn + (rTicks - rBrn) * 0.35, m.deg, '#ff0000', `900 ${baseFontSize * 1.4}px Prompt`, '#ffffff', 10);
                 });
 
             } else {
-                // Normal Mode: Clean UI based on User Feedback
-                
-                // Base Black Background
+                // Normal Mode: Clean UI with Borders and Highlights
+
+                // Base Background (Dark Slate)
                 ctx.beginPath();
                 ctx.arc(0,0, rTicks, 0, 2*Math.PI);
                 ctx.fillStyle = '#0a0f1d';
                 ctx.fill();
 
-                // Draw standard grid lines (Gold)
+                // Draw Grid (Gold)
                 const ringColor = 'rgba(212,175,55,0.4)';
                 for(let i = 0; i < 24; i++) drawSeg(rBrn, rTicks, i*15-7.5, i*15+7.5, 'transparent', ringColor, 2);
                 for(let i = 0; i < 12; i++) drawSeg(rDir, rBrn, i*30-15, i*30+15, 'transparent', ringColor, 2);
                 for(let i = 0; i < 8; i++) drawSeg(rStar, rDir, i*45-22.5, i*45+22.5, 'transparent', ringColor, 2);
-                drawSeg(rTai, rStar, 0, 360, 'transparent', ringColor, 2); // Star ring
+                drawSeg(rTai, rStar, 0, 360, 'transparent', ringColor, 2); 
                 
                 const vm = state.viewMode;
-                const baseFontSize = size * 0.035; 
-                const innerFontSize = baseFontSize * 0.5;
 
-                // --- Mode: KUA (8 Mansions) ---
-                if (vm === 'KUA') {
-                    state.calc.auspiciousDirs.forEach(dCode => {
-                        drawSeg(rStar, rTicks, dirs8[dCode].start, dirs8[dCode].end, 'rgba(16, 185, 129, 0.25)', 'rgba(16, 185, 129, 0.8)', 2); // พื้นเขียว
-                    });
-                    state.calc.inauspiciousDirs.forEach(dCode => {
-                        drawSeg(rStar, rTicks, dirs8[dCode].start, dirs8[dCode].end, 'rgba(239, 68, 68, 0.25)', 'rgba(239, 68, 68, 0.8)', 2); // พื้นแดง
-                    });
-                }
-
-                // --- Mode: TIME (Afflictions) ---
+                // --- Base Data Structures for Afflictions ---
                 const activeSuiPos = [];
+                let activeSanShas = [];
                 if (vm === 'TIME') {
                     Object.keys(state.toggles).filter(k => state.toggles[k]).forEach(p => {
                         const aff = state.calc.afflictions[p];
                         activeSuiPos.push({ branch: aff.clash, p: p });
+                        activeSanShas.push(aff);
+                    });
+                }
+
+                // --- Render 24 Mountains ---
+                mountains24.forEach((m, i) => {
+                    const txt = m.name.split(' ');
+                    drawTxt(txt[0], rBrn + (rTicks - rBrn) * 0.70, m.deg, '#fcd34d', `bold ${baseFontSize * 0.65}px Arial`, 'transparent');
+                    drawTxt(txt[1], rBrn + (rTicks - rBrn) * 0.35, m.deg, '#ffffff', `600 ${baseFontSize * 0.9}px Prompt`, 'transparent');
+                });
+
+                // --- Render 12 Branches (Inner Ring) ---
+                for (let i = 0; i < 12; i++) {
+                    const clashData = activeSuiPos.filter(a => a.branch === i);
+                    // Sui Po Highlight (Flashing Red Box just for this cell)
+                    if (clashData.length > 0 && vm === 'TIME') {
+                        const pulse = 0.5 + Math.sin(Date.now() / 200) * 0.4;
+                        const branchBgColor = `rgba(239, 68, 68, ${pulse})`; 
+                        drawSeg(rDir, rBrn, i*30-15, i*30+15, branchBgColor, '#ef4444', 4);
+                    }
+                    
+                    drawTxt(branches[i].branch, rDir + (rBrn - rDir) * 0.70, i * 30, '#ffffff', `bold ${innerFontSize * 1.3}px Arial`, 'rgba(0,0,0,0.8)', 4);
+                    drawTxt(branches[i].name.split(' ')[0], rDir + (rBrn - rDir) * 0.35, i * 30, '#ffffff', `600 ${innerFontSize * 2.3}px Prompt`, 'rgba(0,0,0,0.8)', 4);
+                }
+
+                // --- Render 8 Directions (KUA Mode logic) ---
+                Object.keys(dirs8).forEach(k => {
+                    const d = dirs8[k];
+                    let mid = (d.start + d.end) / 2; if (d.start > d.end) mid = (d.start + d.end + 360) / 2;
+                    
+                    let engColor = '#d4af37';
+                    let thColor = '#cbd5e1';
+                    
+                    if (vm === 'KUA') {
+                        if (state.calc.auspiciousDirs.includes(k)) {
+                            engColor = '#10b981'; thColor = '#10b981'; 
+                            // เพิ่มสีพื้นหลังจางๆ พร้อมเส้นขอบเขียว
+                            drawSeg(rStar, rDir, d.start, d.end, 'rgba(16, 185, 129, 0.15)', '#10b981', 3);
+                        } else if (state.calc.inauspiciousDirs.includes(k)) {
+                            engColor = '#ef4444'; thColor = '#ef4444'; 
+                            // เพิ่มสีพื้นหลังจางๆ พร้อมเส้นขอบแดง
+                            drawSeg(rStar, rDir, d.start, d.end, 'rgba(239, 68, 68, 0.15)', '#ef4444', 3);
+                        }
+                    }
+
+                    drawTxt(k, rStar + (rDir - rStar) * 0.72, mid, engColor, `900 ${innerFontSize * 1.75}px Arial`, 'rgba(0,0,0,0.9)', 4);
+                    
+                    const isLong = d.name.length > 7;
+                    const thSize = isLong ? innerFontSize * 1.15 : innerFontSize * 1.6;
+                    drawTxt(d.name, rStar + (rDir - rStar) * 0.28, mid, thColor, `500 ${thSize}px Prompt`, 'rgba(0,0,0,0.9)', 4);
+                });
+
+                // --- Render Flying Stars ---
+                if (vm === 'STARS') {
+                    Object.keys(dirs8).forEach(k => {
+                        const d = dirs8[k];
+                        let mid = (d.start + d.end) / 2; if (d.start > d.end) mid = (d.start + d.end + 360) / 2;
+                        const starNum = state.calc.stars.year[k];
                         
-                        // San Sha - Orange Arc on outer edge ONLY
+                        let sCol = '#94a3b8'; let bgCol = 'rgba(148, 163, 184, 0.15)'; 
+                        if ([9, 1, 8].includes(starNum)) { sCol = '#4ade80'; bgCol = 'rgba(74, 222, 128, 0.15)'; } 
+                        if ([2, 7, 3].includes(starNum)) { sCol = '#f87171'; bgCol = 'rgba(248, 113, 113, 0.15)'; } 
+                        if (starNum === 5) { sCol = '#facc15'; bgCol = 'rgba(250, 204, 21, 0.15)'; } 
+                        
+                        // ระบายสีพื้นหลังจางๆ ในช่องดาวเหิน
+                        drawSeg(rTai, rStar, d.start, d.end, bgCol, 'transparent');
+                        
+                        const starRad = rTai + (rStar - rTai) * 0.5;
+                        ctx.save();
+                        ctx.rotate((mid - 90) * Math.PI / 180);
+                        ctx.translate(starRad, 0);
+                        ctx.rotate(Math.PI / 2);
+                        
+                        // Circle Border around Star Number
+                        ctx.beginPath();
+                        ctx.arc(0, 0, innerFontSize * 1.8, 0, 2*Math.PI);
+                        ctx.strokeStyle = sCol;
+                        ctx.lineWidth = 4;
+                        ctx.fillStyle = '#0f172a';
+                        ctx.fill();
+                        ctx.stroke();
+                        
+                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillStyle = sCol;
+                        ctx.font = `900 ${innerFontSize * 2.2}px Arial`;
+                        ctx.fillText(starNum, 0, 0);
+                        ctx.restore();
+                    });
+                }
+
+                // --- Render San Sha (Orange Outer Arc) ---
+                if (vm === 'TIME') {
+                    activeSanShas.forEach(aff => {
                         ctx.beginPath();
                         const ssSRad = (aff.ssStart - 90) * Math.PI / 180;
                         let ssERad = (aff.ssEnd - 90) * Math.PI / 180;
@@ -767,91 +828,7 @@
                     });
                 }
 
-                // 24 Mountains Text
-                mountains24.forEach((m, i) => {
-                    const txt = m.name.split(' ');
-                    drawTxt(txt[0], rBrn + (rTicks - rBrn) * 0.70, m.deg, '#fcd34d', `bold ${baseFontSize * 0.65}px Arial`, 'rgba(0,0,0,0.8)', 4);
-                    drawTxt(txt[1], rBrn + (rTicks - rBrn) * 0.35, m.deg, '#ffffff', `600 ${baseFontSize * 0.9}px Prompt`, 'rgba(0,0,0,0.8)', 4);
-                });
-
-                // 12 Branches Text & Sui Po
-                for (let i = 0; i < 12; i++) {
-                    const clashData = activeSuiPos.filter(a => a.branch === i);
-                    
-                    // Sui Po Highlight (Flashing Box)
-                    if (clashData.length > 0 && vm === 'TIME') {
-                        const pulse = 0.6 + Math.sin(Date.now() / 200) * 0.4;
-                        const branchBgColor = `rgba(239, 68, 68, ${pulse})`; 
-                        drawSeg(rDir, rBrn, i*30-15, i*30+15, branchBgColor, '#ef4444', 4);
-                    }
-                    
-                    drawTxt(branches[i].branch, rDir + (rBrn - rDir) * 0.70, i * 30, '#ffffff', `bold ${innerFontSize * 1.3}px Arial`, 'rgba(0,0,0,0.9)', 4);
-                    drawTxt(branches[i].name.split(' ')[0], rDir + (rBrn - rDir) * 0.35, i * 30, '#ffffff', `600 ${innerFontSize * 2.3}px Prompt`, 'rgba(0,0,0,0.9)', 4);
-                }
-
-                // 8 Directions Text (Changes color in KUA mode)
-                Object.keys(dirs8).forEach(k => {
-                    const d = dirs8[k];
-                    let mid = (d.start + d.end) / 2; if (d.start > d.end) mid = (d.start + d.end + 360) / 2;
-                    
-                    let engColor = '#d4af37';
-                    let thColor = '#cbd5e1';
-                    
-                    if (vm === 'KUA') {
-                        if (state.calc.auspiciousDirs.includes(k)) {
-                            engColor = '#34d399'; thColor = '#10b981'; // Emerald
-                        } else if (state.calc.inauspiciousDirs.includes(k)) {
-                            engColor = '#f87171'; thColor = '#ef4444'; // Red
-                        }
-                    }
-
-                    drawTxt(k, rStar + (rDir - rStar) * 0.72, mid, engColor, `900 ${innerFontSize * 1.75}px Arial`, 'rgba(0,0,0,0.9)', 4);
-                    const isLong = d.name.length > 7;
-                    const thSize = isLong ? innerFontSize * 1.15 : innerFontSize * 1.6;
-                    drawTxt(d.name, rStar + (rDir - rStar) * 0.28, mid, thColor, `500 ${thSize}px Prompt`, 'rgba(0,0,0,0.8)', 4);
-                });
-
-                // Flying Stars
-                if (vm === 'STARS') {
-                    Object.keys(dirs8).forEach(k => {
-                        const d = dirs8[k];
-                        let mid = (d.start + d.end) / 2; if (d.start > d.end) mid = (d.start + d.end + 360) / 2;
-                        const starNum = state.calc.stars.year[k];
-                        let sCol = '#94a3b8'; let bgCol = 'rgba(148, 163, 184, 0.2)'; // Gray
-                        if ([9, 1, 8].includes(starNum)) { sCol = '#4ade80'; bgCol = 'rgba(74, 222, 128, 0.25)'; } // Green
-                        if ([2, 7, 3].includes(starNum)) { sCol = '#f87171'; bgCol = 'rgba(248, 113, 113, 0.25)'; } // Red
-                        if (starNum === 5) { sCol = '#facc15'; bgCol = 'rgba(250, 204, 21, 0.25)'; } // Yellow
-                        
-                        // ไฮไลท์ระบายสีพื้นหลังในช่องทิศดาวเหิน (ไม่กระพริบ)
-                        drawSeg(rTai, rStar, d.start, d.end, bgCol, sCol, 2);
-                        
-                        const starRad = rTai + (rStar - rTai) * 0.5;
-                        
-                        ctx.save();
-                        ctx.rotate((mid - 90) * Math.PI / 180);
-                        ctx.translate(starRad, 0);
-                        // Rotate back to upright for the number
-                        ctx.rotate(Math.PI / 2);
-                        
-                        // Circle Border
-                        ctx.beginPath();
-                        ctx.arc(0, 0, innerFontSize * 1.8, 0, 2*Math.PI);
-                        ctx.strokeStyle = sCol;
-                        ctx.lineWidth = 4;
-                        ctx.fillStyle = '#0f172a'; // Dark bg for circle
-                        ctx.fill();
-                        ctx.stroke();
-                        
-                        // Text
-                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                        ctx.fillStyle = sCol;
-                        ctx.font = `900 ${innerFontSize * 2.2}px Arial`;
-                        ctx.fillText(starNum, 0, 0);
-                        ctx.restore();
-                    });
-                }
-
-                // Center Taiji
+                // --- Center Taiji ---
                 ctx.beginPath(); ctx.arc(0, 0, rTai, 0, 2*Math.PI); ctx.fillStyle = '#0f172a'; ctx.fill();
                 const tj = rTai * 0.8;
                 ctx.beginPath(); ctx.arc(0, 0, tj, Math.PI/2, Math.PI*1.5); ctx.fillStyle = '#ffffff'; ctx.fill();
@@ -860,12 +837,6 @@
                 ctx.beginPath(); ctx.arc(0, tj/2, tj/2, 0, 2*Math.PI); ctx.fillStyle = '#000000'; ctx.fill();
                 ctx.beginPath(); ctx.arc(0, -tj/2, tj/6, 0, 2*Math.PI); ctx.fillStyle = '#000000'; ctx.fill();
                 ctx.beginPath(); ctx.arc(0, tj/2, tj/6, 0, 2*Math.PI); ctx.fillStyle = '#ffffff'; ctx.fill();
-                
-                // Red Crosshairs overlay
-                ctx.strokeStyle = 'rgba(255,0,0,0.5)';
-                ctx.lineWidth = 4;
-                ctx.beginPath(); ctx.moveTo(-size/2, 0); ctx.lineTo(size/2, 0); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(0, -size/2); ctx.lineTo(0, size/2); ctx.stroke();
             }
 
             ctx.restore();
@@ -926,14 +897,13 @@
                     els.adviceTitle.classList.remove('text-red-600');
                 }
             } else if (state.viewMode === 'TIME') {
-                // Check if current degree hits San Sha or Sui Po
                 let badTitle = [];
-                // Simple approx for current branch based on deg
                 let currentBranch = Math.floor((deg + 15) % 360 / 30);
                 
                 Object.keys(state.toggles).filter(k=>state.toggles[k]).forEach(p => {
                      const aff = state.calc.afflictions[p];
-                     if(aff.clash === currentBranch) badTitle.push(`ทิศชง(${p})`);
+                     const thName = (p==='year'?'ปี':p==='month'?'เดือน':p==='day'?'วัน':'ยาม');
+                     if(aff.clash === currentBranch) badTitle.push(`ทิศชง(${thName})`);
                      
                      let inSS = false;
                      if(aff.ssStart > aff.ssEnd) {
@@ -941,7 +911,7 @@
                      } else {
                          if(deg >= aff.ssStart && deg <= aff.ssEnd) inSS = true;
                      }
-                     if(inSS) badTitle.push(`ทิศอสูร(${p})`);
+                     if(inSS) badTitle.push(`ทิศอสูร(${thName})`);
                 });
 
                 if(badTitle.length > 0) {
@@ -951,7 +921,7 @@
                      els.adviceTitle.classList.add('text-red-600');
                      hasBad = true;
                 } else {
-                     title = "ทิศปกติ (กาลเวลา)";
+                     title = "ทิศปกติ (กาลเวลาจร)";
                      remedy = "ไม่มีดาวร้ายจรปะทะ สามารถใช้งานได้ปกติ";
                      els.dirAdvice.classList.replace('border-red-500', 'border-slate-300');
                      els.adviceTitle.classList.remove('text-red-600');
@@ -1019,7 +989,7 @@
             state.isCompassActive = true;
             els.compassBtn.classList.replace('bg-indigo-600/90', 'bg-red-600/90');
             els.compassBtn.innerHTML = '<svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg>';
-            els.manualRotationControl.classList.add('hidden'); // Hide manual slider
+            els.manualRotationControl.classList.add('hidden'); 
         }
 
         function stopCompass() {
@@ -1028,16 +998,12 @@
             window.removeEventListener('deviceorientationabsolute', handleOrientation);
             els.compassBtn.classList.replace('bg-red-600/90', 'bg-indigo-600/90');
             els.compassBtn.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>';
-            els.manualRotationControl.classList.remove('hidden'); // Show manual slider
-            
-            // Sync slider to current stopped position
+            els.manualRotationControl.classList.remove('hidden'); 
             els.manualDegree.value = displayDegree;
         }
 
-        // Manual Rotation
         els.manualDegree.addEventListener('input', (e) => {
             targetDegree = parseFloat(e.target.value);
-            // Instantly snap for slider
             displayDegree = targetDegree; 
             if(luopanMesh) luopanMesh.rotation.z = -displayDegree * (Math.PI / 180);
             updateAdviceBox(displayDegree);
@@ -1058,7 +1024,6 @@
                     els.arBtn.classList.replace('text-emerald-400', 'text-white');
                     document.body.style.backgroundColor = 'transparent';
                     
-                    // Show capture (shutter) button for Image background
                     els.importImgBtn.querySelector('svg').innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>`;
                     
                     updateStatusBadge();
@@ -1072,7 +1037,6 @@
                 els.arBtn.classList.replace('text-white', 'text-emerald-400');
                 document.body.style.backgroundColor = '#020617';
                 
-                // Restore folder icon
                 els.importImgBtn.querySelector('svg').innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>`;
                 
                 updateStatusBadge();
@@ -1087,18 +1051,14 @@
                 if(userImageMesh) scene.remove(userImageMesh);
                 
                 const aspect = tex.image.width / tex.image.height;
-                // Create plane, size 20 width base
                 const geo = new THREE.PlaneGeometry(20, 20 / aspect);
                 const mat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide });
                 userImageMesh = new THREE.Mesh(geo, mat);
                 
-                // Push it back behind the luopan and grid
-                userImageMesh.position.y = -1; // Y in Threejs coords here is depth due to camera looking down
-                userImageMesh.rotation.x = -Math.PI / 2; // Flat on ground parallel to luopan
-                
+                userImageMesh.position.y = -1; 
+                userImageMesh.rotation.x = -Math.PI / 2; 
                 scene.add(userImageMesh);
                 
-                // Show Edit Button
                 els.editImgBtn.classList.remove('hidden');
                 resetImgTransforms();
             });
@@ -1112,24 +1072,20 @@
             }
         });
 
-        // If in AR mode, clicking the folder button acts as a shutter
         els.importImgBtn.addEventListener('click', (e) => {
             if(isARTransparent && video.readyState === video.HAVE_ENOUGH_DATA) {
-                e.preventDefault(); // Stop file picker
+                e.preventDefault(); 
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = video.videoWidth;
                 tempCanvas.height = video.videoHeight;
                 tempCanvas.getContext('2d').drawImage(video, 0, 0);
                 applyUserImage(tempCanvas.toDataURL('image/jpeg'));
-                
-                // Auto turn off AR video to show captured image
                 els.arBtn.click();
             }
         });
 
         els.editImgBtn.addEventListener('click', () => {
             els.imageEditPanel.classList.remove('hidden');
-            // Dim Luopan for better visibility of plan
             if(luopanMesh) luopanMesh.material.opacity = 0.3;
         });
 
@@ -1142,17 +1098,15 @@
             if(!userImageMesh) return;
             const sc = parseFloat(els.imgScale.value);
             const rZ = parseFloat(els.imgRotZ.value);
-            const rX = parseFloat(els.imgRotX.value); // Tilt Y
-            const rY = parseFloat(els.imgRotY.value); // Tilt X
+            const rX = parseFloat(els.imgRotX.value); 
+            const rY = parseFloat(els.imgRotY.value); 
             const pX = parseFloat(els.imgPosX.value);
             const pY = parseFloat(els.imgPosY.value);
 
             userImageMesh.scale.set(sc, sc, sc);
-            // Apply rotations relative to the flat plane
             userImageMesh.rotation.set(-Math.PI/2 + THREE.MathUtils.degToRad(rX), THREE.MathUtils.degToRad(rY), THREE.MathUtils.degToRad(rZ), 'ZXY');
-            userImageMesh.position.set(pX, -1, -pY); // -pY because in our cam setup, -z is up on screen
+            userImageMesh.position.set(pX, -1, -pY); 
 
-            // Update Labels
             els.valImgScale.innerText = sc.toFixed(2);
             els.valImgRotZ.innerText = rZ.toFixed(1) + '°';
             els.valImgRotX.innerText = rX.toFixed(1) + '°';
@@ -1166,12 +1120,8 @@
         });
 
         function resetImgTransforms() {
-            els.imgScale.value = 1;
-            els.imgRotZ.value = 0;
-            els.imgRotX.value = 0;
-            els.imgRotY.value = 0;
-            els.imgPosX.value = 0;
-            els.imgPosY.value = 0;
+            els.imgScale.value = 1; els.imgRotZ.value = 0; els.imgRotX.value = 0;
+            els.imgRotY.value = 0; els.imgPosX.value = 0; els.imgPosY.value = 0;
             updateImageTransform();
         }
         els.resetImgBtn.addEventListener('click', resetImgTransforms);
@@ -1179,22 +1129,15 @@
         // --- Render Loop ---
         function animate() {
             requestAnimationFrame(animate);
-            
-            // Flashing Red Box for TIME mode
-            if(!isARTransparent && state.viewMode === 'TIME') {
-                 draw2DTexture(); 
-            }
+            if(!isARTransparent && state.viewMode === 'TIME') draw2DTexture(); 
 
-            if (luopanMesh) {
-                if (state.isCompassActive) {
-                    displayDegree = lerpAngle(displayDegree, targetDegree, 0.15);
-                    luopanMesh.rotation.z = -displayDegree * (Math.PI / 180);
-                    
-                    // Throttle DOM updates for performance
-                    if(Math.abs(state.currentDegree - displayDegree) > 0.5) {
-                        updateAdviceBox(displayDegree);
-                        state.currentDegree = displayDegree;
-                    }
+            if (luopanMesh && state.isCompassActive) {
+                displayDegree = lerpAngle(displayDegree, targetDegree, 0.15);
+                luopanMesh.rotation.z = -displayDegree * (Math.PI / 180);
+                
+                if(Math.abs(state.currentDegree - displayDegree) > 0.5) {
+                    updateAdviceBox(displayDegree);
+                    state.currentDegree = displayDegree;
                 }
             }
             renderer.render(scene, camera);
