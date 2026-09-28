@@ -238,6 +238,12 @@
                 <span id="degreeValue" class="text-yellow-400 font-bold text-2xl font-mono relative z-10 drop-shadow-md">0.0°</span>
                 <div id="dirLabel" class="text-slate-300 text-[11px] font-semibold mt-1 relative z-10 uppercase tracking-wider">เหนือ (N)</div>
             </div>
+            
+            <!-- Advice Box (Dynamic Feng Shui Suggestions) -->
+            <div id="dirAdvice" class="absolute top-full mt-4 bg-white/95 backdrop-blur-sm border border-slate-400 rounded-md px-4 py-2.5 shadow-[0_10px_25px_rgba(0,0,0,0.5)] text-center w-max max-w-[90vw] pointer-events-none transition-all duration-300">
+                <div id="adviceTitle" class="text-black font-bold text-[13px] tracking-wide"></div>
+                <div id="adviceRemedy" class="text-slate-700 text-[12px] mt-1"></div>
+            </div>
         </div>
         
         <!-- Hidden 2D Canvas for Texture (3K Resolution) -->
@@ -316,6 +322,18 @@
             7: { aus: ['NW','SW','NE','W'], inaus: ['E','SE','S','N'] },
             8: { aus: ['SW','NW','W','NE'], inaus: ['S','N','SE','E'] },
             9: { aus: ['E','SE','N','S'], inaus: ['NE','W','SW','NW'] }
+        };
+
+        const starMeanings = {
+            1: { title: "ดาว 1 โชคเสริม ธุรกิจ การเดินทาง ปรับตัว", remedy: "วางอุปกรณ์ เช่น น้ำพุ, น้ำตก, ตู้ปลา, พัดลม, นาฬิกาลูกตุ้มโลหะ" },
+            2: { title: "ดาว 2 ป่วยไข้ อุปสรรค ปัญหาเรื้อรัง", remedy: "ห้ามกระตุ้น! แขวนน้ำเต้าโลหะ หรือ เหรียญจีน 6 จักรพรรดิ" },
+            3: { title: "ดาว 3 ทะเลาะเบาะแว้ง คดีความ อารมณ์ร้อน", remedy: "สลายพลังด้วย สีแดง เช่น พรม โคมไฟสว่าง ของตกแต่งสีแดง" },
+            4: { title: "ดาว 4 ความรัก เสน่ห์ การศึกษา ปัญญา", remedy: "วางต้นไผ่กวนอิม 4 ต้น ดอกไม้สด ต้นไม้สวยงาม หรือพู่กันจีน" },
+            5: { title: "ดาว 5 วิบัติ ภัยพิบัติ อุบัติเหตุ เสียทรัพย์", remedy: "⚠️ ห้ามเคาะเจาะตอกเด็ดขาด! แขวนระฆังลมโลหะ 6 หลอด" },
+            6: { title: "ดาว 6 อำนาจ บารมี ผู้อุปถัมภ์ เลื่อนขั้น", remedy: "กระตุ้นด้วย ก้อนทอง ดินเผา เซรามิก หรือลูกแก้วคริสตัล" },
+            7: { title: "ดาว 7 โจรภัย แข่งขัน สูญเสีย เลือดตกยางออก", remedy: "วางอ่างน้ำนิ่งสีฟ้า/ดำ แร่พลอยสีน้ำเงิน เพื่อถ่ายเทพลังร้าย" },
+            8: { title: "ดาว 8 โชคลาภ มั่งคั่ง ร่ำรวย (ดาวดีที่สุด)", remedy: "เปิดไฟสว่าง วางน้ำพุ พัดลม วัตถุเคลื่อนไหว เพื่อกระตุ้นโชค" },
+            9: { title: "ดาว 9 ชื่อเสียง ยินดี สำเร็จรวดเร็ว งานมงคล", remedy: "วางต้นไม้สวยงาม ดอกไม้สด โคมไฟสว่าง หรือของตกแต่งสีแดง" }
         };
 
         let state = {
@@ -752,12 +770,48 @@
             els.degreeValue.textContent = deg.toFixed(1) + '°';
 
             let label = "";
+            let currentDirCode = "";
             for (const [code, info] of Object.entries(dirs8)) {
                 let start = info.start, end = info.end;
                 let inRange = (start > end) ? (deg >= start || deg < end) : (deg >= start && deg < end);
-                if (inRange) { label = `${info.name.split(' ')[0]} (${code})`; break; }
+                if (inRange) { 
+                    label = `${info.name.split(' ')[0]} (${code})`; 
+                    currentDirCode = code;
+                    break; 
+                }
             }
             els.dirLabel.textContent = label;
+
+            // Update Dynamic Advice Box based on Flying Stars & Afflictions
+            if (currentDirCode && state.calc.stars && state.calc.stars.year) {
+                let starNum = state.calc.stars.year[currentDirCode];
+                let advice = starMeanings[starNum];
+                
+                let isAfflicted = false;
+                let afflictionNames = [];
+                const active = Object.keys(state.toggles).filter(k => state.toggles[k]);
+                active.forEach(p => {
+                    const aff = state.calc.afflictions[p];
+                    if (checkOverlap(dirs8[currentDirCode].start, dirs8[currentDirCode].end, aff.suiPoStart, aff.suiPoEnd)) {
+                        isAfflicted = true; afflictionNames.push('ทิศแตก');
+                    }
+                    if (checkOverlap(dirs8[currentDirCode].start, dirs8[currentDirCode].end, aff.ssStart, aff.ssEnd)) {
+                        isAfflicted = true; afflictionNames.push('ทิศอสูร');
+                    }
+                });
+
+                const advTitleEl = document.getElementById('adviceTitle');
+                const advRemedyEl = document.getElementById('adviceRemedy');
+
+                if (advice) {
+                    let titleHtml = advice.title;
+                    if (isAfflicted) {
+                         titleHtml += ` <span class="text-red-600 font-bold animate-pulse">(⚠️ ติด ${[...new Set(afflictionNames)].join(',')})</span>`;
+                    }
+                    advTitleEl.innerHTML = titleHtml;
+                    advRemedyEl.innerHTML = advice.remedy;
+                }
+            }
         }
 
         function handleOrientation(event) {
