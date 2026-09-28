@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Luopan 3D Pro: Time & Personal Feng Shui Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold-primary: #d4af37;
+            --bg-dark: #0f172a;
+        }
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: var(--bg-dark);
+            color: #f8fafc;
+            overflow: hidden;
+            touch-action: none;
+        }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+        ::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--gold-primary); }
+
+        .gold-gradient-text {
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border-right: 1px solid rgba(212, 175, 55, 0.15);
+        }
+
+        /* Sidebar Animations */
+        .sidebar-expanded { transform: translateX(0); width: 22rem; }
+        .sidebar-collapsed { transform: translateX(-100%); width: 0; border-right: none; }
+        @media (max-width: 768px) {
+            .sidebar-expanded { width: 100%; position: absolute; z-index: 40; }
+        }
+
+        .check-toggle.active {
+            background-color: rgba(30, 41, 59, 1);
+            border-color: #ca8a04;
+            color: #fde047;
+        }
+        .check-toggle.active .icon { color: #fde047; }
+        
+        @keyframes pulse-blue {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        .btn-compass-active {
+            background-color: rgba(30, 58, 138, 0.9) !important;
+            border-color: #3b82f6 !important;
+            color: #93c5fd !important;
+            animation: pulse-blue 2s infinite;
+        }
+        .btn-compass-active svg { color: #60a5fa; }
+    </style>
+</head>
+<body class="h-screen w-full bg-[#050811] flex relative">
+
+    <!-- Pre-declare update3DTexture so calculateAll can safely reference it -->
+    <script>
+        window.update3DTexture = function() {
+            // Placeholder, overwritten during Three.js initialization
+        };
+    </script>
+
+    <!-- Sidebar Toggle Button -->
+    <button id="sidebarToggleBtn" class="absolute top-4 left-4 z-50 p-2.5 bg-slate-900/90 text-yellow-500 rounded-xl border border-yellow-600/50 shadow-[0_0_15px_rgba(212,175,55,0.3)] hover:bg-slate-800 transition-all backdrop-blur-md">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+    </button>
+
+    <!-- Live Compass Toggle Button -->
+    <button id="compassBtn" class="absolute top-4 right-4 z-40 flex items-center gap-2 px-4 py-2.5 bg-slate-900/90 text-slate-400 rounded-full border border-slate-600/50 shadow-[0_0_15px_rgba(0,0,0,0.5)] hover:bg-slate-800 hover:text-blue-400 transition-all backdrop-blur-md" title="เปิดโหมดเข็มทิศจริง">
+        <svg class="w-5 h-5 transition-transform duration-500" id="compassIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+        <span class="text-[11px] font-bold hidden sm:inline-block">Live Compass</span>
+    </button>
+
+    <!-- Sidebar Configuration Panel -->
+    <aside id="sidebar" class="flex-shrink-0 h-full flex flex-col glass-panel transition-transform duration-300 sidebar-expanded shadow-2xl relative z-40">
+        
+        <div class="pt-16 pb-4 px-5 border-b border-slate-700/50 flex justify-between items-center bg-slate-900/80">
+            <h1 class="text-lg font-bold gold-gradient-text flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                Luopan 3D Pro
+            </h1>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="flex border-b border-slate-800 bg-slate-950/50 text-[11px] font-medium">
+            <button class="tab-btn flex-1 py-3 border-b-2 border-yellow-500 text-yellow-400" data-tab="config">⚙️ ตั้งค่า (Config)</button>
+            <button class="tab-btn flex-1 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200" data-tab="analysis">📊 วิเคราะห์ (Analysis)</button>
+        </div>
+
+        <!-- Tab Contents -->
+        <div class="flex-grow overflow-y-auto p-4 space-y-4">
+            
+            <!-- TAB 1: CONFIGURATION -->
+            <div id="tab-config" class="tab-content block space-y-4">
+                
+                <!-- 1. Time Input -->
+                <div class="space-y-2 bg-slate-800/40 p-3.5 rounded-xl border border-slate-700/50">
+                    <h3 class="text-yellow-500 font-semibold text-[11px] flex items-center gap-2">🕒 กาลเวลาจร (Current Time)</h3>
+                    <input type="datetime-local" id="targetDate" class="w-full bg-slate-950 border border-slate-600 rounded-lg px-3 py-2 text-white focus:border-yellow-500 outline-none transition-all font-mono text-[11px]">
+                    
+                    <div class="pt-3 mt-3 border-t border-slate-700/50">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-[10px] font-medium text-slate-300">เปิดชั้นข้อมูลทิศร้าย (Affliction Layers)</label>
+                            <div class="flex gap-2">
+                                <button id="btnSelectAll" class="text-[10px] text-yellow-500 hover:text-yellow-300">เปิดทั้งหมด</button>
+                                <span class="text-slate-600">|</span>
+                                <button id="btnClearAll" class="text-[10px] text-slate-400 hover:text-slate-200">ปิดทั้งหมด</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button class="check-toggle active flex items-center justify-between px-2.5 py-1.5 bg-slate-800 border border-yellow-600 text-yellow-400 rounded text-[10px] shadow-sm transition-all" data-type="year">
+                                ปี (Year) <span class="icon text-sm">☑</span>
+                            </button>
+                            <button class="check-toggle active flex items-center justify-between px-2.5 py-1.5 bg-slate-800 border border-yellow-600 text-yellow-400 rounded text-[10px] shadow-sm transition-all" data-type="month">
+                                เดือน (Month) <span class="icon text-sm">☑</span>
+                            </button>
+                            <button class="check-toggle active flex items-center justify-between px-2.5 py-1.5 bg-slate-800 border border-yellow-600 text-yellow-400 rounded text-[10px] shadow-sm transition-all" data-type="day">
+                                วัน (Day) <span class="icon text-sm">☑</span>
+                            </button>
+                            <button class="check-toggle active flex items-center justify-between px-2.5 py-1.5 bg-slate-800 border border-yellow-600 text-yellow-400 rounded text-[10px] shadow-sm transition-all" data-type="hour">
+                                ยาม (Hour) <span class="icon text-sm">☑</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Person Input -->
+                <div class="space-y-3 bg-slate-800/40 p-3.5 rounded-xl border border-slate-700/50">
+                    <h3 class="text-yellow-500 font-semibold text-[11px] flex items-center gap-2">👤 ข้อมูลบุคคล (Person)</h3>
+                    <div class="space-y-2">
+                        <div>
+                            <span class="text-[10px] text-slate-400 block mb-1">วัน/เดือน/ปี และเวลาเกิด</span>
+                            <input type="datetime-local" id="birthDate" value="1990-01-01T12:00" class="w-full bg-slate-950 border border-slate-600 rounded-lg px-3 py-2 text-white outline-none focus:border-yellow-500 font-mono text-[11px]">
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-400 block mb-1">เพศกำเนิด</span>
+                            <select id="gender" class="w-full bg-slate-950 border border-slate-600 rounded-lg px-3 py-2 text-white outline-none focus:border-yellow-500 text-[11px]">
+                                <option value="M">ชาย (Male)</option>
+                                <option value="F">หญิง (Female)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between bg-slate-900 border border-yellow-700/30 rounded-lg p-2.5">
+                        <span class="text-[11px] text-yellow-200">รหัสบุคคล (Kua Number):</span>
+                        <div class="w-6 h-6 rounded-full bg-yellow-900/50 border border-yellow-500 flex items-center justify-center text-[11px] font-bold text-yellow-400" id="kuaDisplay">1</div>
+                    </div>
+                </div>
+
+                <!-- 3. Display Modes -->
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-medium text-slate-300">โหมดแสดงผลหน้าปัด (View Mode)</label>
+                    <div class="flex flex-col gap-1.5">
+                        <button class="layer-btn active px-3 py-2 bg-slate-800 border border-yellow-600 text-yellow-400 rounded-lg text-[11px] text-left transition-all" data-layer="ALL">✨ แสดงทั้งหมด (ผสานชั้นข้อมูล)</button>
+                        <button class="layer-btn px-3 py-2 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[11px] text-left transition-all" data-layer="KUA">👤 เฉพาะทิศมงคลบุคคล (8 Mansions)</button>
+                        <button class="layer-btn px-3 py-2 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[11px] text-left transition-all" data-layer="TIME">🕒 เฉพาะทิศร้ายกาลเวลา (Afflictions)</button>
+                        <button class="layer-btn px-3 py-2 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[11px] text-left transition-all" data-layer="STARS">⭐ เฉพาะดาวเหินประจำปี (Flying Stars)</button>
+                    </div>
+                </div>
+                
+                <!-- Moved from floating panel: Warnings & BaZi -->
+                <!-- Strict Warnings -->
+                <div class="border border-red-800/60 bg-red-950/40 rounded-xl p-3 shadow-lg mt-4">
+                    <h3 class="text-red-500 font-bold text-[11px] flex items-center gap-1.5 mb-1.5">
+                        <svg class="w-3 h-3 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        ระบบวิเคราะห์เตือนภัย
+                    </h3>
+                    <div id="strictWarnings" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1">
+                        <!-- JS injects warnings -->
+                    </div>
+                </div>
+
+                <!-- BaZi Result -->
+                <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-3 shadow-lg">
+                    <div class="text-[11px] text-yellow-500 font-bold mb-2 pb-1.5 border-b border-slate-800 flex items-center gap-1.5">
+                        ผลการคำนวณ 4 เสา:
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-[11px]" id="baziPanel">
+                        <!-- JS renders here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: ANALYSIS -->
+            <div id="tab-analysis" class="tab-content hidden space-y-4">
+                
+                <!-- Member Impact -->
+                <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-3 shadow-lg">
+                    <h3 class="text-orange-400 font-bold text-[11px] mb-2 border-b border-slate-800 pb-1.5">🎯 ผลกระทบเจาะลึกบุคคล</h3>
+                    <div id="impactAnalysis" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1"></div>
+                </div>
+
+                <!-- Remedies -->
+                <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-3 shadow-lg">
+                    <h3 class="text-green-400 font-bold text-[11px] mb-2 border-b border-slate-800 pb-1.5">☯️ คำแนะนำจัดเสริม/สลายภัย</h3>
+                    <div id="remedyAnalysis" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1"></div>
+                </div>
+            </div>
+
+        </div>
+    </aside>
+
+    <!-- Main 3D Canvas Area -->
+    <main class="flex-1 relative overflow-hidden flex justify-center items-center h-full bg-[#050811] z-0">
+        <!-- Hidden 2D Canvas for Texture (Resolution multiplied for Crispness) -->
+        <canvas id="luopanCanvas" class="hidden" width="3072" height="3072"></canvas>
+        
+        <!-- Three.js Container -->
+        <div id="canvas3dContainer" class="w-full h-full cursor-default"></div>
+        
+        <!-- Fixed Crosshair (Always remains strictly aligned to the screen) -->
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-80 z-10">
+            <div class="w-[1px] h-[120vh] bg-red-500 absolute left-1/2 -top-[60vh] shadow-[0_0_8px_rgba(239,68,68,0.8)]"></div>
+            <div class="h-[1px] w-[120vw] bg-red-500 absolute top-1/2 -left-[60vw] shadow-[0_0_8px_rgba(239,68,68,0.8)]"></div>
+            <div class="w-6 h-6 border-[3px] border-red-500 rounded-full absolute -top-3 -left-3 bg-transparent shadow-[0_0_12px_rgba(239,68,68,0.8)]"></div>
+        </div>
+    </main>
+
+    <script>
+        // --- 1. DATA STRUCTURES (Branch index 0-11 strictly aligns with calculations) ---
+        const branches = [
+            { name: "ชวด (Rat)", branch: "Zi", dir: 'N', angle: 0 },       // 0
+            { name: "ฉลู (Ox)", branch: "Chou", dir: 'NE', angle: 30 },     // 1
+            { name: "ขาล (Tiger)", branch: "Yin", dir: 'NE', angle: 60 },    // 2
+            { name: "เถาะ (Rabbit)", branch: "Mao", dir: 'E', angle: 90 },    // 3
+            { name: "มะโรง (Dragon)", branch: "Chen", dir: 'SE', angle: 120 },// 4
+            { name: "มะเส็ง (Snake)", branch: "Si", dir: 'SE', angle: 150 },  // 5
+            { name: "มะเมีย (Horse)", branch: "Wu", dir: 'S', angle: 180 },   // 6
+            { name: "มะแม (Goat)", branch: "Wei", dir: 'SW', angle: 210 },   // 7
+            { name: "วอก (Monkey)", branch: "Shen", dir: 'SW', angle: 240 },  // 8
+            { name: "ระกา (Rooster)", branch: "You", dir: 'W', angle: 270 },  // 9
+            { name: "จอ (Dog)", branch: "Xu", dir: 'NW', angle: 300 },     // 10
+            { name: "กุน (Pig)", branch: "Hai", dir: 'NW', angle: 330 }      // 11
+        ];
+
+        const dirs8 = {
+            'N':  { name: 'เหนือ', start: 337.5, end: 22.5, element: 'Water', bagua: 'Kan' },
+            'NE': { name: 'ต.อ.เฉียงเหนือ', start: 22.5, end: 67.5, element: 'Earth', bagua: 'Gen' },
+            'E':  { name: 'ตะวันออก', start: 67.5, end: 112.5, element: 'Wood', bagua: 'Zhen' },
+            'SE': { name: 'ต.อ.เฉียงใต้', start: 112.5, end: 157.5, element: 'Wood', bagua: 'Xun' },
+            'S':  { name: 'ใต้', start: 157.5, end: 202.5, element: 'Fire', bagua: 'Li' },
+            'SW': { name: 'ต.ต.เฉียงใต้', start: 202.5, end: 247.5, element: 'Earth', bagua: 'Kun' },
+            'W':  { name: 'ตะวันตก', start: 247.5, end: 292.5, element: 'Metal', bagua: 'Dui' },
+            'NW': { name: 'ต.ต.เฉียงเหนือ', start: 292.5, end: 337.5, element: 'Metal', bagua: 'Qian' }
+        };
+
+        const mountains24 = [
+            "Zi", "Gui", "Chou", "Gen", "Yin", "Jia", "Mao", "Yi", 
+            "Chen", "Xun", "Si", "Bing", "Wu", "Ding", "Wei", "Kun", 
+            "Shen", "Geng", "You", "Xin", "Xu", "Qian", "Hai", "Ren"
+        ];
+        const mountains24TH = [
+            "ชวด", "กุ่ย", "ฉลู", "เกิน", "ขาล", "เจี่ย", "เถาะ", "อี่", 
+            "มะโรง", "ซวิ่น", "มะเส็ง", "ปิ่ง", "มะเมีย", "ติง", "มะแม", "คุน", 
+            "วอก", "เกิง", "ระกา", "ซิน", "จอ", "เฉียน", "กุน", "เหริน"
+        ];
+
+        const baguaImpactMap = {
+            'N': { member: 'ลูกชายคนกลาง', organ: 'ไต, หู, ระบบไหลเวียน', career: 'ความก้าวหน้าในอาชีพชะงัก' },
+            'NE': { member: 'ลูกชายคนเล็ก', organ: 'มือ, กระดูกสันหลัง, ระบบย่อย', career: 'การเรียนและสติปัญญาสะดุด' },
+            'E': { member: 'ลูกชายคนโต', organ: 'ตับ, เส้นเอ็น, แขนขา', career: 'ความอบอุ่นในบ้าน, การเริ่มต้นใหม่ล้มเหลว' },
+            'SE': { member: 'ลูกสาวคนโต', organ: 'ถุงน้ำดี, ต้นขา, ลำไส้', career: 'สูญเสียโชคลาภทางการเงินกะทันหัน' },
+            'S': { member: 'ลูกสาวคนกลาง', organ: 'หัวใจ, สายตา, ระบบเลือด', career: 'เสียชื่อเสียง, คดีความ, เกียรติยศหมอง' },
+            'SW': { member: 'แม่ / ผู้นำหญิง', organ: 'ช่องท้อง, ผิวหนัง, มดลูก', career: 'ความสัมพันธ์สมรสร้าวฉาน, วุ่นวายในบ้าน' },
+            'W': { member: 'ลูกสาวคนเล็ก', organ: 'ปอด, ระบบหายใจ, ช่องปาก', career: 'บริวารตีจาก, โชคการค้าหดหาย' },
+            'NW': { member: 'พ่อ / ผู้นำชาย', organ: 'ศีรษะ, สมอง, กระดูก', career: 'เสื่อมอำนาจบารมี, เลื่อนตำแหน่งยาก' }
+        };
+
+        const kuaData = {
+            1: { aus: ['SE','E','S','N'], inaus: ['W','NE','NW','SW'] },
+            2: { aus: ['NE','W','NW','SW'], inaus: ['E','SE','S','N'] },
+            3: { aus: ['S','N','SE','E'], inaus: ['SW','NW','NE','W'] },
+            4: { aus: ['N','S','E','SE'], inaus: ['NW','SW','W','NE'] },
+            6: { aus: ['W','NE','SW','NW'], inaus: ['SE','E','N','S'] },
+            7: { aus: ['NW','SW','NE','W'], inaus: ['E','SE','S','N'] },
+            8: { aus: ['SW','NW','W','NE'], inaus: ['S','N','SE','E'] },
+            9: { aus: ['E','SE','N','S'], inaus: ['NE','W','SW','NW'] }
+        };
+
+        let state = {
+            date: new Date(),
+            birthDate: new Date(1990, 0, 1),
+            gender: 'M',
+            viewMode: 'ALL',
+            toggles: { year: true, month: true, day: true, hour: true },
+            calc: { bazi: {}, afflictions: {}, stars: {}, kua: 1, auspiciousDirs: [], inauspiciousDirs: [] },
+            sidebarOpen: true
+        };
+
+        const els = {
+            targetDate: document.getElementById('targetDate'),
+            birthDate: document.getElementById('birthDate'),
+            gender: document.getElementById('gender'),
+            toggles: document.querySelectorAll('.check-toggle'),
+            btnSelectAll: document.getElementById('btnSelectAll'),
+            btnClearAll: document.getElementById('btnClearAll'),
+            layerBtns: document.querySelectorAll('.layer-btn'),
+            baziPanel: document.getElementById('baziPanel'),
+            kuaDisplay: document.getElementById('kuaDisplay'),
+            canvas: document.getElementById('luopanCanvas'),
+            strictWarnings: document.getElementById('strictWarnings'),
+            impactAnalysis: document.getElementById('impactAnalysis'),
+            remedyAnalysis: document.getElementById('remedyAnalysis'),
+            tabBtns: document.querySelectorAll('.tab-btn'),
+            tabContents: document.querySelectorAll('.tab-content'),
+            sidebar: document.getElementById('sidebar'),
+            sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+            compassBtn: document.getElementById('compassBtn'),
+            compassIcon: document.getElementById('compassIcon')
+        };
+        const ctx = els.canvas.getContext('2d', { alpha: false });
+
+        // Set Default Date
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        els.targetDate.value = now.toISOString().slice(0, 16);
+
+        // --- 2. CORE COMPUTATION ENGINES (Strictly Refactored) ---
+        function sumDigits(n) {
+            let s = n.toString().split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
+            return s > 9 ? sumDigits(s) : s;
+        }
+
+        function calculateAll() {
+            if(!els.targetDate.value) return;
+            const dt = new Date(els.targetDate.value);
+            state.date = dt;
+            const bDt = new Date(els.birthDate.value);
+            state.birthDate = bDt;
+            state.gender = els.gender.value;
+
+            const y = dt.getFullYear(); 
+            const m = dt.getMonth() + 1; 
+            const d = dt.getDate(); 
+            const h = dt.getHours();
+
+            // 1: Day Branch Engine (Epoch: 1 Jan 2024 = Jia Zi / Index 0)
+            const utcTarget = Date.UTC(y, m-1, d);
+            const utcEpoch = Date.UTC(2024, 0, 1);
+            const diffDays = Math.floor((utcTarget - utcEpoch) / 86400000);
+            const ganzhiIndex = ((diffDays % 60) + 60) % 60; // 0-59
+            const dayBranchIndex = ganzhiIndex % 12; // 0-11
+            state.calc.bazi.day = dayBranchIndex;
+
+            // 2: Year Branch Engine (Cutoff ~Feb 4)
+            let solarYear = y;
+            if (m < 2 || (m === 2 && d < 4)) {
+                solarYear -= 1;
+            }
+            const yearBranchIndex = ((solarYear - 4) % 12 + 12) % 12;
+            state.calc.bazi.year = yearBranchIndex;
+
+            // 3: Hour Branch Engine (23:00 - 00:59 is Rat/0)
+            const hourBranchIndex = Math.floor(((h + 1) % 24) / 2);
+            state.calc.bazi.hour = hourBranchIndex;
+
+            // 4: Month Branch Engine (Approximated Solar Months)
+            const cutoffs = [0, 5, 4, 6, 5, 6, 6, 7, 8, 8, 8, 7, 7];
+            let solarMonth = m;
+            if (d < cutoffs[m]) solarMonth = (m === 1) ? 12 : m - 1;
+            const mToBranch = { 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9, 10:10, 11:11, 12:0 };
+            const monthBranchIndex = mToBranch[solarMonth];
+            state.calc.bazi.month = monthBranchIndex;
+
+            // Render BaZi Panel (True Branches)
+            const pNames = { year: 'ปี', month: 'เดือน', day: 'วัน', hour: 'ยาม' };
+            els.baziPanel.innerHTML = Object.keys(pNames).map(p => `
+                <div class="bg-slate-950 rounded px-2.5 py-1.5 border border-slate-700/50 flex justify-between">
+                    <span class="text-yellow-500 font-medium text-[10px]">${pNames[p]}:</span>
+                    <span class="text-white font-medium text-[10px]">${branches[state.calc.bazi[p]].name}</span>
+                </div>
+            `).join('');
+
+            // 5: Afflictions Engine (Sui Po & San Sha)
+            ['year', 'month', 'day', 'hour'].forEach(pillar => {
+                const bIdx = state.calc.bazi[pillar];
+                
+                // Sui Po (Clash directly opposite)
+                const suiPoBranchIndex = (bIdx + 6) % 12;
+                const clashAngle = branches[suiPoBranchIndex].angle; 
+                const suiPoStart = (clashAngle - 15 + 360) % 360;
+                const suiPoEnd = (clashAngle + 15) % 360;
+
+                // San Sha (Three Killings based on Trine)
+                let ssStart, ssEnd, ssDir;
+                if ([8, 0, 4].includes(bIdx)) { // Water -> South
+                    ssStart = 135; ssEnd = 225; ssDir = 'S';
+                } else if ([11, 3, 7].includes(bIdx)) { // Wood -> West
+                    ssStart = 225; ssEnd = 315; ssDir = 'W';
+                } else if ([2, 6, 10].includes(bIdx)) { // Fire -> North
+                    ssStart = 315; ssEnd = 45; ssDir = 'N';
+                } else { // Metal (5,9,1) -> East
+                    ssStart = 45; ssEnd = 135; ssDir = 'E';
+                }
+
+                // Explicit separation of True vs Sui Po
+                state.calc.afflictions[pillar] = { 
+                    trueBranch: bIdx,
+                    suiPoBranch: suiPoBranchIndex,
+                    suiPoStart, 
+                    suiPoEnd, 
+                    ssStart, 
+                    ssEnd, 
+                    ssDir, 
+                    clashAngle 
+                };
+            });
+
+            // 6: Flying Stars Engine (Annual)
+            let base = sumDigits(solarYear); 
+            let yearStar = 11 - base;
+            if (yearStar > 9) yearStar = sumDigits(yearStar);
+            if (yearStar === 0) yearStar = 9;
+            if (yearStar === 5) yearStar = 5; 
+            
+            const luoShuPath = ['Center', 'NW', 'W', 'NE', 'S', 'N', 'SW', 'E', 'SE'];
+            let stars = {};
+            for(let i=0; i<9; i++) { 
+                let s = yearStar + i; 
+                if(s > 9) s -= 9; 
+                stars[luoShuPath[i]] = s; 
+            }
+            state.calc.stars.year = stars;
+
+            // 7: Personal Kua Engine
+            const bYear = bDt.getFullYear();
+            let baseKua = sumDigits(bYear);
+            let kua = state.gender === 'M' ? 11 - baseKua : 4 + baseKua;
+            if (kua > 9) kua = sumDigits(kua);
+            if (kua === 0) kua = 9;
+            if (kua === 5) kua = state.gender === 'M' ? 2 : 8;
+            
+            state.calc.kua = kua;
+            state.calc.auspiciousDirs = kuaData[kua].aus;
+            state.calc.inauspiciousDirs = kuaData[kua].inaus;
+            els.kuaDisplay.textContent = kua;
+
+            draw2DTexture();
+            generateAnalysis();
+        }
+
+        // --- 3. 2D CANVAS RENDERING (Upgraded 3K Graphics) ---
+        function draw2DTexture() {
+            const size = 3072;
+            ctx.clearRect(0, 0, size, size);
+
+            const cx = size / 2, cy = size / 2;
+            const radius = (size / 2) - 15; 
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(-Math.PI / 2); // North UP (-90 deg on canvas)
+
+            const rBase = radius;
+            const rTicks = radius * 0.96;
+            const rMnt = radius * 0.80;
+            const rBrn = radius * 0.60;
+            const rDir = radius * 0.42;
+            const rStar = radius * 0.28;
+            const rTai = radius * 0.16;
+
+            function drawSeg(rIn, rOut, sDeg, eDeg, fill, stroke, lineWidth=1) {
+                const sRad = sDeg * Math.PI / 180;
+                let eRad = eDeg * Math.PI / 180;
+                if (eDeg < sDeg) eRad += 2 * Math.PI;
+                ctx.beginPath(); ctx.arc(0, 0, rOut, sRad, eRad); ctx.arc(0, 0, rIn, eRad, sRad, true); ctx.closePath();
+                if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+                if (stroke) { ctx.lineWidth = lineWidth; ctx.strokeStyle = stroke; ctx.stroke(); }
+            }
+
+            function drawTxt(txt, r, deg, color, font, shadowColor=null, shadowBlur=0) {
+                ctx.save();
+                ctx.rotate(deg * Math.PI / 180); ctx.translate(r, 0); ctx.rotate(Math.PI / 2);
+                if(shadowColor) { ctx.shadowColor = shadowColor; ctx.shadowBlur = shadowBlur; }
+                ctx.fillStyle = color; ctx.font = font;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(txt, 0, 0);
+                ctx.restore();
+            }
+
+            // --- 1. Base Plate Background ---
+            const bgGrad = ctx.createRadialGradient(0, 0, radius*0.2, 0, 0, radius);
+            bgGrad.addColorStop(0, '#1e293b');
+            bgGrad.addColorStop(0.6, '#0f172a');
+            bgGrad.addColorStop(1, '#020617');
+            ctx.beginPath(); ctx.arc(0, 0, radius, 0, 2*Math.PI);
+            ctx.fillStyle = bgGrad; ctx.fill();
+            
+            // Outer Golden Rims
+            ctx.lineWidth = 15; ctx.strokeStyle = '#b8860b'; 
+            ctx.beginPath(); ctx.arc(0, 0, radius - 7, 0, 2*Math.PI); ctx.stroke();
+            ctx.lineWidth = 4; ctx.strokeStyle = '#fef08a'; 
+            ctx.beginPath(); ctx.arc(0, 0, radius - 18, 0, 2*Math.PI); ctx.stroke();
+            ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(254,240,138,0.5)'; 
+            ctx.beginPath(); ctx.arc(0, 0, radius - 25, 0, 2*Math.PI); ctx.stroke();
+
+            // Precision Ticks (Compass Edge)
+            for (let i = 0; i < 360; i++) {
+                const rad = i * Math.PI / 180;
+                const isMajor = i % 15 === 0;
+                const isMinor = i % 5 === 0;
+                
+                let len, col, lw;
+                if (isMajor) { len = (rBase - rTicks) * 0.8; col = '#ef4444'; lw = 5; }
+                else if (isMinor) { len = (rBase - rTicks) * 0.5; col = '#d4af37'; lw = 3; }
+                else { len = (rBase - rTicks) * 0.3; col = 'rgba(212,175,55,0.4)'; lw = 2; }
+
+                ctx.beginPath(); ctx.moveTo(Math.cos(rad) * rTicks, Math.sin(rad) * rTicks);
+                ctx.lineTo(Math.cos(rad) * (rTicks + len), Math.sin(rad) * (rTicks + len));
+                ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.stroke();
+            }
+
+            // Grid Rings
+            const ringColor = 'rgba(212,175,55,0.6)';
+            for(let i = 0; i < 24; i++) drawSeg(rBrn, rTicks, i*15-7.5, i*15+7.5, i%2===0?'rgba(255,255,255,0.03)':'transparent', ringColor, 2);
+            for(let i = 0; i < 12; i++) drawSeg(rDir, rBrn, i*30-15, i*30+15, i%2===0?'rgba(0,0,0,0.4)':'transparent', ringColor, 3);
+            for(let i = 0; i < 8; i++) drawSeg(rStar, rDir, i*45-22.5, i*45+22.5, 'rgba(15,23,42,0.8)', ringColor, 4);
+            for(let i = 0; i < 8; i++) drawSeg(rTai, rStar, i*45-22.5, i*45+22.5, 'rgba(2,6,23,1)', '#d4af37', 5);
+
+            // --- 2. Data Blending Layers (Underneath Text) ---
+            const vm = state.viewMode;
+            ctx.globalCompositeOperation = 'screen';
+            
+            // Auspicious Kua
+            if (vm === 'ALL' || vm === 'KUA') {
+                state.calc.auspiciousDirs.forEach(dCode => {
+                    const d = dirs8[dCode];
+                    drawSeg(rTai, rTicks, d.start, d.end, 'rgba(16, 185, 129, 0.35)', null);
+                });
+            }
+
+            // Afflictions
+            if (vm === 'ALL' || vm === 'TIME') {
+                const active = Object.keys(state.toggles).filter(k => state.toggles[k]);
+                // San Sha (Orange)
+                active.forEach(p => {
+                    const aff = state.calc.afflictions[p];
+                    drawSeg(rTai, rTicks, aff.ssStart, aff.ssEnd, 'rgba(249, 115, 22, 0.45)', null);
+                });
+                // Sui Po (Red)
+                active.forEach(p => {
+                    const aff = state.calc.afflictions[p];
+                    drawSeg(rTai, rTicks, aff.suiPoStart, aff.suiPoEnd, 'rgba(225, 29, 72, 0.55)', null);
+                });
+            }
+            ctx.globalCompositeOperation = 'source-over'; // Reset
+
+            // --- 3. Typography ---
+            const baseFontSize = size * 0.035; // Keep outer ring font size
+            const innerFontSize = baseFontSize * 0.5; // Reduced by 50% for inner rings
+
+            // 24 Mountains (Outer Ring - Size maintained)
+            for (let i = 0; i < 24; i++) {
+                const en = mountains24[i];
+                const th = mountains24TH[i];
+                const mr = rBrn + (rTicks - rBrn) / 2;
+                drawTxt(en, mr + baseFontSize*0.7, i * 15, '#fde047', `bold ${baseFontSize*0.9}px Arial`, 'rgba(0,0,0,0.8)', 6);
+                drawTxt(th, mr - baseFontSize*0.7, i * 15, '#e2e8f0', `500 ${baseFontSize*0.95}px Prompt`, 'rgba(0,0,0,0.8)', 6);
+            }
+            
+            // 12 Branches (Inner Ring 1 - Thai Font increased by ~50% (x1.35))
+            for (let i = 0; i < 12; i++) {
+                drawTxt(branches[i].name.split(' ')[0], rDir + (rBrn - rDir) * 0.5, i * 30, '#ffffff', `600 ${innerFontSize * 1.35}px Prompt`, 'rgba(0,0,0,0.9)', 10);
+            }
+            
+            // 8 Directions (Inner Ring 2 - Thai Font increased by ~50% (x0.85))
+            Object.keys(dirs8).forEach(k => {
+                const d = dirs8[k];
+                let mid = (d.start + d.end) / 2; if (d.start > d.end) mid = (d.start + d.end + 360) / 2;
+                drawTxt(k, rStar + (rDir - rStar) * 0.65, mid, '#d4af37', `900 ${innerFontSize * 1.75}px Arial`, 'rgba(0,0,0,0.9)', 15);
+                drawTxt(d.name, rStar + (rDir - rStar) * 0.20, mid, '#cbd5e1', `500 ${innerFontSize * 0.85}px Prompt`, 'rgba(0,0,0,0.8)', 8);
+            });
+            
+            // Flying Stars (Inner Ring 3 - Font reduced by 50%, Padding adjusted)
+            if (vm === 'ALL' || vm === 'STARS') {
+                Object.keys(dirs8).forEach(k => {
+                    const d = dirs8[k];
+                    let mid = (d.start + d.end) / 2; if (d.start > d.end) mid = (d.start + d.end + 360) / 2;
+                    const starNum = state.calc.stars.year[k];
+                    let sCol = '#94a3b8';
+                    if ([9, 1, 8].includes(starNum)) sCol = '#4ade80';
+                    if ([5, 2, 7, 3].includes(starNum)) sCol = '#f87171';
+                    if (starNum === 5) sCol = '#facc15'; 
+                    drawTxt(starNum, rTai + (rStar - rTai) * 0.5, mid, sCol, `900 ${innerFontSize * 2.25}px Arial`, 'rgba(0,0,0,0.9)', 20);
+                });
+            }
+
+            // --- 4. Center Taiji & Bagua ---
+            ctx.restore(); ctx.save(); ctx.translate(cx, cy);
+            
+            ctx.beginPath();
+            for(let i = 0; i < 8; i++) {
+                const ang = (i * 45 + 22.5) * Math.PI / 180;
+                ctx[i === 0 ? 'moveTo' : 'lineTo'](Math.cos(ang) * rTai, Math.sin(ang) * rTai);
+            }
+            ctx.closePath(); 
+            ctx.fillStyle = '#0f172a'; ctx.fill(); 
+            ctx.lineWidth = 10; ctx.strokeStyle = '#d4af37'; ctx.stroke();
+
+            const tr = rTai * 0.65;
+            ctx.shadowBlur = 35; ctx.shadowColor = 'rgba(212,175,55,0.6)';
+            ctx.rotate(-Math.PI / 2);
+            
+            ctx.beginPath(); ctx.arc(0, 0, tr, 0, 2 * Math.PI); ctx.fillStyle = '#f8fafc'; ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.beginPath(); ctx.arc(0, 0, tr, Math.PI / 2, 3 * Math.PI / 2); ctx.fillStyle = '#020617'; ctx.fill();
+            
+            ctx.beginPath(); ctx.arc(0, -tr / 2, tr / 2, 0, 2 * Math.PI); ctx.fillStyle = '#f8fafc'; ctx.fill();
+            ctx.beginPath(); ctx.arc(0, tr / 2, tr / 2, 0, 2 * Math.PI); ctx.fillStyle = '#020617'; ctx.fill();
+            
+            ctx.beginPath(); ctx.arc(0, -tr / 2, tr / 6, 0, 2 * Math.PI); ctx.fillStyle = '#020617'; ctx.fill();
+            ctx.beginPath(); ctx.arc(0, tr / 2, tr / 6, 0, 2 * Math.PI); ctx.fillStyle = '#f8fafc'; ctx.fill();
+            
+            ctx.beginPath(); ctx.arc(0, 0, tr, 0, 2 * Math.PI); ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 6; ctx.stroke();
+            
+            ctx.restore();
+            window.update3DTexture(); // Signal Three.js to update
+        }
+
+        // --- 4. ANALYSIS ENGINE ---
+        function checkOverlap(tS, tE, aS, aE) {
+            let cur = tS; let count = 0;
+            while(count < 72) {
+                let inRange = (aS < aE) ? (cur >= aS && cur <= aE) : (cur >= aS || cur <= aE);
+                if(inRange) return true;
+                if(Math.abs(cur - tE) < 5) break;
+                cur = (cur + 5) % 360; count++;
+            }
+            return false;
+        }
+
+        function generateAnalysis() {
+            els.strictWarnings.innerHTML = '';
+            els.impactAnalysis.innerHTML = '';
+            els.remedyAnalysis.innerHTML = '';
+
+            const active = Object.keys(state.toggles).filter(k => state.toggles[k]);
+            const pNames = { year:'ปี', month:'เดือน', day:'วัน', hour:'ยาม' };
+            let hasWarnings = false;
+
+            Object.keys(dirs8).forEach(dCode => {
+                const dir = dirs8[dCode];
+                let hits = [];
+                let isAuspicious = state.calc.auspiciousDirs.includes(dCode);
+                let fsStar = state.calc.stars.year[dCode];
+
+                active.forEach(p => {
+                    const aff = state.calc.afflictions[p];
+                    if (checkOverlap(dir.start, dir.end, aff.suiPoStart, aff.suiPoEnd)) hits.push(`ทิศแตก (${pNames[p]})`);
+                    if (checkOverlap(dir.start, dir.end, aff.ssStart, aff.ssEnd)) hits.push(`ทิศอสูร (${pNames[p]})`);
+                });
+                if (fsStar === 5) hits.push(`ดาว 5 วิบัติ`);
+
+                if (hits.length > 0) {
+                    hasWarnings = true;
+                    let warningPrefix = isAuspicious ? `<span class="text-yellow-400">แม้เป็นทิศมงคล แต่</span>` : '';
+                    
+                    els.strictWarnings.insertAdjacentHTML('beforeend', `
+                        <div class="border-l-2 border-red-500 bg-red-900/40 p-2 rounded text-[10px] mb-2 shadow-sm">
+                            <span class="text-white font-bold block">⚠️ คำเตือน: ทิศ ${dir.name} (${dCode})</span> 
+                            ${warningPrefix} ติดปะทะ: <span class="text-red-400 font-bold">${hits.join(' และ ')}</span>
+                            <div class="mt-1 text-red-200/90 leading-tight">ห้ามทำการตอก เจาะ ย้ายเตียง หรือขุดดิน ในทิศนี้เด็ดขาดในช่วงเวลาดังกล่าว</div>
+                        </div>
+                    `);
+
+                    const impact = baguaImpactMap[dCode];
+                    let eventWarn = hits.some(h => h.includes('แตก') || h.includes('อสูร') || h.includes('5')) 
+                        ? 'ระวังอุบัติเหตุกะทันหัน, เจ็บป่วยรักษายาก, ผ่าตัด, เสียทรัพย์กะทันหัน' 
+                        : 'พลังงานแปรปรวนชะงักงัน';
+                    if(fsStar === 7) eventWarn += ' (ระวังวิวาท ถูกหลอกลวง)';
+
+                    els.impactAnalysis.insertAdjacentHTML('beforeend', `
+                        <div class="bg-slate-800/50 border border-slate-700/50 rounded p-2.5 text-[10px] mb-2 shadow-sm">
+                            <div class="font-bold text-red-400 mb-1.5 border-b border-slate-700/50 pb-1">หากละเมิดทิศ ${dir.name}</div>
+                            <div class="text-slate-300 mb-1"><span class="w-4 inline-block">👤</span> <strong class="text-white">บุคคลกระทบ:</strong> ${impact.member}</div>
+                            <div class="text-slate-300 mb-1"><span class="w-4 inline-block">🫀</span> <strong class="text-white">สุขภาพ:</strong> ${impact.organ}</div>
+                            <div class="text-slate-300 mb-1"><span class="w-4 inline-block">💼</span> <strong class="text-white">ชีวิต/งาน:</strong> ${impact.career}</div>
+                            <div class="text-slate-300"><span class="w-4 inline-block">⚠️</span> <strong class="text-red-300">ระวังเหตุ:</strong> ${eventWarn}</div>
+                        </div>
+                    `);
+
+                    els.remedyAnalysis.insertAdjacentHTML('beforeend', `
+                        <div class="bg-slate-800/50 border-l-2 border-red-500 rounded p-2.5 text-[10px] text-slate-300 mb-2 shadow-sm">
+                            <strong class="text-white block mb-1">🛡️ วิธีสลายภัยทิศ ${dir.name}:</strong> 
+                            หลีกเลี่ยงความเคลื่อนไหว ให้ใช้อ่างน้ำนิ่งขนาดใหญ่ หรือตั้งวัตถุโลหะกลมวาวหนักๆ (เช่น ลูกตุ้มนาฬิกาโลหะ) เพื่อสลายพลังร้าย
+                        </div>
+                    `);
+                } 
+                else if (isAuspicious) {
+                    let actAdvice = [9, 1, 8].includes(fsStar) 
+                        ? 'ดาวมงคลหนุนนำ แนะนำให้เปิดไฟสว่าง พัดลม หรือน้ำพุ เพื่อกระตุ้นโชคเต็มที่' 
+                        : 'ทิศมงคลประจำตัว ใช้นั่งทำงานหรือนอนเพื่อรับปราณมงคลได้ดี การเคาะกระตุ้นทำได้ปลอดภัย';
+
+                    els.remedyAnalysis.insertAdjacentHTML('beforeend', `
+                        <div class="bg-emerald-900/20 border-l-2 border-emerald-500 rounded p-2.5 text-[10px] text-slate-300 mb-2 shadow-sm">
+                            <strong class="text-emerald-400 block mb-1">✨ ทิศมงคล ${dir.name}:</strong> 
+                            ${actAdvice}
+                        </div>
+                    `);
+                }
+            });
+
+            if (!hasWarnings) {
+                els.strictWarnings.innerHTML = '<div class="text-green-400 text-[10px] text-center py-3 bg-green-900/20 rounded-lg border border-green-800/50">✅ ปลอดภัยทุกทิศในกาลเวลานี้</div>';
+                els.impactAnalysis.innerHTML = '<div class="text-slate-500 text-[10px] text-center py-3">- ไม่มีทิศปะทะร้ายแรง -</div>';
+            }
+        }
+
+        // --- 5. COMPASS SENSOR ENGINE (DEVICE ORIENTATION) ---
+        let isCompassActive = false;
+        let targetRotation = 0; 
+        let currentRotation = 0; 
+        let sensorWarnTimeout = null;
+
+        function lerpAngle(start, end, factor) {
+            let delta = end - start;
+            while (delta > Math.PI) delta -= Math.PI * 2;
+            while (delta < -Math.PI) delta += Math.PI * 2;
+            return start + delta * factor;
+        }
+
+        function handleOrientation(event) {
+            if (!isCompassActive) return;
+            let heading = null;
+            
+            if (event.webkitCompassHeading !== undefined) {
+                heading = event.webkitCompassHeading;
+            } else if (event.alpha !== null) {
+                heading = 360 - event.alpha;
+            }
+
+            if (heading !== null) {
+                clearTimeout(sensorWarnTimeout);
+                targetRotation = heading * (Math.PI / 180);
+            }
+        }
+
+        function activateCompass() {
+            isCompassActive = true;
+            els.compassBtn.classList.remove('bg-slate-900/90', 'text-slate-400', 'border-slate-600/50');
+            els.compassBtn.classList.add('btn-compass-active');
+            
+            sensorWarnTimeout = setTimeout(() => {
+                if(isCompassActive) {
+                    alert("ไม่ได้รับสัญญาณเข็มทิศ: โปรดตรวจสอบการเปิดใช้งาน GPS/Sensor และตรวจสอบว่าคุณเปิดเว็บนี้ผ่าน https:// เท่านั้น");
+                }
+            }, 3000);
+
+            if ('ondeviceorientationabsolute' in window) {
+                window.addEventListener('deviceorientationabsolute', handleOrientation);
+            }
+            window.addEventListener('deviceorientation', handleOrientation);
+        }
+
+        els.compassBtn.addEventListener('click', () => {
+            if (isCompassActive) {
+                isCompassActive = false;
+                window.removeEventListener('deviceorientation', handleOrientation);
+                window.removeEventListener('deviceorientationabsolute', handleOrientation);
+                els.compassBtn.classList.add('bg-slate-900/90', 'text-slate-400', 'border-slate-600/50');
+                els.compassBtn.classList.remove('btn-compass-active');
+                targetRotation = 0; 
+            } else {
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    DeviceOrientationEvent.requestPermission()
+                        .then(permissionState => {
+                            if (permissionState === 'granted') activateCompass();
+                            else alert("ระบบต้องการอนุญาตการเข้าถึงเซ็นเซอร์เข็มทิศเพื่อใช้งานฟังก์ชันนี้");
+                        })
+                        .catch(console.error);
+                } else {
+                    activateCompass();
+                }
+            }
+        });
+
+        // --- 6. THREE.JS 3D SCENE (Strict Orthographic Top-Down) ---
+        let scene, camera, renderer, luopanMesh;
+
+        function init3D() {
+            calculateAll();
+
+            const container = document.getElementById('canvas3dContainer');
+            scene = new THREE.Scene();
+
+            camera = new THREE.PerspectiveCamera(35, 1, 0.1, 1000);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7); // Reduced ambient light slightly
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffeedd, 0.4); // Reduced directional light
+            dirLight.position.set(0, 0, 10); // Directly above for even lighting
+            scene.add(dirLight);
+
+            const radius = 5;
+            const height = 0.4;
+            const geometry = new THREE.CylinderGeometry(radius, radius, height, 128);
+            geometry.rotateX(Math.PI / 2); // Lay flat facing Z axis (Camera)
+            
+            const texture = new THREE.CanvasTexture(els.canvas);
+            texture.generateMipmaps = true;
+            texture.minFilter = THREE.LinearMipmapLinearFilter;
+            texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+            const materials = [
+                new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.8, roughness: 0.3 }), // Side (Gold)
+                new THREE.MeshStandardMaterial({ map: texture, roughness: 0.8, metalness: 0.05 }),   // Top Face (Luopan) - Less shiny to avoid glare
+                new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 })                  // Bottom
+            ];
+
+            luopanMesh = new THREE.Mesh(geometry, materials);
+            // Face directly to the camera (Z axis), No tilts.
+            luopanMesh.rotation.set(0, 0, 0);
+            scene.add(luopanMesh);
+
+            window.update3DTexture = function() {
+                if (luopanMesh && luopanMesh.material[1].map) {
+                    luopanMesh.material[1].map.needsUpdate = true;
+                }
+            };
+            window.update3DTexture();
+
+            // Responsive Camera Setup (Fits screen perfectly)
+            const resizeObserver = new ResizeObserver(() => onWindowResize());
+            resizeObserver.observe(container);
+            onWindowResize(); // Force initial calculation
+
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                if (luopanMesh) {
+                    // Compass Sensor Rotation (Only rotates around Z axis)
+                    currentRotation = lerpAngle(currentRotation, targetRotation, 0.08);
+                    luopanMesh.rotation.z = -currentRotation;
+                }
+
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('canvas3dContainer');
+            if(!container || container.clientWidth === 0) return;
+            
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            const aspect = width / height;
+            
+            camera.aspect = aspect;
+            
+            // Calculate distance to fit the radius on screen perfectly
+            const fovRad = (camera.fov / 2) * (Math.PI / 180);
+            const safeRadius = 5.2; // slightly larger than mesh radius 5 to give a small margin
+            
+            let distance = aspect < 1 
+                ? (safeRadius / aspect) / Math.tan(fovRad) // Portrait
+                : safeRadius / Math.tan(fovRad);           // Landscape
+                
+            camera.position.set(0, 0, distance);
+            camera.lookAt(0, 0, 0);
+            camera.updateProjectionMatrix();
+            
+            renderer.setSize(width, height);
+        }
+
+        // --- 7. EVENT LISTENERS ---
+        els.targetDate.addEventListener('change', calculateAll);
+        els.birthDate.addEventListener('change', calculateAll);
+        els.gender.addEventListener('change', calculateAll);
+
+        els.toggles.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const t = e.currentTarget;
+                const type = t.getAttribute('data-type');
+                state.toggles[type] = !state.toggles[type];
+                
+                if (state.toggles[type]) {
+                    t.classList.add('active', 'border-yellow-600', 'text-yellow-400', 'bg-slate-800');
+                    t.classList.remove('border-slate-700', 'text-slate-400', 'bg-slate-800/50');
+                    t.querySelector('.icon').textContent = '☑';
+                } else {
+                    t.classList.remove('active', 'border-yellow-600', 'text-yellow-400', 'bg-slate-800');
+                    t.classList.add('border-slate-700', 'text-slate-400', 'bg-slate-800/50');
+                    t.querySelector('.icon').textContent = '☐';
+                }
+                calculateAll();
+            });
+        });
+
+        els.btnSelectAll.addEventListener('click', () => {
+            Object.keys(state.toggles).forEach(k => state.toggles[k] = true);
+            els.toggles.forEach(t => {
+                t.classList.add('active', 'border-yellow-600', 'text-yellow-400', 'bg-slate-800');
+                t.classList.remove('border-slate-700', 'text-slate-400', 'bg-slate-800/50');
+                t.querySelector('.icon').textContent = '☑';
+            });
+            calculateAll();
+        });
+
+        els.btnClearAll.addEventListener('click', () => {
+            Object.keys(state.toggles).forEach(k => state.toggles[k] = false);
+            els.toggles.forEach(t => {
+                t.classList.remove('active', 'border-yellow-600', 'text-yellow-400', 'bg-slate-800');
+                t.classList.add('border-slate-700', 'text-slate-400', 'bg-slate-800/50');
+                t.querySelector('.icon').textContent = '☐';
+            });
+            calculateAll();
+        });
+
+        els.layerBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                els.layerBtns.forEach(b => {
+                    b.classList.remove('active', 'bg-slate-800', 'border-yellow-600', 'text-yellow-400');
+                    b.classList.add('bg-slate-900', 'border-slate-700', 'text-slate-400');
+                });
+                const t = e.target;
+                t.classList.add('active', 'bg-slate-800', 'border-yellow-600', 'text-yellow-400');
+                t.classList.remove('bg-slate-900', 'border-slate-700', 'text-slate-400');
+                state.viewMode = t.getAttribute('data-layer');
+                draw2DTexture();
+            });
+        });
+
+        els.tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                els.tabBtns.forEach(b => {
+                    b.classList.remove('border-yellow-500', 'text-yellow-400');
+                    b.classList.add('border-transparent', 'text-slate-400');
+                });
+                els.tabContents.forEach(c => { c.classList.remove('block'); c.classList.add('hidden'); });
+                
+                btn.classList.remove('border-transparent', 'text-slate-400');
+                btn.classList.add('border-yellow-500', 'text-yellow-400');
+                document.getElementById(`tab-${btn.getAttribute('data-tab')}`).classList.remove('hidden');
+                document.getElementById(`tab-${btn.getAttribute('data-tab')}`).classList.add('block');
+            });
+        });
+
+        els.sidebarToggleBtn.addEventListener('click', () => {
+            state.sidebarOpen = !state.sidebarOpen;
+            if (state.sidebarOpen) {
+                els.sidebar.classList.add('sidebar-expanded');
+                els.sidebar.classList.remove('sidebar-collapsed');
+            } else {
+                els.sidebar.classList.remove('sidebar-expanded');
+                els.sidebar.classList.add('sidebar-collapsed');
+            }
+        });
+
+        window.onload = init3D;
+    </script>
+</body>
+</html>
