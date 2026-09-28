@@ -609,12 +609,13 @@
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // แก้ปัญหาภาพเบลอบนจอมือถือความละเอียดสูง
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('canvas3dContainer').appendChild(renderer.domElement);
 
         const canvas2d = document.createElement('canvas');
         const ctx = canvas2d.getContext('2d');
-        const texSize = 2048;
+        const texSize = 3072; // อัปเกรดความคมชัดของ Texture (4K Ready)
         canvas2d.width = texSize; canvas2d.height = texSize;
         const texture = new THREE.CanvasTexture(canvas2d);
         texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
@@ -740,10 +741,10 @@
                 // --- Mode: KUA (8 Mansions) ---
                 if (vm === 'KUA') {
                     state.calc.auspiciousDirs.forEach(dCode => {
-                        drawSeg(rStar, rTicks, dirs8[dCode].start, dirs8[dCode].end, 'transparent', 'rgba(16, 185, 129, 0.8)', 6); // Green border
+                        drawSeg(rStar, rTicks, dirs8[dCode].start, dirs8[dCode].end, 'rgba(16, 185, 129, 0.25)', 'rgba(16, 185, 129, 0.8)', 2); // พื้นเขียว
                     });
                     state.calc.inauspiciousDirs.forEach(dCode => {
-                        drawSeg(rStar, rTicks, dirs8[dCode].start, dirs8[dCode].end, 'transparent', 'rgba(239, 68, 68, 0.8)', 6); // Red border
+                        drawSeg(rStar, rTicks, dirs8[dCode].start, dirs8[dCode].end, 'rgba(239, 68, 68, 0.25)', 'rgba(239, 68, 68, 0.8)', 2); // พื้นแดง
                     });
                 }
 
@@ -816,10 +817,13 @@
                         const d = dirs8[k];
                         let mid = (d.start + d.end) / 2; if (d.start > d.end) mid = (d.start + d.end + 360) / 2;
                         const starNum = state.calc.stars.year[k];
-                        let sCol = '#94a3b8'; // Gray
-                        if ([9, 1, 8].includes(starNum)) sCol = '#4ade80'; // Green
-                        if ([2, 7, 3].includes(starNum)) sCol = '#f87171'; // Red
-                        if (starNum === 5) sCol = '#facc15'; // Yellow
+                        let sCol = '#94a3b8'; let bgCol = 'rgba(148, 163, 184, 0.2)'; // Gray
+                        if ([9, 1, 8].includes(starNum)) { sCol = '#4ade80'; bgCol = 'rgba(74, 222, 128, 0.25)'; } // Green
+                        if ([2, 7, 3].includes(starNum)) { sCol = '#f87171'; bgCol = 'rgba(248, 113, 113, 0.25)'; } // Red
+                        if (starNum === 5) { sCol = '#facc15'; bgCol = 'rgba(250, 204, 21, 0.25)'; } // Yellow
+                        
+                        // ไฮไลท์ระบายสีพื้นหลังในช่องทิศดาวเหิน (ไม่กระพริบ)
+                        drawSeg(rTai, rStar, d.start, d.end, bgCol, sCol, 2);
                         
                         const starRad = rTai + (rStar - rTai) * 0.5;
                         
