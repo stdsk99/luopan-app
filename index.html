@@ -231,7 +231,7 @@
         <video id="arVideo" class="absolute inset-0 w-full h-full object-cover hidden" style="z-index: 1;" autoplay playsinline muted></video>
 
         <!-- Live Degree Display Box (Positioned properly over the top edge) -->
-        <div id="degreeDisplay" class="absolute z-20 flex flex-col items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300" style="top: calc(50% - min(47vw, 47vh)); left: 50%; transform: translate(-50%, -100%); margin-top: -8px;">
+        <div id="degreeDisplay" class="absolute z-20 flex flex-col items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300" style="top: calc(50% - min(47vw, 47vh)); left: 50%; transform: translate(-50%, -100%); margin-top: -60px;">
             <div class="bg-slate-900/95 backdrop-blur-md border border-yellow-500/80 rounded-xl px-5 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.8)] text-center relative">
                 <!-- Triangle pointer -->
                 <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-slate-900 border-b border-r border-yellow-500/80 rotate-45"></div>
@@ -325,7 +325,7 @@
             viewMode: 'ALL',
             toggles: { year: true, month: true, day: true, hour: true },
             calc: { bazi: {}, afflictions: {}, stars: {}, kua: 1, auspiciousDirs: [], inauspiciousDirs: [] },
-            sidebarOpen: false // Changed default to closed for better mobile UX
+            sidebarOpen: false 
         };
 
         const els = {
@@ -358,7 +358,7 @@
             mainArea: document.getElementById('mainArea'),
             radialBg: document.getElementById('radialBg')
         };
-        const ctx = els.canvas.getContext('2d', { alpha: false });
+        const ctx = els.canvas.getContext('2d', { alpha: true });
 
         // Set Default Date Helper
         function setDateToNow() {
@@ -499,123 +499,159 @@
                 let eRad = eDeg * Math.PI / 180;
                 if (eDeg < sDeg) eRad += 2 * Math.PI;
                 ctx.beginPath(); ctx.arc(0, 0, rOut, sRad, eRad); ctx.arc(0, 0, rIn, eRad, sRad, true); ctx.closePath();
-                if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+                if (fill && fill !== 'transparent') { ctx.fillStyle = fill; ctx.fill(); }
                 if (stroke) { ctx.lineWidth = lineWidth; ctx.strokeStyle = stroke; ctx.stroke(); }
             }
 
-            function drawTxt(txt, r, deg, color, font, shadowColor=null, shadowBlur=0) {
+            function drawTxt(txt, r, deg, color, font, shadowColor=null, shadowBlur=0, strokeColor=null, strokeWidth=0) {
                 ctx.save();
                 ctx.rotate(deg * Math.PI / 180); ctx.translate(r, 0); ctx.rotate(Math.PI / 2);
                 if(shadowColor) { ctx.shadowColor = shadowColor; ctx.shadowBlur = shadowBlur; }
-                ctx.fillStyle = color; ctx.font = font;
+                ctx.font = font;
                 ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                
+                if (strokeColor && strokeWidth > 0) {
+                    ctx.lineJoin = "round";
+                    ctx.lineWidth = strokeWidth;
+                    ctx.strokeStyle = strokeColor;
+                    ctx.strokeText(txt, 0, 0);
+                    ctx.shadowBlur = 0; 
+                }
+                
+                ctx.fillStyle = color; 
                 ctx.fillText(txt, 0, 0);
                 ctx.restore();
             }
 
-            const bgGrad = ctx.createRadialGradient(0, 0, radius*0.2, 0, 0, radius);
-            bgGrad.addColorStop(0, '#1e293b');
-            bgGrad.addColorStop(0.6, '#0f172a');
-            bgGrad.addColorStop(1, '#020617');
-            ctx.beginPath(); ctx.arc(0, 0, radius, 0, 2*Math.PI);
-            ctx.fillStyle = bgGrad; ctx.fill();
-            
-            ctx.lineWidth = 15; ctx.strokeStyle = '#b8860b'; ctx.beginPath(); ctx.arc(0, 0, radius - 7, 0, 2*Math.PI); ctx.stroke();
-            ctx.lineWidth = 4; ctx.strokeStyle = '#fef08a'; ctx.beginPath(); ctx.arc(0, 0, radius - 18, 0, 2*Math.PI); ctx.stroke();
-            ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(254,240,138,0.5)'; ctx.beginPath(); ctx.arc(0, 0, radius - 25, 0, 2*Math.PI); ctx.stroke();
+            // --- NORMAL MODE: Draw full compass background ---
+            if (!isARTransparent) {
+                const bgGrad = ctx.createRadialGradient(0, 0, radius*0.2, 0, 0, radius);
+                bgGrad.addColorStop(0, '#1e293b');
+                bgGrad.addColorStop(0.6, '#0f172a');
+                bgGrad.addColorStop(1, '#020617');
+                ctx.beginPath(); ctx.arc(0, 0, radius, 0, 2*Math.PI);
+                ctx.fillStyle = bgGrad; ctx.fill();
+                
+                ctx.lineWidth = 15; ctx.strokeStyle = '#b8860b'; ctx.beginPath(); ctx.arc(0, 0, radius - 7, 0, 2*Math.PI); ctx.stroke();
+                ctx.lineWidth = 4; ctx.strokeStyle = '#fef08a'; ctx.beginPath(); ctx.arc(0, 0, radius - 18, 0, 2*Math.PI); ctx.stroke();
+                ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(254,240,138,0.5)'; ctx.beginPath(); ctx.arc(0, 0, radius - 25, 0, 2*Math.PI); ctx.stroke();
+                
+                // Ticks
+                for (let i = 0; i < 360; i++) {
+                    const rad = i * Math.PI / 180;
+                    const isMajor = i % 15 === 0;
+                    const isMinor = i % 5 === 0;
+                    let len = isMajor ? (rBase - rTicks) * 0.8 : (isMinor ? (rBase - rTicks) * 0.5 : (rBase - rTicks) * 0.3);
+                    let col = isMajor ? '#ef4444' : (isMinor ? '#d4af37' : 'rgba(212,175,55,0.4)');
+                    let lw = isMajor ? 5 : (isMinor ? 3 : 2);
 
-            for (let i = 0; i < 360; i++) {
-                const rad = i * Math.PI / 180;
-                const isMajor = i % 15 === 0;
-                const isMinor = i % 5 === 0;
-                let len = isMajor ? (rBase - rTicks) * 0.8 : (isMinor ? (rBase - rTicks) * 0.5 : (rBase - rTicks) * 0.3);
-                let col = isMajor ? '#ef4444' : (isMinor ? '#d4af37' : 'rgba(212,175,55,0.4)');
-                let lw = isMajor ? 5 : (isMinor ? 3 : 2);
+                    ctx.beginPath(); ctx.moveTo(Math.cos(rad) * rTicks, Math.sin(rad) * rTicks);
+                    ctx.lineTo(Math.cos(rad) * (rTicks + len), Math.sin(rad) * (rTicks + len));
+                    ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.stroke();
+                }
 
-                ctx.beginPath(); ctx.moveTo(Math.cos(rad) * rTicks, Math.sin(rad) * rTicks);
-                ctx.lineTo(Math.cos(rad) * (rTicks + len), Math.sin(rad) * (rTicks + len));
-                ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.stroke();
+                // Ring Backgrounds
+                const ringColor = 'rgba(212,175,55,0.6)';
+                for(let i = 0; i < 24; i++) drawSeg(rBrn, rTicks, i*15-7.5, i*15+7.5, i%2===0?'rgba(255,255,255,0.03)':'transparent', ringColor, 2);
+                for(let i = 0; i < 12; i++) drawSeg(rDir, rBrn, i*30-15, i*30+15, i%2===0?'rgba(0,0,0,0.4)':'transparent', ringColor, 3);
+                for(let i = 0; i < 8; i++) drawSeg(rStar, rDir, i*45-22.5, i*45+22.5, 'rgba(15,23,42,0.8)', ringColor, 4);
+                for(let i = 0; i < 8; i++) drawSeg(rTai, rStar, i*45-22.5, i*45+22.5, 'rgba(2,6,23,1)', '#d4af37', 5);
+
+                // Affliction Overlays
+                const vm = state.viewMode;
+                ctx.globalCompositeOperation = 'screen';
+                if (vm === 'ALL' || vm === 'KUA') {
+                    state.calc.auspiciousDirs.forEach(dCode => {
+                        const d = dirs8[dCode];
+                        drawSeg(rTai, rTicks, d.start, d.end, 'rgba(16, 185, 129, 0.35)', null);
+                    });
+                }
+                if (vm === 'ALL' || vm === 'TIME') {
+                    const active = Object.keys(state.toggles).filter(k => state.toggles[k]);
+                    active.forEach(p => {
+                        const aff = state.calc.afflictions[p];
+                        drawSeg(rTai, rTicks, aff.ssStart, aff.ssEnd, 'rgba(249, 115, 22, 0.45)', null);
+                        drawSeg(rTai, rTicks, aff.suiPoStart, aff.suiPoEnd, 'rgba(225, 29, 72, 0.55)', null);
+                    });
+                }
+                ctx.globalCompositeOperation = 'source-over'; 
             }
-
-            const ringColor = 'rgba(212,175,55,0.6)';
-            for(let i = 0; i < 24; i++) drawSeg(rBrn, rTicks, i*15-7.5, i*15+7.5, i%2===0?'rgba(255,255,255,0.03)':'transparent', ringColor, 2);
-            for(let i = 0; i < 12; i++) drawSeg(rDir, rBrn, i*30-15, i*30+15, i%2===0?'rgba(0,0,0,0.4)':'transparent', ringColor, 3);
-            for(let i = 0; i < 8; i++) drawSeg(rStar, rDir, i*45-22.5, i*45+22.5, 'rgba(15,23,42,0.8)', ringColor, 4);
-            for(let i = 0; i < 8; i++) drawSeg(rTai, rStar, i*45-22.5, i*45+22.5, 'rgba(2,6,23,1)', '#d4af37', 5);
-
-            const vm = state.viewMode;
-            ctx.globalCompositeOperation = 'screen';
-            if (vm === 'ALL' || vm === 'KUA') {
-                state.calc.auspiciousDirs.forEach(dCode => {
-                    const d = dirs8[dCode];
-                    drawSeg(rTai, rTicks, d.start, d.end, 'rgba(16, 185, 129, 0.35)', null);
-                });
-            }
-            if (vm === 'ALL' || vm === 'TIME') {
-                const active = Object.keys(state.toggles).filter(k => state.toggles[k]);
-                active.forEach(p => {
-                    const aff = state.calc.afflictions[p];
-                    drawSeg(rTai, rTicks, aff.ssStart, aff.ssEnd, 'rgba(249, 115, 22, 0.45)', null);
-                    drawSeg(rTai, rTicks, aff.suiPoStart, aff.suiPoEnd, 'rgba(225, 29, 72, 0.55)', null);
-                });
-            }
-            ctx.globalCompositeOperation = 'source-over'; 
 
             const baseFontSize = size * 0.035; 
+            // 50% smaller font size for inner rings
             const innerFontSize = baseFontSize * 0.5;
 
-            // 24 Mountains
+            // --- 24 Mountains Text ---
             for (let i = 0; i < 24; i++) {
                 const mr = rBrn + (rTicks - rBrn) / 2;
-                drawTxt(mountains24[i], mr + baseFontSize*0.7, i * 15, '#fde047', `bold ${baseFontSize*0.9}px Arial`, 'rgba(0,0,0,0.8)', 6);
-                drawTxt(mountains24TH[i], mr - baseFontSize*0.7, i * 15, '#e2e8f0', `500 ${baseFontSize*0.95}px Prompt`, 'rgba(0,0,0,0.8)', 6);
+                
+                // Color Logic: Red for AR, Yellow/White for Normal
+                let tColor = isARTransparent ? '#ff3333' : '#fde047'; 
+                let tColorTH = isARTransparent ? '#ff3333' : '#e2e8f0'; 
+                
+                // Outline Logic: Thick black stroke in AR to stand out against camera, or faint shadow in normal mode
+                let strokeCol = isARTransparent ? 'rgba(255,255,255,1)' : null; // White outline in AR to contrast with red
+                let strokeW = isARTransparent ? 12 : 0; 
+                let shadowBlur = isARTransparent ? 0 : 6;
+
+                // Adjust positioning slightly to accommodate the stroke outline
+                drawTxt(mountains24[i], mr + baseFontSize*0.7, i * 15, tColor, `bold ${baseFontSize*0.9}px Arial`, 'rgba(0,0,0,1)', shadowBlur, strokeCol, strokeW);
+                drawTxt(mountains24TH[i], mr - baseFontSize*0.7, i * 15, tColorTH, `500 ${baseFontSize*0.95 * 1.5}px Prompt`, 'rgba(0,0,0,1)', shadowBlur, strokeCol, strokeW);
             }
             
-            // 12 Branches (Inner Ring 1) - Thai font +50% bigger
-            for (let i = 0; i < 12; i++) {
-                drawTxt(branches[i].name.split(' ')[0], rDir + (rBrn - rDir) * 0.5, i * 30, '#ffffff', `600 ${innerFontSize * 1.5}px Prompt`, 'rgba(0,0,0,0.9)', 10);
-            }
-            
-            // 8 Directions (Inner Ring 2) - Thai font +50% bigger
-            Object.keys(dirs8).forEach(k => {
-                const d = dirs8[k];
-                let mid = (d.start + d.end) / 2; if (d.start > d.end) mid = (d.start + d.end + 360) / 2;
-                drawTxt(k, rStar + (rDir - rStar) * 0.65, mid, '#d4af37', `900 ${innerFontSize * 1.75}px Arial`, 'rgba(0,0,0,0.9)', 15);
-                drawTxt(d.name, rStar + (rDir - rStar) * 0.20, mid, '#cbd5e1', `500 ${innerFontSize * 1.275}px Prompt`, 'rgba(0,0,0,0.8)', 8);
-            });
-            
-            // Flying Stars (Inner Ring 3)
-            if (vm === 'ALL' || vm === 'STARS') {
+            // --- Inner Texts & Center (Hide if AR is Transparent) ---
+            if (!isARTransparent) {
+                // 12 Branches (Inner Ring 1) 
+                for (let i = 0; i < 12; i++) {
+                    // ปรับขนาดภาษาไทยให้ใหญ่เต็มช่อง 30 องศาพอดี (ไม่ล้นเส้น)
+                    drawTxt(branches[i].name.split(' ')[0], rDir + (rBrn - rDir) * 0.5, i * 30, '#ffffff', `600 ${innerFontSize * 1.35}px Prompt`, 'rgba(0,0,0,0.9)', 10);
+                }
+                
+                // 8 Directions (Inner Ring 2)
                 Object.keys(dirs8).forEach(k => {
                     const d = dirs8[k];
                     let mid = (d.start + d.end) / 2; if (d.start > d.end) mid = (d.start + d.end + 360) / 2;
-                    const starNum = state.calc.stars.year[k];
-                    let sCol = '#94a3b8';
-                    if ([9, 1, 8].includes(starNum)) sCol = '#4ade80';
-                    if ([5, 2, 7, 3].includes(starNum)) sCol = '#f87171';
-                    if (starNum === 5) sCol = '#facc15'; 
-                    drawTxt(starNum, rTai + (rStar - rTai) * 0.5, mid, sCol, `900 ${innerFontSize * 2.25}px Arial`, 'rgba(0,0,0,0.9)', 20);
+                    // English dir remains innerFontSize
+                    drawTxt(k, rStar + (rDir - rStar) * 0.65, mid, '#d4af37', `900 ${innerFontSize * 1.75}px Arial`, 'rgba(0,0,0,0.9)', 15);
+                    // ปรับขนาดภาษาไทย (เช่น ต.ต.เฉียงเหนือ) ให้เต็มช่อง 45 องศาพอดีเป๊ะโดยไม่ทับตัวอังกฤษ
+                    drawTxt(d.name, rStar + (rDir - rStar) * 0.22, mid, '#cbd5e1', `500 ${innerFontSize * 0.95}px Prompt`, 'rgba(0,0,0,0.8)', 8);
                 });
-            }
+                
+                // Flying Stars (Inner Ring 3)
+                const vm = state.viewMode;
+                if (vm === 'ALL' || vm === 'STARS') {
+                    Object.keys(dirs8).forEach(k => {
+                        const d = dirs8[k];
+                        let mid = (d.start + d.end) / 2; if (d.start > d.end) mid = (d.start + d.end + 360) / 2;
+                        const starNum = state.calc.stars.year[k];
+                        let sCol = '#94a3b8';
+                        if ([9, 1, 8].includes(starNum)) sCol = '#4ade80';
+                        if ([5, 2, 7, 3].includes(starNum)) sCol = '#f87171';
+                        if (starNum === 5) sCol = '#facc15'; 
+                        drawTxt(starNum, rTai + (rStar - rTai) * 0.5, mid, sCol, `900 ${innerFontSize * 2.25}px Arial`, 'rgba(0,0,0,0.9)', 20);
+                    });
+                }
 
-            // Center Taiji
-            ctx.restore(); ctx.save(); ctx.translate(cx, cy);
-            ctx.beginPath();
-            for(let i = 0; i < 8; i++) {
-                const ang = (i * 45 + 22.5) * Math.PI / 180;
-                ctx[i === 0 ? 'moveTo' : 'lineTo'](Math.cos(ang) * rTai, Math.sin(ang) * rTai);
+                // Center Taiji
+                ctx.restore(); ctx.save(); ctx.translate(cx, cy);
+                ctx.beginPath();
+                for(let i = 0; i < 8; i++) {
+                    const ang = (i * 45 + 22.5) * Math.PI / 180;
+                    ctx[i === 0 ? 'moveTo' : 'lineTo'](Math.cos(ang) * rTai, Math.sin(ang) * rTai);
+                }
+                ctx.closePath(); ctx.fillStyle = '#0f172a'; ctx.fill(); ctx.lineWidth = 10; ctx.strokeStyle = '#d4af37'; ctx.stroke();
+                const tr = rTai * 0.65;
+                ctx.shadowBlur = 35; ctx.shadowColor = 'rgba(212,175,55,0.6)'; ctx.rotate(-Math.PI / 2);
+                ctx.beginPath(); ctx.arc(0, 0, tr, 0, 2 * Math.PI); ctx.fillStyle = '#f8fafc'; ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.beginPath(); ctx.arc(0, 0, tr, Math.PI / 2, 3 * Math.PI / 2); ctx.fillStyle = '#020617'; ctx.fill();
+                ctx.beginPath(); ctx.arc(0, -tr / 2, tr / 2, 0, 2 * Math.PI); ctx.fillStyle = '#f8fafc'; ctx.fill();
+                ctx.beginPath(); ctx.arc(0, tr / 2, tr / 2, 0, 2 * Math.PI); ctx.fillStyle = '#020617'; ctx.fill();
+                ctx.beginPath(); ctx.arc(0, -tr / 2, tr / 6, 0, 2 * Math.PI); ctx.fillStyle = '#020617'; ctx.fill();
+                ctx.beginPath(); ctx.arc(0, tr / 2, tr / 6, 0, 2 * Math.PI); ctx.fillStyle = '#f8fafc'; ctx.fill();
+                ctx.beginPath(); ctx.arc(0, 0, tr, 0, 2 * Math.PI); ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 6; ctx.stroke();
             }
-            ctx.closePath(); ctx.fillStyle = '#0f172a'; ctx.fill(); ctx.lineWidth = 10; ctx.strokeStyle = '#d4af37'; ctx.stroke();
-            const tr = rTai * 0.65;
-            ctx.shadowBlur = 35; ctx.shadowColor = 'rgba(212,175,55,0.6)'; ctx.rotate(-Math.PI / 2);
-            ctx.beginPath(); ctx.arc(0, 0, tr, 0, 2 * Math.PI); ctx.fillStyle = '#f8fafc'; ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.beginPath(); ctx.arc(0, 0, tr, Math.PI / 2, 3 * Math.PI / 2); ctx.fillStyle = '#020617'; ctx.fill();
-            ctx.beginPath(); ctx.arc(0, -tr / 2, tr / 2, 0, 2 * Math.PI); ctx.fillStyle = '#f8fafc'; ctx.fill();
-            ctx.beginPath(); ctx.arc(0, tr / 2, tr / 2, 0, 2 * Math.PI); ctx.fillStyle = '#020617'; ctx.fill();
-            ctx.beginPath(); ctx.arc(0, -tr / 2, tr / 6, 0, 2 * Math.PI); ctx.fillStyle = '#020617'; ctx.fill();
-            ctx.beginPath(); ctx.arc(0, tr / 2, tr / 6, 0, 2 * Math.PI); ctx.fillStyle = '#f8fafc'; ctx.fill();
-            ctx.beginPath(); ctx.arc(0, 0, tr, 0, 2 * Math.PI); ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 6; ctx.stroke();
+            
             ctx.restore();
             if(window.update3DTexture) window.update3DTexture();
         }
@@ -702,12 +738,12 @@
         let targetRotation = 0; 
         let currentRotation = 0; 
         let sensorWarnTimeout = null;
-
-        function smoothLerpAngle(current, target, factor) {
-            let delta = target - current;
-            while (delta > Math.PI) delta -= Math.PI * 2;
-            while (delta < -Math.PI) delta += Math.PI * 2;
-            return current + delta * factor;
+        
+        function shortestPathLerpAngle(current, target, factor) {
+            let diff = target - current;
+            while (diff > Math.PI) diff -= Math.PI * 2;
+            while (diff < -Math.PI) diff += Math.PI * 2;
+            return current + diff * factor;
         }
 
         function updateDegreeDisplay(rad) {
@@ -776,11 +812,13 @@
         // --- 5B. AR CAMERA ENGINE ---
         let isARActive = false;
         let videoStream = null;
+        let isARTransparent = false;
         
         els.cameraBtn.addEventListener('click', async () => {
             if (isARActive) {
                 // Turn OFF AR Mode
                 isARActive = false;
+                isARTransparent = false;
                 if (videoStream) {
                     videoStream.getTracks().forEach(track => track.stop());
                 }
@@ -791,6 +829,16 @@
                 
                 els.cameraBtn.classList.remove('text-green-400', 'border-green-500', 'bg-green-900/30');
                 els.cameraBtn.classList.add('text-slate-400', 'border-slate-600/50', 'bg-slate-900/90');
+                
+                // Switch back to normal geometry
+                if (luopanMesh) {
+                    const radius = 5;
+                    luopanMesh.geometry.dispose();
+                    // Full disk for normal mode
+                    luopanMesh.geometry = new THREE.CircleGeometry(radius, 128);
+                }
+                
+                draw2DTexture(); // Re-draw full texture
             } else {
                 // Turn ON AR Mode
                 try {
@@ -800,11 +848,22 @@
                     
                     els.mainArea.classList.remove('bg-[#050811]');
                     els.mainArea.classList.add('bg-transparent');
-                    els.radialBg.classList.add('opacity-0'); // Hide dark vignette to see camera clearly
+                    els.radialBg.classList.add('opacity-0');
                     
                     isARActive = true;
+                    isARTransparent = true;
                     els.cameraBtn.classList.add('text-green-400', 'border-green-500', 'bg-green-900/30');
                     els.cameraBtn.classList.remove('text-slate-400', 'border-slate-600/50', 'bg-slate-900/90');
+                    
+                    // Switch to ring geometry to leave center empty in AR
+                    if (luopanMesh) {
+                        const radius = 5;
+                        luopanMesh.geometry.dispose();
+                        // Hollow ring for AR mode, radius matching the rBrn boundary in canvas
+                        luopanMesh.geometry = new THREE.RingGeometry(radius * 0.60, radius, 128); 
+                    }
+                    
+                    draw2DTexture(); // Re-draw transparent texture
                 } catch (err) {
                     alert("ไม่สามารถเปิดกล้องได้ โปรดตรวจสอบการอนุญาตใช้งานกล้อง: " + err.message);
                 }
@@ -822,6 +881,7 @@
             
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setClearColor(0x000000, 0); 
             container.appendChild(renderer.domElement);
 
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.95); 
@@ -830,27 +890,30 @@
             dirLight.position.set(0, 0, 10); 
             scene.add(dirLight);
 
-            const radius = 5, height = 0.4;
-            const geometry = new THREE.CylinderGeometry(radius, radius, height, 128);
-            geometry.rotateX(Math.PI / 2); 
+            const radius = 5;
+            // Initialize with CircleGeometry for the normal full view
+            const geometry = new THREE.CircleGeometry(radius, 128);
             
             const texture = new THREE.CanvasTexture(els.canvas);
             texture.generateMipmaps = true;
             texture.minFilter = THREE.LinearMipmapLinearFilter;
             texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
-            const materials = [
-                new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.6, roughness: 0.4 }), 
-                new THREE.MeshStandardMaterial({ map: texture, roughness: 1.0, metalness: 0.0 }),   
-                new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 })                  
-            ];
+            const material = new THREE.MeshStandardMaterial({ 
+                map: texture, 
+                roughness: 1.0, 
+                metalness: 0.0, 
+                transparent: true,
+                alphaTest: 0.1
+            });
 
-            luopanMesh = new THREE.Mesh(geometry, materials);
-            luopanMesh.rotation.set(0, 0, 0); 
+            luopanMesh = new THREE.Mesh(geometry, material);
             scene.add(luopanMesh);
 
             window.update3DTexture = function() {
-                if (luopanMesh && luopanMesh.material[1].map) luopanMesh.material[1].map.needsUpdate = true;
+                if (luopanMesh && luopanMesh.material.map) {
+                    luopanMesh.material.map.needsUpdate = true;
+                }
             };
             window.update3DTexture();
 
@@ -861,7 +924,7 @@
             function animate() {
                 requestAnimationFrame(animate);
                 if (luopanMesh) {
-                    currentRotation = smoothLerpAngle(currentRotation, targetRotation, 0.15); // Smoothed lerp
+                    currentRotation = shortestPathLerpAngle(currentRotation, targetRotation, 0.12);
                     luopanMesh.rotation.z = -currentRotation;
                     if (isCompassActive) updateDegreeDisplay(currentRotation);
                 }
@@ -944,7 +1007,6 @@
             });
         });
 
-        // Layer Quick Cycle Logic
         const layerModes = ['ALL', 'TIME', 'KUA'];
         let currentLayerIdx = 0;
         els.layerCycleBtn.addEventListener('click', () => {
