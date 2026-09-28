@@ -47,11 +47,6 @@
 
     <script> window.update3DTexture = function() {}; </script>
 
-    <!-- Status Badge (Top Center) -->
-    <div id="statusBadge" class="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 bg-slate-900/80 text-yellow-400 border border-yellow-600/50 px-4 py-1.5 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap shadow-[0_4px_15px_rgba(0,0,0,0.5)] backdrop-blur-md transition-all">
-        โหมด: ผสานชั้นข้อมูล
-    </div>
-
     <!-- Sidebar Toggle Button -->
     <button id="sidebarToggleBtn" class="absolute top-4 left-4 z-40 p-2.5 bg-slate-900/90 text-yellow-500 rounded-xl border border-yellow-600/50 shadow-[0_0_15px_rgba(212,175,55,0.3)] hover:bg-slate-800 transition-all backdrop-blur-md">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -114,7 +109,7 @@
                 <!-- 1. Time Input -->
                 <div class="space-y-2 bg-slate-800/40 p-3.5 rounded-xl border border-slate-700/50">
                     <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-yellow-500 font-semibold text-[11px] flex items-center gap-2">🕒 กาลเวลาจร (Target Time)</h3>
+                        <h3 class="text-yellow-500 font-semibold text-[11px] flex items-center gap-2">🕒 กาลเวลาจร (Time)</h3>
                         <button id="btnSetNow" class="bg-blue-600/30 hover:bg-blue-500/50 text-blue-300 px-2.5 py-1 rounded text-[10px] border border-blue-500/50 transition-colors shadow-sm font-medium">ปัจจุบัน</button>
                     </div>
                     <input type="datetime-local" id="targetDate" class="w-full bg-slate-950 border border-slate-600 rounded-lg px-3 py-2 text-white focus:border-yellow-500 outline-none transition-all font-mono text-[11px]">
@@ -145,7 +140,7 @@
                     <h3 class="text-yellow-500 font-semibold text-[11px] flex items-center gap-2">👤 ข้อมูลบุคคล (Person)</h3>
                     <div class="space-y-2">
                         <div>
-                            <span class="text-[10px] text-slate-400 block mb-1">วัน/เดือน/ปี และเวลาเกิด</span>
+                            <span class="text-[10px] text-slate-400 block mb-1">วันเกิด/เวลาเกิด</span>
                             <input type="datetime-local" id="birthDate" value="1990-01-01T12:00" class="w-full bg-slate-950 border border-slate-600 rounded-lg px-3 py-2 text-white outline-none focus:border-yellow-500 font-mono text-[11px]">
                         </div>
                         <div>
@@ -165,12 +160,12 @@
 
                 <!-- View Modes -->
                 <div class="space-y-2">
-                    <label class="block text-[10px] font-medium text-slate-300">โหมดหน้าปัด (View Mode)</label>
+                    <label class="block text-[10px] font-medium text-slate-300">โหมดแสดงผลหน้าปัด (View Mode)</label>
                     <div class="flex flex-col gap-1.5">
                         <button class="layer-btn active px-3 py-2 bg-slate-800 border border-yellow-600 text-yellow-400 rounded-lg text-[11px] text-left transition-all" data-layer="ALL">✨ แสดงทั้งหมด (ผสานชั้นข้อมูล)</button>
-                        <button class="layer-btn px-3 py-2 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[11px] text-left transition-all" data-layer="KUA">👤 ทิศมงคลบุคคล (8 Mansions)</button>
-                        <button class="layer-btn px-3 py-2 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[11px] text-left transition-all" data-layer="TIME">🕒 ทิศร้ายกาลเวลา (Afflictions)</button>
-                        <button class="layer-btn px-3 py-2 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[11px] text-left transition-all" data-layer="STARS">⭐ ดาวเหินประจำปี (Flying Stars)</button>
+                        <button class="layer-btn px-3 py-2 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[11px] text-left transition-all" data-layer="KUA">👤 เฉพาะทิศมงคลบุคคล (8 Mansions)</button>
+                        <button class="layer-btn px-3 py-2 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[11px] text-left transition-all" data-layer="TIME">🕒 เฉพาะทิศร้ายกาลเวลา (Afflictions)</button>
+                        <button class="layer-btn px-3 py-2 bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 rounded-lg text-[11px] text-left transition-all" data-layer="STARS">⭐ เฉพาะดาวเหิน (Flying Stars)</button>
                     </div>
                 </div>
                 
@@ -190,7 +185,7 @@
                 <div class="border border-red-800/60 bg-red-950/40 rounded-xl p-3 shadow-lg">
                     <h3 class="text-red-500 font-bold text-[11px] flex items-center gap-1.5 mb-1.5">
                         <svg class="w-3 h-3 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                        ระบบเตือนทิศร้ายกาลเวลา
+                        ระบบแจ้งเตือนทิศร้าย (ตามกาลเวลาจร)
                     </h3>
                     <div id="strictWarnings" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1"></div>
                 </div>
@@ -245,7 +240,7 @@
             </div>
         </div>
 
-        <!-- Live Degree Display Box -->
+        <!-- Live Degree Display Box (Positioned exactly on top rim of Luopan) -->
         <div id="degreeDisplay" class="absolute z-20 flex flex-col items-center pointer-events-none transition-opacity duration-300 w-full" style="top: calc(50% - min(47vw, 47vh)); left: 50%; transform: translate(-50%, -100%);">
             
             <!-- Advice Box (Moved ABOVE the degree box) -->
@@ -262,8 +257,13 @@
             </div>
         </div>
 
+        <!-- Status Badge & Legend (Moved to Bottom) -->
+        <div id="statusBadge" class="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-30 bg-slate-900/90 text-yellow-400 border border-yellow-600/50 px-5 py-2 rounded-xl text-[11px] font-semibold tracking-wide shadow-[0_4px_15px_rgba(0,0,0,0.5)] backdrop-blur-md transition-all pointer-events-none text-center w-max max-w-[95vw]">
+            <!-- Content injected via JS -->
+        </div>
+
         <!-- Manual Compass Slider -->
-        <div id="manualCompassControl" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 w-[85vw] max-w-[500px] z-40 bg-slate-900/80 p-3 rounded-xl border border-slate-600/50 backdrop-blur-md flex flex-col gap-2 items-center shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
+        <div id="manualCompassControl" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-[85vw] max-w-[500px] z-40 bg-slate-900/80 p-3 rounded-xl border border-slate-600/50 backdrop-blur-md flex flex-col gap-2 items-center shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
             <span class="text-yellow-400 text-[11px] font-bold">👆 เลื่อนปรับองศาจานหล่อแกด้วยตนเอง</span>
             <input type="range" id="manualSlider" min="0" max="360" step="0.1" value="0">
         </div>
@@ -420,10 +420,37 @@
             if (state.viewMode === 'TIME') modeName = "ทิศร้ายกาลเวลา";
             if (state.viewMode === 'STARS') modeName = "ดาวเหินประจำปี";
             
-            const active = Object.keys(state.toggles).filter(k => state.toggles[k]).map(k => pNames[k]);
-            let activeText = active.length > 0 ? ` (เช็ค: ${active.join(',')})` : ' (ปิดการเช็คทิศร้าย)';
+            // Build the string detailing the active branches
+            let activeDetails = [];
+            if (state.calc && state.calc.timeBazi) {
+                if (state.toggles.year && state.calc.timeBazi.year !== undefined) activeDetails.push(`ปี${branches[state.calc.timeBazi.year].name.split(' ')[0]}`);
+                if (state.toggles.month && state.calc.timeBazi.month !== undefined) activeDetails.push(`เดือน${branches[state.calc.timeBazi.month].name.split(' ')[0]}`);
+                if (state.toggles.day && state.calc.timeBazi.day !== undefined) activeDetails.push(`วัน${branches[state.calc.timeBazi.day].name.split(' ')[0]}`);
+                if (state.toggles.hour && state.calc.timeBazi.hour !== undefined) activeDetails.push(`ยาม${branches[state.calc.timeBazi.hour].name.split(' ')[0]}`);
+            }
+
+            let activeText = activeDetails.length > 0 ? `<br><span class="text-[10px] font-normal text-yellow-200">(เช็ค: ${activeDetails.join(', ')})</span>` : '<br><span class="text-[10px] font-normal text-slate-400">(ปิดการเช็คทิศร้าย)</span>';
+            let mainText = (state.viewMode === 'ALL' || state.viewMode === 'TIME') ? `โหมด: ${modeName} ${activeText}` : `โหมด: ${modeName}`;
             
-            els.statusBadge.textContent = `โหมด: ${modeName} ${state.viewMode !== 'KUA' ? activeText : ''}`;
+            // Generate Legend HTML if not in AR mode
+            let legendHtml = '';
+            if (!isARTransparent) {
+                let legendItems = [];
+                if (state.viewMode === 'ALL' || state.viewMode === 'TIME') {
+                    legendItems.push(`<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-600 shadow-[0_0_4px_rgba(220,38,38,0.8)]"></span>ทิศแตก (ชง)</span>`);
+                    legendItems.push(`<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_4px_rgba(249,115,22,0.8)]"></span>ทิศอสูร</span>`);
+                }
+                if (state.viewMode === 'ALL' || state.viewMode === 'KUA') {
+                    legendItems.push(`<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_4px_rgba(16,185,129,0.8)]"></span>ทิศมงคล (บุคคล)</span>`);
+                }
+                if (legendItems.length > 0) {
+                    legendHtml = `<div class="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-2 pt-1.5 border-t border-slate-700/80 text-[10px] text-slate-300 font-medium">
+                        ${legendItems.join('')}
+                    </div>`;
+                }
+            }
+
+            els.statusBadge.innerHTML = `<div class="flex flex-col">${mainText}${legendHtml}</div>`;
         }
 
         function getPillars(dt) {
@@ -639,18 +666,19 @@
                 // 12 Branches
                 for (let i = 0; i < 12; i++) {
                     const clashData = activeSuiPos.filter(a => a.branch === i);
+                    let branchBgColor = 'transparent';
                     if (clashData.length > 0 && (state.viewMode === 'ALL' || state.viewMode === 'TIME')) {
-                        // Highligh Red Background
-                        drawSeg(rDir, rBrn, i*30-15, i*30+15, 'rgba(239, 68, 68, 0.7)', '#ef4444', 3);
-                        drawTxt(branches[i].branch, rDir + (rBrn - rDir) * 0.70, i * 30, '#ffffff', `bold ${innerFontSize * 1.3}px Arial`, 'rgba(0,0,0,0.9)', 10);
-                        drawTxt(branches[i].name.split(' ')[0], rDir + (rBrn - rDir) * 0.25, i * 30, '#ffffff', `600 ${innerFontSize * 2.3}px Prompt`, 'rgba(0,0,0,0.9)', 10);
+                        // Highligh Red Background + Pulse effect
+                        branchBgColor = `rgba(239, 68, 68, ${0.6 + Math.sin(Date.now() / 200) * 0.2})`; 
+                        drawSeg(rDir, rBrn, i*30-15, i*30+15, branchBgColor, '#ef4444', 4);
+                        
                         // Add small label
                         const clashLabel = `ชง${clashData.map(c=>c.p).join(',')}`;
-                        drawTxt(clashLabel, rDir + 15, i * 30, '#fef08a', `500 ${innerFontSize * 0.75}px Prompt`);
-                    } else {
-                        drawTxt(branches[i].branch, rDir + (rBrn - rDir) * 0.70, i * 30, '#ffffff', `bold ${innerFontSize * 1.3}px Arial`, 'rgba(0,0,0,0.9)', 10);
-                        drawTxt(branches[i].name.split(' ')[0], rDir + (rBrn - rDir) * 0.25, i * 30, '#ffffff', `600 ${innerFontSize * 2.3}px Prompt`, 'rgba(0,0,0,0.9)', 10);
+                        drawTxt(clashLabel, rDir + 25, i * 30, '#fef08a', `700 ${innerFontSize * 0.9}px Prompt`, 'rgba(0,0,0,1)', 10);
                     }
+                    
+                    drawTxt(branches[i].branch, rDir + (rBrn - rDir) * 0.70, i * 30, '#ffffff', `bold ${innerFontSize * 1.3}px Arial`, 'rgba(0,0,0,0.9)', 10);
+                    drawTxt(branches[i].name.split(' ')[0], rDir + (rBrn - rDir) * 0.35, i * 30, '#ffffff', `600 ${innerFontSize * 2.3}px Prompt`, 'rgba(0,0,0,0.9)', 10);
                 }
                 
                 // 8 Directions (Responsive TH size)
@@ -863,8 +891,10 @@
             if (!isCompassActive && !isImageEditMode) {
                 els.manualCompassControl.classList.remove('hidden');
                 els.manualSlider.value = (targetRotation * 180 / Math.PI) % 360;
+                els.statusBadge.classList.replace('bottom-4', 'bottom-24'); // Move up if slider is visible
             } else {
                 els.manualCompassControl.classList.add('hidden');
+                els.statusBadge.classList.replace('bottom-24', 'bottom-4'); // Move down if slider is hidden
             }
         }
 
@@ -893,6 +923,7 @@
         let videoStream = null;
         let isARTransparent = false;
         let isImageEditMode = false;
+        let needsPulse = false;
         
         function updateARState() {
             // Check if either Camera or an Uploaded Image is active
@@ -922,6 +953,7 @@
                 }
             }
             draw2DTexture();
+            updateStatusBadge(); // Update badge to hide/show legend based on AR state
         }
 
         els.cameraBtn.addEventListener('click', async () => {
@@ -1078,6 +1110,15 @@
 
             function animate() {
                 requestAnimationFrame(animate);
+                
+                // Pulse logic for red background in Sui Po
+                if(!isARTransparent && (state.viewMode === 'ALL' || state.viewMode === 'TIME')) {
+                     const activeSuiPos = Object.keys(state.toggles).filter(k => state.toggles[k]);
+                     if(activeSuiPos.length > 0) {
+                         draw2DTexture(); // Redraw constantly if pulsing is needed
+                     }
+                }
+
                 if (luopanMesh) {
                     currentRotation = shortestPathLerpAngle(currentRotation, targetRotation, 0.12);
                     luopanMesh.rotation.z = -currentRotation;
