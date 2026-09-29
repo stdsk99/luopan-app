@@ -485,16 +485,16 @@
             ['year', 'month', 'day', 'hour'].forEach(p => { state.calc.afflictions[p] = getAffliction(state.calc.timeBazi[p]); });
 
             // Flying Stars
-            const diff = state.date.getFullYear() - 2024; let centerStar = 3 - (diff % 9); if (centerStar <= 0) centerStar += 9;
-            const luoShuPath = ['Center', 'NW', 'W', 'NE', 'S', 'N', 'SW', 'E', 'SE']; const yearStars = {};
-            let currentStar = centerStar;
-            luoShuPath.forEach(dir => { if (dir !== 'Center') yearStars[dir] = currentStar; currentStar = currentStar === 9 ? 1 : currentStar + 1; });
-            state.calc.stars = { year: yearStars, center: centerStar };
+        const diff = state.date.getFullYear() - 2024; let centerStar = 3 - (diff % 9); if (centerStar <= 0) centerStar += 9;
+        const luoShuPath = ['Center', 'NW', 'W', 'NE', 'S', 'N', 'SW', 'E', 'SE']; const yearStars = {};
+        let currentStar = centerStar;
+        luoShuPath.forEach(dir => { if (dir !== 'Center') yearStars[dir] = currentStar; currentStar = currentStar === 9 ? 1 : currentStar + 1; });
+        state.calc.stars = { year: yearStars, center: centerStar };
 
-            updateUI(); updateStatusBadge(); updateAdviceBox(state.currentDegree); if(!isARTransparent) draw2DTexture();
-        }
+        updateUI(); updateStatusBadge(); updateAdviceBox(state.currentDegree); draw2DTexture();
+    }
 
-        function updateUI() {
+    function updateUI() {
             // ฟังก์ชันวาดเสาปาจื่อ 1 เสา (บน-ล่าง)
             const renderPillar = (ganIdx, zhiIdx, labelTitle) => {
                 const g = ganData[ganIdx]; const z = zhiData[zhiIdx];
@@ -571,17 +571,17 @@
             else { els.quickLayerBtn.classList.replace('border-yellow-500', 'border-indigo-500'); els.quickLayerBtn.classList.replace('text-yellow-400', 'text-indigo-400'); }
         }
 
-        els.layerBtns.forEach(btn => { btn.addEventListener('click', (e) => { state.viewMode = e.target.getAttribute('data-layer'); state.is64GuaMode = (state.viewMode === '64GUA'); setActiveMenuButton(); updateStatusBadge(); if(!isARTransparent) draw2DTexture(); updateAdviceBox(state.currentDegree); }); });
-        
-        els.quickLayerBtn.addEventListener('click', () => {
-            if (state.viewMode === 'TIME') { state.viewMode = 'KUA'; state.is64GuaMode = false; } 
-            else if (state.viewMode === 'KUA') { state.viewMode = 'STARS'; state.is64GuaMode = false; } 
-            else if (state.viewMode === 'STARS') { state.is64GuaMode = true; state.viewMode = '64GUA'; } 
-            else { state.is64GuaMode = false; state.viewMode = 'TIME'; }
-            setActiveMenuButton(); updateStatusBadge(); if(!isARTransparent) draw2DTexture(); updateAdviceBox(state.currentDegree);
-        });
+    els.layerBtns.forEach(btn => { btn.addEventListener('click', (e) => { state.viewMode = e.target.getAttribute('data-layer'); state.is64GuaMode = (state.viewMode === '64GUA'); setActiveMenuButton(); updateStatusBadge(); draw2DTexture(); updateAdviceBox(state.currentDegree); }); });
+    
+    els.quickLayerBtn.addEventListener('click', () => {
+        if (state.viewMode === 'TIME') { state.viewMode = 'KUA'; state.is64GuaMode = false; } 
+        else if (state.viewMode === 'KUA') { state.viewMode = 'STARS'; state.is64GuaMode = false; } 
+        else if (state.viewMode === 'STARS') { state.is64GuaMode = true; state.viewMode = '64GUA'; } 
+        else { state.is64GuaMode = false; state.viewMode = 'TIME'; }
+        setActiveMenuButton(); updateStatusBadge(); draw2DTexture(); updateAdviceBox(state.currentDegree);
+    });
 
-        els.tabBtns.forEach(btn => {
+    els.tabBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 els.tabBtns.forEach(b => { b.classList.remove('text-yellow-400', 'border-yellow-500'); b.classList.add('text-slate-400', 'border-transparent'); });
                 e.target.classList.remove('text-slate-400', 'border-transparent'); e.target.classList.add('text-yellow-400', 'border-yellow-500');
@@ -591,11 +591,11 @@
         });
 
         els.menuBtn.addEventListener('click', () => { els.sidebar.classList.add('open'); els.topLeftControls.style.opacity = '0'; setTimeout(() => { els.topLeftControls.style.pointerEvents = 'none'; }, 300); });
-        els.closeSidebarBtn.addEventListener('click', () => { els.sidebar.classList.remove('open'); els.topLeftControls.style.pointerEvents = 'auto'; setTimeout(() => { els.topLeftControls.style.opacity = '1'; }, 100); });
+    els.closeSidebarBtn.addEventListener('click', () => { els.sidebar.classList.remove('open'); els.topLeftControls.style.pointerEvents = 'auto'; setTimeout(() => { els.topLeftControls.style.opacity = '1'; }, 100); });
 
-        ['togYear', 'togMonth', 'togDay', 'togHour'].forEach(id => { els[id].addEventListener('change', (e) => { state.toggles[id.replace('tog', '').toLowerCase()] = e.target.checked; updateUI(); updateStatusBadge(); if(!isARTransparent) draw2DTexture(); updateAdviceBox(state.currentDegree); }); });
+    ['togYear', 'togMonth', 'togDay', 'togHour'].forEach(id => { els[id].addEventListener('change', (e) => { state.toggles[id.replace('tog', '').toLowerCase()] = e.target.checked; updateUI(); updateStatusBadge(); draw2DTexture(); updateAdviceBox(state.currentDegree); }); });
 
-        const scene = new THREE.Scene(); const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+    const scene = new THREE.Scene(); const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3)); renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('canvas3dContainer').appendChild(renderer.domElement);
@@ -650,20 +650,19 @@
 
             const baseFontSize = size * 0.035; const innerFontSize = baseFontSize * 0.5;
 
-            if (isARTransparent) {
-                if(state.is64GuaMode || state.viewMode === '64GUA') {
-                     for(let i = 0; i < 64; i++) { let hexagramUnicode = String.fromCharCode(0x4DC0 + i); drawTxt(hexagramUnicode, rBrn + (rTicks - rBrn) * 0.5, i*(360/64) + (360/128), '#ff0000', `900 ${baseFontSize * 1.5}px Arial`, '#ffffff', 8); }
-                } else {
-                     mountains24.forEach(m => { const txt = m.name.split(' '); drawTxt(txt[0], rBrn + (rTicks - rBrn) * 0.7, m.deg, '#ff0000', `900 ${baseFontSize * 1.1}px Arial`, '#ffffff', 8); drawTxt(txt[1], rBrn + (rTicks - rBrn) * 0.35, m.deg, '#ff0000', `900 ${baseFontSize * 1.4}px Prompt`, '#ffffff', 10); });
-                }
-            } else if (state.is64GuaMode || state.viewMode === '64GUA') {
-                ctx.beginPath(); ctx.arc(0,0, rTicks, 0, 2*Math.PI); ctx.fillStyle = '#0a0f1d'; ctx.fill(); const ringColor = 'rgba(212,175,55,0.4)';
+            // กำหนดสีพื้นหลังให้โปร่งแสง 60% (Alpha 0.6) เมื่อเปิดโหมด AR
+            const bgGua = isARTransparent ? 'rgba(10, 15, 29, 0.6)' : '#0a0f1d';
+            const bgMain = isARTransparent ? 'rgba(15, 23, 42, 0.6)' : '#0f172a';
+            const centerFill = isARTransparent ? 'rgba(15, 23, 42, 0.6)' : '#0f172a';
+
+            if (state.is64GuaMode || state.viewMode === '64GUA') {
+                ctx.beginPath(); ctx.arc(0,0, rTicks, 0, 2*Math.PI); ctx.fillStyle = bgGua; ctx.fill(); const ringColor = 'rgba(212,175,55,0.4)';
                 for(let i = 0; i < 64; i++) { drawSeg(rDir, rTicks, i*(360/64), (i+1)*(360/64), 'transparent', ringColor, 1.5); let hexagramUnicode = String.fromCharCode(0x4DC0 + i); drawTxt(hexagramUnicode, rDir + (rTicks-rDir)*0.6, i*(360/64) + (360/128), '#fcd34d', `900 ${baseFontSize*1.5}px Arial`, 'transparent'); }
                 const trigrams = ['☰', '☴', '☵', '☶', '☷', '☳', '☲', '☱'];
                 for(let i = 0; i < 8; i++) { drawSeg(rStar, rDir, i*45-22.5, i*45+22.5, 'transparent', ringColor, 2); drawTxt(trigrams[i], rStar + (rDir-rStar)*0.5, i*45, '#d4af37', `900 ${baseFontSize*2}px Arial`, 'transparent'); }
                 drawSeg(rTai, rStar, 0, 360, 'transparent', ringColor, 2); drawTxt("ผัง 64 ข่วย", rTai * 1.6, 0, '#ffffff', `600 ${baseFontSize*0.6}px Prompt`, 'rgba(0,0,0,0.8)', 6);
             } else {
-                ctx.beginPath(); ctx.arc(0,0, rTicks, 0, 2*Math.PI); ctx.fillStyle = '#0f172a'; ctx.fill(); const ringColor = 'rgba(212,175,55,0.4)';
+                ctx.beginPath(); ctx.arc(0,0, rTicks, 0, 2*Math.PI); ctx.fillStyle = bgMain; ctx.fill(); const ringColor = 'rgba(212,175,55,0.4)';
                 for(let i = 0; i < 24; i++) drawSeg(rBrn, rTicks, i*15-7.5, i*15+7.5, 'transparent', ringColor, 2);
                 for(let i = 0; i < 12; i++) drawSeg(rDir, rBrn, i*30-15, i*30+15, 'transparent', ringColor, 2);
                 for(let i = 0; i < 8; i++) drawSeg(rStar, rDir, i*45-22.5, i*45+22.5, 'transparent', ringColor, 2);
@@ -700,7 +699,7 @@
                         if ([9, 1, 8].includes(starNum)) { sCol = '#4ade80'; bgCol = 'rgba(74, 222, 128, 0.15)'; } if ([2, 7, 3].includes(starNum)) { sCol = '#f87171'; bgCol = 'rgba(248, 113, 113, 0.15)'; } if (starNum === 5) { sCol = '#facc15'; bgCol = 'rgba(250, 204, 21, 0.15)'; } 
                         drawSeg(rTai, rStar, d.start, d.end, bgCol, 'transparent'); const starRad = rTai + (rStar - rTai) * 0.5;
                         ctx.save(); ctx.rotate((mid - 90) * Math.PI / 180); ctx.translate(starRad, 0); ctx.rotate(Math.PI / 2);
-                        ctx.beginPath(); ctx.arc(0, 0, innerFontSize * 1.8, 0, 2*Math.PI); ctx.strokeStyle = sCol; ctx.lineWidth = 3; ctx.fillStyle = '#0f172a'; ctx.fill(); ctx.stroke();
+                        ctx.beginPath(); ctx.arc(0, 0, innerFontSize * 1.8, 0, 2*Math.PI); ctx.strokeStyle = sCol; ctx.lineWidth = 3; ctx.fillStyle = centerFill; ctx.fill(); ctx.stroke();
                         ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = sCol; ctx.font = `900 ${innerFontSize * 2.2}px Arial`; ctx.fillText(starNum, 0, 0); ctx.restore();
                     });
                 }
@@ -713,7 +712,7 @@
                 }
             }
             
-            ctx.beginPath(); ctx.arc(0, 0, rTai, 0, 2*Math.PI); ctx.fillStyle = '#0f172a'; ctx.fill(); const tj = rTai * 0.8;
+            ctx.beginPath(); ctx.arc(0, 0, rTai, 0, 2*Math.PI); ctx.fillStyle = centerFill; ctx.fill(); const tj = rTai * 0.8;
             ctx.beginPath(); ctx.arc(0, 0, tj, Math.PI/2, Math.PI*1.5); ctx.fillStyle = '#ffffff'; ctx.fill();
             ctx.beginPath(); ctx.arc(0, 0, tj, Math.PI*1.5, Math.PI/2); ctx.fillStyle = '#000000'; ctx.fill();
             ctx.beginPath(); ctx.arc(0, -tj/2, tj/2, 0, 2*Math.PI); ctx.fillStyle = '#ffffff'; ctx.fill();
@@ -820,8 +819,7 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            if(!isARTransparent && (state.viewMode === 'TIME' || state.is64GuaMode || state.viewMode === '64GUA')) draw2DTexture(); 
-            // แก้ไข: ถอดเครื่องหมายลบออกจาก displayDegree ในฟังก์ชันหมุนเข็มทิศ
+            if(state.viewMode === 'TIME' || state.is64GuaMode || state.viewMode === '64GUA') draw2DTexture(); 
             if (luopanMesh && state.isCompassActive) { displayDegree = lerpAngle(displayDegree, targetDegree, 0.15); luopanMesh.rotation.z = displayDegree * (Math.PI / 180); if(Math.abs(state.currentDegree - displayDegree) > 0.5) { updateAdviceBox(displayDegree); state.currentDegree = displayDegree; } }
             renderer.render(scene, camera);
         }
