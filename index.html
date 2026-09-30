@@ -35,19 +35,22 @@
             object-fit: cover; z-index: 0; display: none;
         }
 
+        /* ปรับปรุงกล่องข้อความด้านบน ให้อิงจากขอบบนของจอเพื่อหลบ Address Bar */
         #degreeDisplay {
-            top: calc(50% + 10vh);
-            transform: translate(-50%, calc(-100% - 44vmin - 10px));
+            top: 85px; 
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 100vw;
         }
-        @media (max-aspect-ratio: 3/5) { #degreeDisplay { transform: translate(-50%, calc(-100% - 44vw - 10px)); } }
-        @media (max-aspect-ratio: 9/20) { #degreeDisplay { transform: translate(-50%, calc(-100% - 38vw - 10px)); } }
         
+        /* ปรับปรุงกล่องข้อความด้านล่าง ให้อิงจากขอบล่างของจอเพื่อไม่ให้ล้นตกขอบ */
         #statusBadgeWrapper {
-            top: calc(50% + 10vh);
-            transform: translate(-50%, calc(44vmin + 10px));
+            top: auto;
+            bottom: 95px; /* เว้นระยะให้ลอยอยู่เหนือแถบเลื่อนองศา */
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 100vw;
         }
-        @media (max-aspect-ratio: 3/5) { #statusBadgeWrapper { transform: translate(-50%, calc(44vw + 10px)); } }
-        @media (max-aspect-ratio: 9/20) { #statusBadgeWrapper { transform: translate(-50%, calc(38vw + 10px)); } }
         
         .cn-char { font-family: 'STKaiti', 'KaiTi', 'SimKai', serif; }
 
@@ -791,6 +794,11 @@
                     document.getElementById('fpOffsetXVal').innerText = '0.0';
                     document.getElementById('fpOffsetYVal').innerText = '0.0';
                     els.fpControls.classList.remove('hidden');
+
+                    /* ปรับความโปร่งใสของจานหล่อแกอัตโนมัติให้เหลือ 60% เมื่อโหลดแปลนเสร็จ */
+                    els.luopanOpacity.value = 0.6;
+                    els.luopanOpacity.dispatchEvent(new Event('input'));
+
                     showToast("โหลดแปลนบ้านสำเร็จ");
                 };
                 img.src = event.target.result;
@@ -884,13 +892,11 @@
             else if (aspect < 0.6) safeRadius = 5.8;
             else if (aspect > 1.5) safeRadius = 4.5;
             
-            // ขยับศูนย์กลางจานหล่อแก 3D ลงมา 10% ของความสูงหน้าจอ (10vh)
+            /* ขยับศูนย์กลางจานหล่อแก 3D (ลบ Z-Shift ออก) ให้อยู่กึ่งกลางหน้าจอ 100% (Dead Center) */
             const camY = (safeRadius / aspect) / Math.tan(fovRad);
-            const visibleHeight = 2 * camY * Math.tan(fovRad);
-            const zShift = 0.10 * visibleHeight; 
 
-            camera.position.set(0, camY, -zShift); 
-            camera.lookAt(0, 0, -zShift); 
+            camera.position.set(0, camY, 0); 
+            camera.lookAt(0, 0, 0); 
             camera.updateProjectionMatrix(); 
             renderer.setSize(width, height);
         }
