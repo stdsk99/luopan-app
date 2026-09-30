@@ -517,7 +517,7 @@
             updateUI(); 
             updateStatusBadge(); 
             updateAdviceBox(state.currentDegree); 
-            if(!isARTransparent) draw2DTexture();
+            draw2DTexture();
         }
 
         function updateUI() {
@@ -629,7 +629,7 @@
                 state.is64GuaMode = (state.viewMode === '64GUA'); 
                 setActiveMenuButton(); 
                 updateStatusBadge(); 
-                if(!isARTransparent) draw2DTexture(); 
+                draw2DTexture(); 
                 updateAdviceBox(state.currentDegree); 
             }); 
         });
@@ -639,7 +639,7 @@
             else if (state.viewMode === 'KUA') { state.viewMode = 'STARS'; state.is64GuaMode = false; } 
             else if (state.viewMode === 'STARS') { state.is64GuaMode = true; state.viewMode = '64GUA'; } 
             else { state.is64GuaMode = false; state.viewMode = 'TIME'; }
-            setActiveMenuButton(); updateStatusBadge(); if(!isARTransparent) draw2DTexture(); updateAdviceBox(state.currentDegree);
+            setActiveMenuButton(); updateStatusBadge(); draw2DTexture(); updateAdviceBox(state.currentDegree);
         });
 
         els.tabBtns.forEach(btn => {
@@ -668,7 +668,7 @@
             els[id].addEventListener('change', (e) => { 
                 state.toggles[id.replace('tog', '').toLowerCase()] = e.target.checked; 
                 updateUI(); updateStatusBadge(); 
-                if(!isARTransparent) draw2DTexture(); 
+                draw2DTexture(); 
                 updateAdviceBox(state.currentDegree); 
             }); 
         });
