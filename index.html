@@ -37,17 +37,17 @@
 
         #degreeDisplay {
             top: 50%;
-            transform: translate(-50%, calc(-100% - 47vmin));
+            transform: translate(-50%, calc(-100% - 44vmin - 10px));
         }
-        @media (max-aspect-ratio: 3/5) { #degreeDisplay { transform: translate(-50%, calc(-100% - 42vw)); } }
-        @media (max-aspect-ratio: 9/20) { #degreeDisplay { transform: translate(-50%, calc(-100% - 36vw)); } }
+        @media (max-aspect-ratio: 3/5) { #degreeDisplay { transform: translate(-50%, calc(-100% - 44vw - 10px)); } }
+        @media (max-aspect-ratio: 9/20) { #degreeDisplay { transform: translate(-50%, calc(-100% - 38vw - 10px)); } }
         
         #statusBadgeWrapper {
             top: 50%;
-            transform: translate(-50%, calc(47vmin + 10px));
+            transform: translate(-50%, calc(44vmin + 10px));
         }
-        @media (max-aspect-ratio: 3/5) { #statusBadgeWrapper { transform: translate(-50%, calc(42vw + 10px)); } }
-        @media (max-aspect-ratio: 9/20) { #statusBadgeWrapper { transform: translate(-50%, calc(36vw + 10px)); } }
+        @media (max-aspect-ratio: 3/5) { #statusBadgeWrapper { transform: translate(-50%, calc(44vw + 10px)); } }
+        @media (max-aspect-ratio: 9/20) { #statusBadgeWrapper { transform: translate(-50%, calc(38vw + 10px)); } }
         
         .cn-char { font-family: 'STKaiti', 'KaiTi', 'SimKai', serif; }
 
@@ -581,14 +581,8 @@
         }
 
         function updateStatusBadge() {
-            if (isARTransparent) {
-                els.statusBadge.style.opacity = '0'; 
-                setTimeout(() => { els.statusBadge.parentElement.style.display = 'none'; }, 300); 
-                return;
-            } else { 
-                els.statusBadge.parentElement.style.display = 'flex'; 
-                els.statusBadge.style.opacity = '1'; 
-            }
+            els.statusBadge.parentElement.style.display = 'flex';
+            els.statusBadge.style.opacity = '1';
 
             let modeName = "", legendHtml = "", activeDetails = [];
             if (state.calc && state.calc.timeBazi) {
