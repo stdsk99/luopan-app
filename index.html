@@ -626,17 +626,17 @@
             let activeText = activeDetails.length > 0 ? `(เช็ค: ${activeDetails.join(', ')})` : '(ปิดการเช็คกาลเวลา)';
 
             if (state.is64GuaMode || state.viewMode === '64GUA') {
-                modeName = `<span class="text-indigo-400 font-bold text-[12px] md:text-[13px]">📍 ผัง 64 ข่วย (Xuan Kong Da Gua)</span>`;
-                legendHtml = `<div class="text-[9px] md:text-[10px] text-slate-300 mt-1">ใช้ตรวจสอบความหมายของข่วย และตั้งหาฤกษ์ยามมงคลระดับสูง</div>`;
+                modeName = `<span class="text-indigo-400 font-bold text-[clamp(13px,3.5vmin,24px)]">📍 ผัง 64 ข่วย (Xuan Kong Da Gua)</span>`;
+                legendHtml = `<div class="text-[clamp(10px,2.8vmin,18px)] text-slate-300 mt-1">ใช้ตรวจสอบความหมายของข่วย และตั้งหาฤกษ์ยามมงคลระดับสูง</div>`;
             } else if (state.viewMode === 'KUA') {
-                modeName = `<span class="text-emerald-400 font-bold text-[12px] md:text-[13px]">โหมด: เฉพาะทิศมงคลบุคคล (8 Mansions)</span>`;
-                legendHtml = `<div class="flex justify-center gap-4 mt-2 pt-1.5 border-t border-slate-700/80"><span class="flex items-center gap-1.5 text-emerald-400"><span class="w-3 h-3 border-2 border-emerald-500 rounded-sm"></span>ทิศมงคล</span><span class="flex items-center gap-1.5 text-red-400"><span class="w-3 h-3 border-2 border-red-500 rounded-sm"></span>ทิศร้าย</span></div>`;
+                modeName = `<span class="text-emerald-400 font-bold text-[clamp(13px,3.5vmin,24px)]">โหมด: เฉพาะทิศมงคลบุคคล (8 Mansions)</span>`;
+                legendHtml = `<div class="flex justify-center gap-4 mt-2 pt-1.5 border-t border-slate-700/80 text-[clamp(11px,3vmin,20px)]"><span class="flex items-center gap-1.5 text-emerald-400"><span class="w-3 h-3 md:w-4 md:h-4 border-2 border-emerald-500 rounded-sm"></span>ทิศมงคล</span><span class="flex items-center gap-1.5 text-red-400"><span class="w-3 h-3 md:w-4 md:h-4 border-2 border-red-500 rounded-sm"></span>ทิศร้าย</span></div>`;
             } else if (state.viewMode === 'TIME') {
-                modeName = `<span class="text-yellow-400 font-bold text-[12px] md:text-[13px]">โหมด: แสดงทิศร้ายกาลเวลา</span><br><span class="text-[9px] md:text-[10px] text-slate-300 font-normal mt-1 block">${activeText}</span>`;
-                legendHtml = `<div class="flex justify-center gap-4 mt-2 pt-1.5 border-t border-slate-700/80"><span class="flex items-center gap-1.5 text-red-400"><span class="w-3 h-3 bg-red-600 rounded-sm"></span>ทิศแตก(ชง)</span><span class="flex items-center gap-1.5 text-orange-400"><span class="w-4 h-1.5 bg-orange-500 rounded-full"></span>ทิศอสูร</span></div>`;
+                modeName = `<span class="text-yellow-400 font-bold text-[clamp(13px,3.5vmin,24px)]">โหมด: แสดงทิศร้ายกาลเวลา</span><br><span class="text-[clamp(10px,2.8vmin,18px)] text-slate-300 font-normal mt-1 block">${activeText}</span>`;
+                legendHtml = `<div class="flex justify-center gap-4 mt-2 pt-1.5 border-t border-slate-700/80 text-[clamp(11px,3vmin,20px)]"><span class="flex items-center gap-1.5 text-red-400"><span class="w-3 h-3 md:w-4 md:h-4 bg-red-600 rounded-sm"></span>ทิศแตก(ชง)</span><span class="flex items-center gap-1.5 text-orange-400"><span class="w-4 h-1.5 md:w-6 md:h-2 bg-orange-500 rounded-full"></span>ทิศอสูร</span></div>`;
             } else if (state.viewMode === 'STARS') {
-                modeName = `<span class="text-blue-400 font-bold text-[12px] md:text-[13px]">โหมด: ดาวเหินประจำปี</span><br><span class="text-[9px] md:text-[10px] text-slate-300 font-normal mt-1 block">(อิงจากปีปฏิทิน)</span>`;
-                legendHtml = `<div class="flex justify-center gap-3 mt-2 pt-1.5 border-t border-slate-700/80 text-[10px]"><span class="flex items-center gap-1 text-emerald-400">⭐มงคล</span><span class="flex items-center gap-1 text-red-400">⭐ร้าย</span><span class="flex items-center gap-1 text-yellow-400">⭐วิบัติ</span></div>`;
+                modeName = `<span class="text-blue-400 font-bold text-[clamp(13px,3.5vmin,24px)]">โหมด: ดาวเหินประจำปี</span><br><span class="text-[clamp(10px,2.8vmin,18px)] text-slate-300 font-normal mt-1 block">(อิงจากปีปฏิทิน)</span>`;
+                legendHtml = `<div class="flex justify-center gap-3 mt-2 pt-1.5 border-t border-slate-700/80 text-[clamp(11px,3vmin,20px)]"><span class="flex items-center gap-1 text-emerald-400">⭐มงคล</span><span class="flex items-center gap-1 text-red-400">⭐ร้าย</span><span class="flex items-center gap-1 text-yellow-400">⭐วิบัติ</span></div>`;
             }
             els.statusBadge.innerHTML = `<div class="flex flex-col text-yellow-500 mb-1">${modeName}</div>${legendHtml}`;
         }
@@ -1083,14 +1083,14 @@
                     title = "⚠️ ระวัง! ทับเส้นแบ่งข่วย (เส้นมรณะ)"; remedy = "พลังงานปะทะกันรุนแรง ห้ามเคาะเจาะทุบ ตั้งประตู โต๊ะทำงาน ทับองศานี้เด็ดขาด";
                     els.dirAdvice.classList.replace('border-slate-300', 'border-red-500'); 
                     els.dirAdvice.classList.replace('border-indigo-500', 'border-red-500'); 
-                    els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-red-600';
+                    els.adviceTitle.className = 'font-bold text-[clamp(14px,3.5vmin,24px)] tracking-wide leading-tight mb-1 md:mb-2 text-red-600';
                 } else {
                     let guaIndex = Math.floor(deg / guaWidth) % 64; 
                     let guaData = gua64Info[guaIndex].split('|'); 
                     title = `☯️ ข่วย${guaData[0]}`; remedy = guaData[1];
                     els.dirAdvice.classList.replace('border-red-500', 'border-indigo-500'); 
                     els.dirAdvice.classList.replace('border-slate-300', 'border-indigo-500'); 
-                    els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-indigo-600';
+                    els.adviceTitle.className = 'font-bold text-[clamp(14px,3.5vmin,24px)] tracking-wide leading-tight mb-1 md:mb-2 text-indigo-600';
                 }
             } else if (state.viewMode === 'STARS') {
                 const starNum = state.calc.stars.year[dirCode];
@@ -1099,27 +1099,27 @@
                     if(starsInfo[starNum].type === 'fatal') { 
                         els.dirAdvice.classList.replace('border-slate-300', 'border-red-500'); 
                         els.dirAdvice.classList.replace('border-indigo-500', 'border-red-500'); 
-                        els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-red-600'; hasBad = true; 
+                        els.adviceTitle.className = 'font-bold text-[clamp(14px,3.5vmin,24px)] tracking-wide leading-tight mb-1 md:mb-2 text-red-600'; hasBad = true; 
                     } else if (starsInfo[starNum].type === 'bad') { 
                         els.dirAdvice.classList.replace('border-slate-300', 'border-orange-500'); 
                         els.dirAdvice.classList.replace('border-indigo-500', 'border-orange-500'); 
-                        els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-orange-600'; 
+                        els.adviceTitle.className = 'font-bold text-[clamp(14px,3.5vmin,24px)] tracking-wide leading-tight mb-1 md:mb-2 text-orange-600'; 
                     } else { 
                         els.dirAdvice.classList.replace('border-red-500', 'border-slate-300'); 
                         els.dirAdvice.classList.replace('border-orange-500', 'border-slate-300'); 
                         els.dirAdvice.classList.replace('border-indigo-500', 'border-slate-300'); 
-                        els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-emerald-600'; 
+                        els.adviceTitle.className = 'font-bold text-[clamp(14px,3.5vmin,24px)] tracking-wide leading-tight mb-1 md:mb-2 text-emerald-600'; 
                     }
                 }
             } else if (state.viewMode === 'KUA') {
                 if (state.calc.auspiciousDirs.includes(dirCode)) { 
                     title = "ทิศมงคลประจำตัว"; remedy = "ส่งเสริมโชคลาภ สุขภาพ ความสัมพันธ์"; 
-                    els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-emerald-600'; 
+                    els.adviceTitle.className = 'font-bold text-[clamp(14px,3.5vmin,24px)] tracking-wide leading-tight mb-1 md:mb-2 text-emerald-600'; 
                 } else { 
                     title = "ทิศร้ายประจำตัว"; remedy = "หลีกเลี่ยงการหันหัวเตียง หรือโต๊ะทำงาน"; 
                     els.dirAdvice.classList.replace('border-slate-300', 'border-red-500'); 
                     els.dirAdvice.classList.replace('border-indigo-500', 'border-red-500'); 
-                    els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-red-600'; hasBad = true; 
+                    els.adviceTitle.className = 'font-bold text-[clamp(14px,3.5vmin,24px)] tracking-wide leading-tight mb-1 md:mb-2 text-red-600'; hasBad = true; 
                 }
                 if(!hasBad) { 
                     els.dirAdvice.classList.replace('border-red-500', 'border-slate-300'); 
@@ -1145,12 +1145,12 @@
                     title = "⚠️ " + badTitle.join(', '); remedy = "ห้ามเคาะ เจาะ ทุบ ตอก ซ่อมแซม ในทิศนี้เด็ดขาด!"; 
                     els.dirAdvice.classList.replace('border-slate-300', 'border-red-500'); 
                     els.dirAdvice.classList.replace('border-indigo-500', 'border-red-500'); 
-                    els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-red-600'; hasBad = true; 
+                    els.adviceTitle.className = 'font-bold text-[clamp(14px,3.5vmin,24px)] tracking-wide leading-tight mb-1 md:mb-2 text-red-600'; hasBad = true; 
                 } else { 
                     title = "ทิศปกติ (กาลเวลาจร)"; remedy = "ไม่มีดาวร้ายจรปะทะ สามารถใช้งานได้ปกติ"; 
                     els.dirAdvice.classList.replace('border-red-500', 'border-slate-300'); 
                     els.dirAdvice.classList.replace('border-indigo-500', 'border-slate-300'); 
-                    els.adviceTitle.className = 'font-bold text-[12px] tracking-wide leading-tight mb-1 text-slate-700'; 
+                    els.adviceTitle.className = 'font-bold text-[clamp(14px,3.5vmin,24px)] tracking-wide leading-tight mb-1 md:mb-2 text-slate-700'; 
                 }
             }
 
@@ -1208,7 +1208,7 @@
         function startCompass() { 
             state.isCompassActive = true; 
             els.compassBtn.classList.replace('bg-indigo-600/95', 'bg-red-600/95'); 
-            els.compassBtn.innerHTML = '<svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg>'; 
+            els.compassBtn.innerHTML = '<svg class="w-6 h-6 md:w-8 md:h-8 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg>'; 
             els.manualRotationControl.classList.add('hidden'); 
             showToast("เริ่มจับเข็มทิศแล้ว");
         }
@@ -1218,7 +1218,7 @@
             window.removeEventListener('deviceorientation', handleOrientation); 
             window.removeEventListener('deviceorientationabsolute', handleOrientation); 
             els.compassBtn.classList.replace('bg-red-600/95', 'bg-indigo-600/95'); 
-            els.compassBtn.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>'; 
+            els.compassBtn.innerHTML = '<svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>'; 
             els.manualRotationControl.classList.remove('hidden'); 
             els.manualDegree.value = displayDegree; 
         }
