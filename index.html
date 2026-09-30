@@ -36,14 +36,14 @@
         }
 
         #degreeDisplay {
-            top: 50%;
+            top: calc(50% + 10vh);
             transform: translate(-50%, calc(-100% - 44vmin - 10px));
         }
         @media (max-aspect-ratio: 3/5) { #degreeDisplay { transform: translate(-50%, calc(-100% - 44vw - 10px)); } }
         @media (max-aspect-ratio: 9/20) { #degreeDisplay { transform: translate(-50%, calc(-100% - 38vw - 10px)); } }
         
         #statusBadgeWrapper {
-            top: 50%;
+            top: calc(50% + 10vh);
             transform: translate(-50%, calc(44vmin + 10px));
         }
         @media (max-aspect-ratio: 3/5) { #statusBadgeWrapper { transform: translate(-50%, calc(44vw + 10px)); } }
@@ -160,14 +160,41 @@
                                 <label class="flex justify-between text-[10px] text-slate-400 mb-1"><span>หมุนองศา (Rotation)</span><span id="fpRotationVal">0°</span></label>
                                 <input type="range" id="fpRotation" min="-180" max="180" step="1" value="0" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
                             </div>
-                            <button id="fpRemoveBtn" class="w-full bg-red-900/50 hover:bg-red-800/80 text-red-300 text-[11px] py-2 rounded-lg border border-red-700/50 transition-colors mt-2">
-                                ลบแปลนบ้าน
-                            </button>
+                            <div>
+                                <label class="flex justify-between text-[10px] text-slate-400 mb-1"><span>เลื่อนซ้าย-ขวา (Pan X)</span><span id="fpOffsetXVal">0.0</span></label>
+                                <input type="range" id="fpOffsetX" min="-10" max="10" step="0.1" value="0" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="flex justify-between text-[10px] text-slate-400 mb-1"><span>เลื่อนขึ้น-ลง (Pan Y)</span><span id="fpOffsetYVal">0.0</span></label>
+                                <input type="range" id="fpOffsetY" min="-10" max="10" step="0.1" value="0" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                            </div>
+                            <div class="flex gap-2 mt-2">
+                                <button id="fpResetBtn" class="flex-1 bg-slate-700/50 hover:bg-slate-600/80 text-slate-300 text-[11px] py-2 rounded-lg border border-slate-600/50 transition-colors">
+                                    รีเซ็ตค่า
+                                </button>
+                                <button id="fpRemoveBtn" class="flex-1 bg-red-900/50 hover:bg-red-800/80 text-red-300 text-[11px] py-2 rounded-lg border border-red-700/50 transition-colors">
+                                    ลบแปลน
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="space-y-2 pb-8">
+                <div class="bg-slate-800/40 rounded-xl p-4 border border-slate-700/50">
+                    <label class="block text-[13px] font-semibold text-emerald-400 mb-3 flex items-center gap-1.5">🎯 ปรับแต่งจานหล่อแก</label>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="flex justify-between text-[10px] text-slate-400 mb-1"><span>ขนาดจาน (Scale)</span><span id="luopanScaleVal">1.0x</span></label>
+                            <input type="range" id="luopanScale" min="0.5" max="3" step="0.1" value="1" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div>
+                            <label class="flex justify-between text-[10px] text-slate-400 mb-1"><span>ความโปร่งใสจาน (Opacity)</span><span id="luopanOpacityVal">100%</span></label>
+                            <input type="range" id="luopanOpacity" min="0.1" max="1" step="0.05" value="1" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2 pb-8 mt-4">
                     <label class="block text-[12px] font-medium text-slate-300 border-b border-slate-700 pb-1">โหมดแสดงผลหน้าปัด (View Mode)</label>
                     <div class="flex flex-col gap-2 pt-2">
                         <button class="layer-btn active px-4 py-3 bg-slate-800 border border-yellow-600 text-yellow-400 rounded-xl text-[13px] font-medium text-left transition-all flex items-center gap-2.5" data-layer="TIME"><span class="text-red-400 text-lg">🕒</span> แสดงทิศร้ายกาลเวลา (Afflictions)</button>
@@ -372,7 +399,9 @@
             fpInput: document.getElementById('fpInput'), fpBtn: document.getElementById('fpBtn'),
             fpScale: document.getElementById('fpScale'), fpOpacity: document.getElementById('fpOpacity'),
             fpRotation: document.getElementById('fpRotation'), fpControls: document.getElementById('fpControls'),
-            fpRemoveBtn: document.getElementById('fpRemoveBtn')
+            fpRemoveBtn: document.getElementById('fpRemoveBtn'), fpOffsetX: document.getElementById('fpOffsetX'),
+            fpOffsetY: document.getElementById('fpOffsetY'), fpResetBtn: document.getElementById('fpResetBtn'),
+            luopanScale: document.getElementById('luopanScale'), luopanOpacity: document.getElementById('luopanOpacity')
         };
 
         function showToast(msg) {
@@ -754,9 +783,13 @@
                     els.fpScale.value = 1;
                     els.fpOpacity.value = 0.5;
                     els.fpRotation.value = 0;
+                    els.fpOffsetX.value = 0;
+                    els.fpOffsetY.value = 0;
                     document.getElementById('fpScaleVal').innerText = '1.0x';
                     document.getElementById('fpOpacityVal').innerText = '50%';
                     document.getElementById('fpRotationVal').innerText = '0°';
+                    document.getElementById('fpOffsetXVal').innerText = '0.0';
+                    document.getElementById('fpOffsetYVal').innerText = '0.0';
                     els.fpControls.classList.remove('hidden');
                     showToast("โหลดแปลนบ้านสำเร็จ");
                 };
@@ -790,6 +823,42 @@
             }
         });
 
+        els.fpOffsetX.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            document.getElementById('fpOffsetXVal').innerText = val.toFixed(1);
+            if(floorPlanMesh) floorPlanMesh.position.x = val;
+        });
+
+        els.fpOffsetY.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            document.getElementById('fpOffsetYVal').innerText = val.toFixed(1);
+            if(floorPlanMesh) floorPlanMesh.position.z = val; // Move along Z axis in 3D (Y in 2D top-down)
+        });
+
+        els.fpResetBtn.addEventListener('click', () => {
+            if(!floorPlanMesh) return;
+            els.fpScale.value = 1; els.fpScale.dispatchEvent(new Event('input'));
+            els.fpOpacity.value = 0.5; els.fpOpacity.dispatchEvent(new Event('input'));
+            els.fpRotation.value = 0; els.fpRotation.dispatchEvent(new Event('input'));
+            els.fpOffsetX.value = 0; els.fpOffsetX.dispatchEvent(new Event('input'));
+            els.fpOffsetY.value = 0; els.fpOffsetY.dispatchEvent(new Event('input'));
+            showToast("รีเซ็ตค่าแปลนบ้านแล้ว");
+        });
+
+        els.luopanScale.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            document.getElementById('luopanScaleVal').innerText = val.toFixed(1) + 'x';
+            if(luopanMesh) luopanMesh.scale.set(val, val, 1);
+            if(centerRing) centerRing.scale.set(val, val, 1);
+            if(crosshair) crosshair.scale.set(val, val, 1);
+        });
+
+        els.luopanOpacity.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            document.getElementById('luopanOpacityVal').innerText = Math.round(val * 100) + '%';
+            if(luopanMesh) luopanMesh.material.opacity = val;
+        });
+
         els.fpRemoveBtn.addEventListener('click', () => {
             if(floorPlanMesh) {
                 scene.remove(floorPlanMesh);
@@ -815,8 +884,13 @@
             else if (aspect < 0.6) safeRadius = 5.8;
             else if (aspect > 1.5) safeRadius = 4.5;
             
-            camera.position.set(0, (safeRadius / aspect) / Math.tan(fovRad), 0); 
-            camera.lookAt(0, 0, 0); 
+            // ขยับศูนย์กลางจานหล่อแก 3D ลงมา 10% ของความสูงหน้าจอ (10vh)
+            const camY = (safeRadius / aspect) / Math.tan(fovRad);
+            const visibleHeight = 2 * camY * Math.tan(fovRad);
+            const zShift = 0.10 * visibleHeight; 
+
+            camera.position.set(0, camY, -zShift); 
+            camera.lookAt(0, 0, -zShift); 
             camera.updateProjectionMatrix(); 
             renderer.setSize(width, height);
         }
